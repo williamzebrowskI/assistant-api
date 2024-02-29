@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wyatt Chatbot - Gemini</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <style>
+        body { font-family: 'Arial', sans-serif; margin: 0; padding: 0; background-color: #f0f2f5; }
+        #chatbotButton { position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background-color: #007bff; color: white; cursor: pointer; border: none; border-radius: 50%; font-size: 24px; display: flex; align-items: center; justify-content: center; }
+        #chatContainer { display: none; position: fixed; bottom: 70px; right: 20px; width: 350px; background-color: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        #messages { overflow-y: auto; padding: 10px; height: 400px; border-bottom: 1px solid #eee; }
+        #inputContainer { display: flex; border-top: 1px solid #eee; }
+        #messageInput { flex-grow: 1; border: none; padding: 10px; font-size: 14px; }
+        #sendButton { background-color: #007bff; color: white; border: none; padding: 10px 15px; cursor: pointer; }
+        #messageInput:focus, #sendButton:focus { outline: none; }
+        .message { padding: 8px 15px; border-radius: 20px; display: inline-block; max-width: 80%; margin-bottom: 10px; }
+        .you { background-color: #e9e9eb; align-self: flex-start; }
+        .bot { background-color: #007bff; color: white; align-self: flex-end; }
+        .chat-header { background: #007bff; color: white; padding: 10px; border-radius: 10px 10px 0 0; font-size: 16px; text-align: center; }
+        .close-btn { position: absolute; right: 10px; top: 10px; cursor: pointer; color: white; }
+    </style>
+</head>
+<body>
+
+<button id="chatbotButton"><i class="fas fa-comment-dots"></i></button>
+<div id="chatContainer">
+    <div class="chat-header">
+        Chat with us!
+        <i class="fas fa-times close-btn"></i>
+    </div>
+    <div id="messages"></div>
+    <div id="inputContainer">
+        <input type="text" id="messageInput" placeholder="Type your question...">
+        <button id="sendButton"><i class="fas fa-paper-plane"></i></button>
+    </div>
+</div>
+
+<script>
+    const chatbotButton = document.getElementById('chatbotButton');
+    const chatContainer = document.getElementById('chatContainer');
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const messagesDiv = document.getElementById('messages');
+    const closeButton = document.querySelector('.close-btn');
+
+    chatbotButton.addEventListener('click', function() {
+        chatContainer.style.display = 'block';
+    });
+
+    closeButton.addEventListener('click', function() {
+        chatContainer.style.display = 'none';
+    });
+
+    function sendMessage(event) {
+        if (event) event.preventDefault();
+        
+        const message = messageInput.value.trim();
+        if (message) {
+            addMessageToChat("You", message, 'you');
+            messageInput.value = '';
+
+            // Example fetch call to your backend
+            fetch('http://localhost:5004/web_ui', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({question: message}),
+            })
+            .then(response => response.json())
+            .then(data => {
+                addMessageToChat("Bot", data.answer, 'bot');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                addMessageToChat("Bot", "Sorry, something went wrong.", 'bot');
+            });
+        }
+    }
+
+    sendButton.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage(e);
+        }
+    });
+
+    function addMessageToChat(sender, message, className) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message', className);
+        messageElement.textContent = message;
+        messagesDiv.appendChild(messageElement);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+</script>
+
+</body>
+</html>
