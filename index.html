@@ -1,17 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fafsa Chatbot</title>
-    <script>
-      window.chatbotConfig = {
-        chatbotId: 'clt7iku9q0001s3jxf1bu1l4f',
-      };
-    </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat with OpenAI Assistant</title>
+<style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f0f2f5; }
+    .chat-container { max-width: 600px; margin: 20px auto; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+    .chat-header { background-color: #007bff; color: #ffffff; padding: 10px; text-align: center; }
+    .chat-body { background-color: #ffffff; padding: 10px; height: 400px; overflow-y: auto; }
+    .chat-footer { background-color: #f0f2f5; padding: 10px; }
+    .message { margin-bottom: 15px; }
+    .user-message { text-align: right; }
+    .user-message p { background-color: #007bff; color: #ffffff; padding: 10px; display: inline-block; border-radius: 20px; }
+    .assistant-message p { background-color: #e9ecef; padding: 10px; display: inline-block; border-radius: 20px; }
+</style>
 </head>
 <body>
-    <!-- Chatbot Script -->
-    <script src="https://www.openassistantgpt.io/chatbot.js"></script>
+
+<div class="chat-container">
+    <div class="chat-header">
+        <h2>OpenAI Assistant Chat</h2>
+    </div>
+    <div class="chat-body" id="chatBody">
+        <!-- Messages will be added here dynamically -->
+    </div>
+    <div class="chat-footer">
+        <form id="queryForm">
+            <input type="text" id="question" name="question" placeholder="Type a message..." required style="width: 80%;">
+            <input type="submit" value="Send" style="width: 18%;">
+        </form>
+    </div>
+</div>
+
+<script>
+  // Retrieve an existing thread_id if available
+  let threadId = sessionStorage.getItem("threadId");
+
+  document.getElementById("queryForm").onsubmit = async function(event) {
+    event.preventDefault();
+    let question = document.getElementById("question").value;
+
+    // Add the user's question to the chat interface immediately
+    addMessageToChat("user", question); // Ensure this is called with "user" to display the user's message
+
+    // Prepare the request data; note that thread_id will be added if available
+    let requestData = { question: question };
+    if (threadId) {
+        requestData.thread_id = threadId;
+    }
+
+    try {
+        let response = await fetch('http://127.0.0.1:8000/query/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestData)
+        });
+
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        let jsonResponse = await response.json();
+        addMessageToChat("assistant", jsonResponse.response); // This displays the assistant's response
+
+        // Remove the user_id handling as it's no longer part of your implementation
+        // if (!userId && jsonResponse.user_id) {
+        //     userId = jsonResponse.user_id;
+        //     localStorage.setItem("userId", userId);  // Save the user_id for future sessions
+        // }
+
+        // If the server provides a thread_id, use it for subsequent requests
+        if (jsonResponse.thread_id) {
+            threadId = jsonResponse.thread_id;
+            sessionStorage.setItem("threadId", threadId);
+        }
+
+    } catch (error) {
+        console.error('Error:', error);
+        addMessageToChat("assistant", "Error: Could not fetch the response.");
+    }
+    document.getElementById("question").value = ""; // Clear input field after sending
+};
+
+
+
+  function addMessageToChat(sender, message) {
+      let chatBody = document.getElementById("chatBody");
+      let messageDiv = document.createElement("div");
+      messageDiv.classList.add("message");
+      if (sender === "user") {
+          messageDiv.classList.add("user-message");
+          messageDiv.innerHTML = `<p>${message}</p>`;
+      } else {
+          messageDiv.classList.add("assistant-message");
+          messageDiv.innerHTML = `<p>${message}</p>`;
+      }
+      chatBody.appendChild(messageDiv);
+      chatBody.scrollTop = chatBody.scrollHeight; // Scroll to the bottom
+  }
+</script>
+
+
 </body>
 </html>
