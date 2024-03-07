@@ -14,7 +14,7 @@ import uuid
 from datetime import datetime
 load_dotenv()
 
-logging.basicConfig(level=logging.INFO)
+#logging.basicConfig(level=logging.INFO)
 
 api_key = os.getenv('OPENAI_API_KEY')
 if not api_key:
@@ -63,7 +63,6 @@ class OpenAIAssistant:
         loop = asyncio.get_event_loop()
         thread_create = partial(self.client.beta.threads.create, messages=[{"role": "user", "content": query}])
         thread = await loop.run_in_executor(None, thread_create)
-        logging.info(f"Thread ID: {thread.id}")
         return thread.id
 
     async def add_message_to_thread(self, query, thread_id):
@@ -95,7 +94,6 @@ class OpenAIAssistant:
         loop = asyncio.get_event_loop()
         run_create = partial(self.client.beta.threads.runs.create, thread_id=thread_id, assistant_id=self.assistant_id)
         run = await loop.run_in_executor(None, run_create)
-        logging.info(f"Run ID: {run.id}")
         return run
 
     async def check_run_status(self, thread_id, run_id):
@@ -138,7 +136,6 @@ class OpenAIAssistant:
         run = await self.run_thread(thread_id)
         
         run_status = await self.check_run_status(thread_id, run.id)
-        print(run_status.status)
         # It keeps checking until the status changes to "completed", indicating that the assistant has finished processing the user's query and a response is ready. 
         while run_status.status != "completed":
             run_status = await self.check_run_status(thread_id, run.id)

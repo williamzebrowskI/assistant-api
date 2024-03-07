@@ -3,12 +3,6 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-es_url = os.getenv('es_url')
-es_index = os.getenv('es_index')
-es_port = os.getenv('es_port')
-es_api_key = os.getenv('es_api_key')
-
-
 class ElasticConnector():
     def __init__(self):
         self.es_url = os.getenv('es_url')
