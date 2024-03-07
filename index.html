@@ -51,7 +51,7 @@
     }
 
     try {
-        let response = await fetch('http://127.0.0.1:8000/query/', {
+        let response = await fetch('http://0.0.0.0:8000/query/', { // What I used for Docker.  For local -Open with Live Server- http://127.0.0.1:8000/query/ )
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestData)
@@ -61,13 +61,6 @@
         let jsonResponse = await response.json();
         addMessageToChat("assistant", jsonResponse.response); // This displays the assistant's response
 
-        // Remove the user_id handling as it's no longer part of your implementation
-        // if (!userId && jsonResponse.user_id) {
-        //     userId = jsonResponse.user_id;
-        //     localStorage.setItem("userId", userId);  // Save the user_id for future sessions
-        // }
-
-        // If the server provides a thread_id, use it for subsequent requests
         if (jsonResponse.thread_id) {
             threadId = jsonResponse.thread_id;
             sessionStorage.setItem("threadId", threadId);
