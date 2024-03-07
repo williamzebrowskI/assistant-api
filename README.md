@@ -1,4 +1,4 @@
-# FAFSA ChatGPT Assistant
+# FAFSA Assistant API
 
 This repository contains the code for `fafsa-chatgpt-assistant`, a tool designed to connect with our Assistant API for FAFSA-related queries.
 
