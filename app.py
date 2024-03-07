@@ -1,14 +1,20 @@
 import asyncio
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from elasticsearch import Elasticsearch, AsyncElasticsearch
+from elastic_connector import ElasticConnector
 from pydantic import BaseModel
+import logging
 from typing import Optional
 from functools import partial
 import openai
 from dotenv import load_dotenv
 import os
-
+import uuid
+from datetime import datetime
 load_dotenv()
+
+logging.basicConfig(level=logging.INFO)
 
 api_key = os.getenv('OPENAI_API_KEY')
 if not api_key:
@@ -26,7 +32,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-ASSISTANT_ID = 'asst_YZD96qZjXi3mFBahDoQgDN1I'
+ASSISTANT_ID = 'asst_n7DAUW1ZS8ATCv9mvaiLSXUx'
 
 class Query(BaseModel):
     question: str
@@ -34,42 +40,122 @@ class Query(BaseModel):
 
 class OpenAIAssistant:
     def __init__(self, assistant_id):
+        """
+        Initializes the OpenAIAssistant instance.
+
+        Args:
+            assistant_id (str): The unique identifier for the OpenAI Assistant.
+        """
         self.assistant_id = assistant_id
         self.client = openai
+        self.elastic_connector = ElasticConnector()
+        self.conversation_uuid = str(uuid.uuid4())
 
-    async def query_assistant(self, query, thread_id=None):
+    async def create_thread(self, query):
+        """
+        Asynchronously creates a new thread in the OpenAI Assistant.
+        Args:
+            query (str): The user's query to initialize the thread with.
+        
+        Returns:
+            str: The ID of the created thread.
+        """
         loop = asyncio.get_event_loop()
-        message_id = None
+        thread_create = partial(self.client.beta.threads.create, messages=[{"role": "user", "content": query}])
+        thread = await loop.run_in_executor(None, thread_create)
+        logging.info(f"Thread ID: {thread.id}")
+        return thread.id
 
-        if thread_id is None:
-            thread_create = partial(self.client.beta.threads.create, messages=[{"role": "user", "content": query}])
-            thread = await loop.run_in_executor(None, thread_create)
-            thread_id = thread.id
+    async def add_message_to_thread(self, query, thread_id):
+        """
+        Asynchronously adds a message from the user to an existing thread.
 
-        else:
-            message_create = partial(self.client.beta.threads.messages.create, thread_id=thread_id, role="user", content=query)
-            message = await loop.run_in_executor(None, message_create)
-            message_id = message.id
+        Args:
+            query (str): The user's query to add to the thread.
+            thread_id (str): The ID of the thread to add the message to.
+        
+        Returns:
+            str: The ID of the created message.
+        """
+        loop = asyncio.get_event_loop()
+        message_create = partial(self.client.beta.threads.messages.create, thread_id=thread_id, role="user", content=query)
+        message = await loop.run_in_executor(None, message_create)
+        return message.id
 
+    async def run_thread(self, thread_id):
+        """
+        Asynchronously runs the assistant on the specified thread, generating a response.
+
+        Args:
+            thread_id (str): The ID of the thread to run the assistant on.
+        
+        Returns:
+            object: The run object created by executing the assistant on the thread.
+        """
+        loop = asyncio.get_event_loop()
         run_create = partial(self.client.beta.threads.runs.create, thread_id=thread_id, assistant_id=self.assistant_id)
         run = await loop.run_in_executor(None, run_create)
+        logging.info(f"Run ID: {run.id}")
+        return run
 
-        run_retrieve = partial(self.client.beta.threads.runs.retrieve, thread_id=thread_id, run_id=run.id)
+    async def check_run_status(self, thread_id, run_id):
+        """
+        Asynchronously checks the status of a run on a thread.
+        Args:
+            thread_id (str): The ID of the thread.
+            run_id (str): The ID of the run to check the status of.
+        
+        Returns:
+            object: The status of the run.
+        """
+       
+        loop = asyncio.get_event_loop()
+        run_retrieve = partial(self.client.beta.threads.runs.retrieve, thread_id=thread_id, run_id=run_id)
         run_status = await loop.run_in_executor(None, run_retrieve)
+        return run_status
 
+    async def query_assistant(self, query, thread_id=None):
+        """
+        Asynchronously queries the assistant, managing thread creation, message addition, and response generation.
+
+        Args:
+            query (str): The user's query to process.
+            thread_id (Optional[str]): The ID of an existing thread to add the query to, if any.
+        
+        Returns:
+            tuple: A tuple containing the assistant's response, the thread ID, and the message ID.
+        """
+        loop = asyncio.get_event_loop()
+        message_id = None
+        
+        if thread_id is None:
+            thread_id = await self.create_thread(query)
+            doc = {"thread_id": f"{thread_id}", "timestamp": datetime.now(), "conversations": {}}
+            await self.elastic_connector.push_to_index(self.conversation_uuid, doc)
+        else:
+            message_id = await self.add_message_to_thread(query, thread_id)
+
+        run = await self.run_thread(thread_id)
+        
+        run_status = await self.check_run_status(thread_id, run.id)
+        print(run_status.status)
+        # It keeps checking until the status changes to "completed", indicating that the assistant has finished processing the user's query and a response is ready. 
         while run_status.status != "completed":
-            await asyncio.sleep(1)
-            run_status = await loop.run_in_executor(None, run_retrieve)
+            run_status = await self.check_run_status(thread_id, run.id)
 
         messages_response = await loop.run_in_executor(None, partial(self.client.beta.threads.messages.list, thread_id=thread_id))
         messages = messages_response.data
-
         latest_message = messages[0]
+
+        # Add Query/Response to Elastic record
+        doc = {"conversations": {f'User: {query}': f'Wyatt: {latest_message.content[0].text.value}'}}
+        await self.elastic_connector.update_document(self.conversation_uuid, doc)
+
         return latest_message.content[0].text.value, thread_id, message_id
-    
 
 assistant = OpenAIAssistant(assistant_id=ASSISTANT_ID)
 
+# API
 @app.post("/query/", response_model=dict)
 async def query_openai(query: Query):
     try:
@@ -77,7 +163,7 @@ async def query_openai(query: Query):
         return {
             "response": response, 
             "thread_id": thread_id,
-            "message_id": message_id  # Include message_id in the response
+            "message_id": message_id
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
