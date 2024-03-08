@@ -51,7 +51,7 @@
     }
 
     try {
-        let response = await fetch('http://0.0.0.0:8000/query/', { // What I used for Docker.  For local -Open with Live Server- http://127.0.0.1:8000/query/ )
+        let response = await fetch('https://openai-assistant-mnf3hilwwq-uk.a.run.app/query/', { // What I used for Docker.  For local -Open with Live Server- http://127.0.0.1:8000/query/ )
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestData)

@@ -1,0 +1,20 @@
+steps:
+  # Build the container image
+  - id: "build"
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/bdt-eng-play/openai-assistant:latest', '-f', 'Dockerfile', '.']
+  
+  # Push the container image to Container Registry
+  - id: "push"
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/bdt-eng-play/openai-assistant:latest']
+
+  # Deploy the image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args: ['run', 'deploy', 'openai-assistant', '--image', 'gcr.io/bdt-eng-play/openai-assistant:latest', '--allow-unauthenticated', '--region', 'us-east4', '--memory', '2G', '--min-instances', '1', '--max-instances', '8', '--port', '8002']
+    waitFor:
+      - "push"
+
+images:
+  - gcr.io/bdt-eng-play/openai-assistant:latest
