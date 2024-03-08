@@ -37,6 +37,7 @@ ASSISTANT_ID = 'asst_n7DAUW1ZS8ATCv9mvaiLSXUx'
 class Query(BaseModel):
     question: str
     thread_id: Optional[str] = None
+    conversation_uuid: Optional[str] = None
 
 class OpenAIAssistant:
     def __init__(self, assistant_id):
@@ -49,7 +50,6 @@ class OpenAIAssistant:
         self.assistant_id = assistant_id
         self.client = openai
         self.elastic_connector = ElasticConnector()
-        self.conversation_uuid = str(uuid.uuid4())
 
     async def create_thread(self, query):
         """
@@ -112,7 +112,7 @@ class OpenAIAssistant:
         run_status = await loop.run_in_executor(None, run_retrieve)
         return run_status
 
-    async def query_assistant(self, query, thread_id=None):
+    async def query_assistant(self, query, thread_id=None, conversation_uuid=None):
         """
         Asynchronously queries the assistant, managing thread creation, message addition, and response generation.
 
@@ -126,10 +126,14 @@ class OpenAIAssistant:
         loop = asyncio.get_event_loop()
         message_id = None
         
+
+            
         if thread_id is None:
+            if conversation_uuid is None:
+                conversation_uuid = str(uuid.uuid4())
             thread_id = await self.create_thread(query)
             doc = {"thread_id": f"{thread_id}", "timestamp": datetime.now(), "conversations": {}}
-            await self.elastic_connector.push_to_index(self.conversation_uuid, doc)
+            await self.elastic_connector.push_to_index(conversation_uuid, doc)
         else:
             message_id = await self.add_message_to_thread(query, thread_id)
 
@@ -146,9 +150,9 @@ class OpenAIAssistant:
 
         # Add Query/Response to Elastic record
         doc = {"conversations": {f'User: {query}': f'Wyatt: {latest_message.content[0].text.value}'}}
-        await self.elastic_connector.update_document(self.conversation_uuid, doc)
+        await self.elastic_connector.update_document(conversation_uuid, doc)
 
-        return latest_message.content[0].text.value, thread_id, message_id
+        return latest_message.content[0].text.value, thread_id, message_id, conversation_uuid
 
 assistant = OpenAIAssistant(assistant_id=ASSISTANT_ID)
 
@@ -156,11 +160,13 @@ assistant = OpenAIAssistant(assistant_id=ASSISTANT_ID)
 @app.post("/query/", response_model=dict)
 async def query_openai(query: Query):
     try:
-        response, thread_id, message_id = await assistant.query_assistant(query.question, query.thread_id)
+        response, thread_id, message_id, conversation_uuid = await assistant.query_assistant(query.question, query.thread_id, query.conversation_uuid)
         return {
             "response": response, 
             "thread_id": thread_id,
-            "message_id": message_id
+            "message_id": message_id,
+            "conversation_uuid": conversation_uuid
+            
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

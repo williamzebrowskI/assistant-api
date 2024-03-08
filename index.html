@@ -36,6 +36,7 @@
 <script>
   // Retrieve an existing thread_id if available
   let threadId = sessionStorage.getItem("threadId");
+  let conversationUuid = sessionStorage.getItem("conversationUuid");
 
   document.getElementById("queryForm").onsubmit = async function(event) {
     event.preventDefault();
@@ -46,12 +47,11 @@
 
     // Prepare the request data; note that thread_id will be added if available
     let requestData = { question: question };
-    if (threadId) {
-        requestData.thread_id = threadId;
-    }
+    if (threadId) requestData.thread_id = threadId;
+    if (conversationUuid) requestData.conversation_uuid = conversationUuid; 
 
     try {
-        let response = await fetch('https://openai-assistant-mnf3hilwwq-uk.a.run.app/query/', { // What I used for Docker.  For local -Open with Live Server- http://127.0.0.1:8000/query/ )
+        let response = await fetch('https://openai-assistant-mnf3hilwwq-uk.a.run.app/query/', { // What I used for Docker.  For local -Open with Live Server- http://127.0.0.1:8000/query/ https://openai-assistant-mnf3hilwwq-uk.a.run.app/query/)
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestData)
@@ -64,6 +64,12 @@
         if (jsonResponse.thread_id) {
             threadId = jsonResponse.thread_id;
             sessionStorage.setItem("threadId", threadId);
+        }
+
+               // Check and store conversationUuid
+        if (jsonResponse.conversation_uuid) {
+            conversationUuid = jsonResponse.conversation_uuid;
+            sessionStorage.setItem("conversationUuid", conversationUuid);
         }
 
     } catch (error) {
