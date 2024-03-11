@@ -1,4 +1,4 @@
-.env
+#.env
 test_app.ipynb
 test.db
 db_connect_excel.py
