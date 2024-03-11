@@ -10,7 +10,6 @@ from functools import partial
 import openai
 from dotenv import load_dotenv
 import os
-import uuid
 from datetime import datetime
 load_dotenv()
 
@@ -26,7 +25,8 @@ app = FastAPI(title="OpenAI Assistant API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://benefitsdatatrust.github.io", "https://openai-assistant-mnf3hilwwq-uk.a.run.app"],
+    # allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
