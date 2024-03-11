@@ -4,3 +4,6 @@ test.db
 db_connect_excel.py
 topics_and_contexts.xlsx
 runs.ipynb
+consolidated_qa_pairs_3_8.json
+evaluate_assistant.ipynb
+.DS_store

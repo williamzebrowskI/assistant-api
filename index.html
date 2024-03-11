@@ -35,24 +35,31 @@
 
 <script>
   // Retrieve an existing thread_id if available
-  let threadId = sessionStorage.getItem("threadId");
-  let conversationUuid = sessionStorage.getItem("conversationUuid");
+  let threadId = localStorage.getItem("threadId");
+
+  document.addEventListener('DOMContentLoaded', function() {
+    SetWyattCookies(); // Call this function as soon as the DOM is fully loaded
+    });
 
   document.getElementById("queryForm").onsubmit = async function(event) {
+    
     event.preventDefault();
     let question = document.getElementById("question").value;
 
     // Add the user's question to the chat interface immediately
     addMessageToChat("user", question); // Ensure this is called with "user" to display the user's message
 
+    const conversationUuid = getCookieValue('BDT_ChatBot_Converstation_UUID');
+    const userUuid = getCookieValue('BDT_ChatBot_User_UUID');
+
+
     // Prepare the request data; note that thread_id will be added if available
-    let requestData = { question: question };
-    if (threadId) requestData.thread_id = threadId;
-    if (conversationUuid) requestData.conversation_uuid = conversationUuid; 
+    let requestData = { question: question, conversation_uuid: conversationUuid, user_id: userUuid, thread_id: threadId};
 
     try {
-        let response = await fetch('https://openai-assistant-mnf3hilwwq-uk.a.run.app/query/', { // What I used for Docker.  For local -Open with Live Server- http://127.0.0.1:8000/query/ https://openai-assistant-mnf3hilwwq-uk.a.run.app/query/)
+        let response = await fetch('http://127.0.0.1:8002/query/', { // What I used for Docker.  For local -Open with Live Server- http://127.0.0.1:8000/query/ https://openai-assistant-mnf3hilwwq-uk.a.run.app/query/)
             method: 'POST',
+            credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestData)
         });
@@ -63,13 +70,7 @@
 
         if (jsonResponse.thread_id) {
             threadId = jsonResponse.thread_id;
-            sessionStorage.setItem("threadId", threadId);
-        }
-
-               // Check and store conversationUuid
-        if (jsonResponse.conversation_uuid) {
-            conversationUuid = jsonResponse.conversation_uuid;
-            sessionStorage.setItem("conversationUuid", conversationUuid);
+            localStorage.setItem("threadId", threadId);
         }
 
     } catch (error) {
@@ -94,6 +95,57 @@
       }
       chatBody.appendChild(messageDiv);
       chatBody.scrollTop = chatBody.scrollHeight; // Scroll to the bottom
+  }
+
+
+ // Cookie management functions added below
+ function SetWyattCookies(){
+    const hasBdtChatBotUserCookie = document.cookie.split('; ').find(row => row.startsWith('BDT_ChatBot_User_UUID' + '='));
+    if (!hasBdtChatBotUserCookie) {
+        setCookieIfNotExists('BDT_ChatBot_User_UUID', uuidv4(), 2); // Set for 2 years
+    }
+    const hasBdtChatBotConversationCookie = document.cookie.split('; ').find(row => row.startsWith('BDT_ChatBot_Converstation_UUID' + '='));
+    if (!hasBdtChatBotConversationCookie) {
+        setCookieIfNotExists('BDT_ChatBot_Converstation_UUID', uuidv4(), 2); // Set for 2 years
+    }
+  }
+
+
+
+  function uuidv4() {
+    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> c / 4)).toString(16)
+    );
+  }
+
+  function setCookieIfNotExists(cookieName, cookieValue, expiryYears) {
+    if (!document.cookie.split('; ').find(row => row.startsWith(cookieName + '='))) {
+        const date = new Date();
+        date.setFullYear(date.getFullYear() + expiryYears);
+        document.cookie = `${cookieName}=${cookieValue}; expires=${date.toUTCString()}; path=/`;
+    }
+  }
+
+  function getCookieValue(cookieName) {
+    const name = cookieName + "=";
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const ca = decodedCookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) === 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+  }
+
+  function deleteCookie(cookieName) {
+    const date = new Date();
+    date.setTime(date.getTime() - (24 * 60 * 60 * 1000));
+    document.cookie = `${cookieName}=; expires=${date.toUTCString()}; path=/`;
   }
 </script>
 

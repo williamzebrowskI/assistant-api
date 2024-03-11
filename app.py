@@ -4,8 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from elasticsearch import Elasticsearch, AsyncElasticsearch
 from elastic_connector import ElasticConnector
 from pydantic import BaseModel
-import logging
 from typing import Optional
+from fastapi import Request
 from functools import partial
 import openai
 from dotenv import load_dotenv
@@ -37,7 +37,7 @@ ASSISTANT_ID = 'asst_n7DAUW1ZS8ATCv9mvaiLSXUx'
 class Query(BaseModel):
     question: str
     thread_id: Optional[str] = None
-    conversation_uuid: Optional[str] = None
+    # conversation_uuid: Optional[str] = None
 
 class OpenAIAssistant:
     def __init__(self, assistant_id):
@@ -112,7 +112,7 @@ class OpenAIAssistant:
         run_status = await loop.run_in_executor(None, run_retrieve)
         return run_status
 
-    async def query_assistant(self, query, thread_id=None, conversation_uuid=None):
+    async def query_assistant(self, query, thread_id=None, conversation_uuid=None, user_id=None):
         """
         Asynchronously queries the assistant, managing thread creation, message addition, and response generation.
 
@@ -123,16 +123,16 @@ class OpenAIAssistant:
         Returns:
             tuple: A tuple containing the assistant's response, the thread ID, and the message ID.
         """
+
+
         loop = asyncio.get_event_loop()
         message_id = None
-        
 
-            
         if thread_id is None:
-            if conversation_uuid is None:
-                conversation_uuid = str(uuid.uuid4())
             thread_id = await self.create_thread(query)
-            doc = {"thread_id": f"{thread_id}", "timestamp": datetime.now(), "conversations": {}}
+            print(f"thread_id = {thread_id}")
+            doc = {"user_id": f"{user_id}", "thread_id": f"{thread_id}", "timestamp": datetime.now(), "conversations": {}}
+            print(f"DOC = {doc}")
             await self.elastic_connector.push_to_index(conversation_uuid, doc)
         else:
             message_id = await self.add_message_to_thread(query, thread_id)
@@ -158,16 +158,23 @@ assistant = OpenAIAssistant(assistant_id=ASSISTANT_ID)
 
 # API
 @app.post("/query/", response_model=dict)
-async def query_openai(query: Query):
+async def query_openai(request: Request, query: Query):
+
+    cookies = request.cookies
+    conversation_uuid = cookies.get('BDT_ChatBot_Converstation_UUID')
+    user_id = cookies.get('BDT_ChatBot_User_UUID')
+
     try:
-        response, thread_id, message_id, conversation_uuid = await assistant.query_assistant(query.question, query.thread_id, query.conversation_uuid)
+        response, thread_id, message_id, conversation_uuid = await assistant.query_assistant(query.question, query.thread_id, conversation_uuid, user_id)
+
         return {
             "response": response, 
             "thread_id": thread_id,
             "message_id": message_id,
-            "conversation_uuid": conversation_uuid
-            
+            "conversation_uuid": conversation_uuid,
+            "user_id": user_id
         }
+    
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
