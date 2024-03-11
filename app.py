@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from elasticsearch import Elasticsearch, AsyncElasticsearch
 from elastic_connector import ElasticConnector
-from pydantic import BaseModel
+from pydantic import BaseModel, UUID4
 from typing import Optional
 from fastapi import Request
 from functools import partial
@@ -25,8 +25,7 @@ app = FastAPI(title="OpenAI Assistant API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://benefitsdatatrust.github.io", "https://openai-assistant-mnf3hilwwq-uk.a.run.app"],
-    # allow_origins=["*"],
+    allow_origins=["https://benefitsdatatrust.github.io"],  # allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -37,7 +36,8 @@ ASSISTANT_ID = 'asst_n7DAUW1ZS8ATCv9mvaiLSXUx'
 class Query(BaseModel):
     question: str
     thread_id: Optional[str] = None
-    # conversation_uuid: Optional[str] = None
+    conversation_uuid: Optional[UUID4] = None
+    user_id: Optional[UUID4] = None
 
 class OpenAIAssistant:
     def __init__(self, assistant_id):

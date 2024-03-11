@@ -51,13 +51,16 @@
 
     const conversationUuid = getCookieValue('BDT_ChatBot_Converstation_UUID');
     const userUuid = getCookieValue('BDT_ChatBot_User_UUID');
+    console.log("conversationUuid:", conversationUuid);
+    console.log("userUuid:", userUuid);
 
 
     // Prepare the request data; note that thread_id will be added if available
-    let requestData = { question: question, conversation_uuid: conversationUuid, user_id: userUuid, thread_id: threadId};
+    let requestData = {question: question, conversation_uuid: conversationUuid, user_id: userUuid, thread_id: threadId};
+    console.log("Sending data to server:", requestData);
 
     try {
-        let response = await fetch('https://openai-assistant-mnf3hilwwq-uk.a.run.app/query/', { // What I used for Docker.  For local -Open with Live Server- http://127.0.0.1:8000/query/ https://openai-assistant-mnf3hilwwq-uk.a.run.app/query/)
+        let response = await fetch('https://openai-assistant-mnf3hilwwq-uk.a.run.app/query/', { // What I used for Docker.  For local -Open with Live Server- http://127.0.0.1:8002/query/ https://openai-assistant-mnf3hilwwq-uk.a.run.app/query/)
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
