@@ -1,8 +1,22 @@
-# FAFSA Assistant API
+<div align="center">
 
-This repository contains the code for `fafsa-chatgpt-assistant`, a tool designed to connect with our Assistant API for FAFSA-related queries.
+<img src="images/wyatt.jpg" alt="Wyatt" width="200"/>
 
-![FAFSA Assistant API Diagram](flow.png)
+`FAFSA OpenAI Assistant API`
+
+---
+
+</div>
+
+<div id="badges" style="text-align: center;">
+  <img src="https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python Badge" style="max-width: 80px; margin: 5px;"/>
+  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black" alt="JavaScript Badge" style="max-width: 80px; margin: 5px;"/>
+  <img src="https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white" alt="HTML5 Badge" style="max-width: 80px; margin: 5px;"/>
+</div>
+
+The `fafsa-chatgpt-assistant` repository hosts the cutting-edge Assistants API designed to streamline FAFSA-related inquiries through a ChatGPT-powered conversational interface. It combines the prowess of OpenAI's GPT model with Elasticsearch's data indexing for an intuitive and efficient user experience.
+
+![FAFSA Assistant API Diagram](images/flow.png)
 
 ## Getting Started
 
