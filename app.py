@@ -124,29 +124,32 @@ class OpenAIAssistant:
             tuple: A tuple containing the assistant's response, the thread ID, and the message ID.
         """
 
-        print(f"thread_id = {thread_id}")
         loop = asyncio.get_event_loop()
         message_id = None
 
+        # If no thread exists, create a new one and log it to Elasticsearch
         if thread_id is None:
             thread_id = await self.create_thread(query)
             doc = {"user_id": f"{user_id}", "thread_id": f"{thread_id}", "timestamp": datetime.now(), "conversations": {}}
             await self.elastic_connector.push_to_index(conversation_uuid, doc)
         else:
+            # If a thread exists, add the user's message to it
             message_id = await self.add_message_to_thread(query, thread_id)
 
+         # Run the assistant on the thread to generate a response
         run = await self.run_thread(thread_id)
         
+        # Keep checking the status of the run until it is completed 
         run_status = await self.check_run_status(thread_id, run.id)
-        # It keeps checking until the status changes to "completed", indicating that the assistant has finished processing the user's query and a response is ready. 
         while run_status.status != "completed":
             run_status = await self.check_run_status(thread_id, run.id)
 
+        # Retrieve the latest message from the assistant
         messages_response = await loop.run_in_executor(None, partial(self.client.beta.threads.messages.list, thread_id=thread_id))
         messages = messages_response.data
         latest_message = messages[0]
 
-        # Add Query/Response to Elastic Record
+        # Log the query and response pair to the Elasticsearch record
         doc = {"conversations": {f'User: {query}': f'Wyatt: {latest_message.content[0].text.value}'}}
         await self.elastic_connector.update_document(conversation_uuid, doc)
 
