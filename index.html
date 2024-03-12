@@ -127,12 +127,16 @@ function SetWyattCookies() {
     }
 }
 
-// Helper function to set cookies with attributes
-function setCookie(cookieName, cookieValue, expiryYears) {
-    const date = new Date();
-    date.setFullYear(date.getFullYear() + expiryYears);
-    document.cookie = `${cookieName}=${cookieValue}; expires=${date.toUTCString()}; path=/; SameSite=Lax; Secure`; 
-}
+  // Updated setCookie function with Secure and SameSite attributes
+  function setCookie(name, value, days) {
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/; Secure; SameSite=Lax";
+  }
 
   function uuidv4() {
     return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
