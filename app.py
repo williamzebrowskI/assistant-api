@@ -149,9 +149,7 @@ class OpenAIAssistant:
 
         if thread_id is None:
             thread_id = await self.create_thread(query)
-            print(f"thread_id = {thread_id}")
             doc = {"user_id": f"{user_id}", "thread_id": f"{thread_id}", "timestamp": datetime.now(), "conversations": {}}
-            print(f"DOC = {doc}")
             await self.elastic_connector.push_to_index(conversation_uuid, doc)
         else:
             message_id = await self.add_message_to_thread(query, thread_id)
