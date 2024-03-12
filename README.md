@@ -17,6 +17,8 @@
 
 The `fafsa-chatgpt-assistant` repository hosts the cutting-edge Assistants API designed to streamline FAFSA-related inquiries through a ChatGPT-powered conversational interface. It combines the prowess of OpenAI's GPT model with Elasticsearch's data indexing for an intuitive and efficient user experience.
 
+
+The following Diagram depicts the flow of a user's message from end to end.
 ![FAFSA Assistant API Diagram](images/flow.png)
 
 ## Getting Started
@@ -42,11 +44,11 @@ The `fafsa-chatgpt-assistant` repository hosts the cutting-edge Assistants API d
 3. **Activate the virtual environment:**
     - On Windows:
         ```bash
-            .\venv\Scripts\activate
+        .\venv\Scripts\activate
         ```
     - On MacOS/Linux:
         ```bash
-            source venv/bin/activate
+        source venv/bin/activate
         ```
 
 4. **Install the required packages:**
@@ -59,6 +61,7 @@ The `fafsa-chatgpt-assistant` repository hosts the cutting-edge Assistants API d
 Create a `.env` file in the root of your project and fill it with your OpenAI and Elasticsearch credentials:
 
     OPENAI_API_KEY=your_openai_api_key_here
+    ASSISTANT_ID=your_assistants_id_here
 
     # Elasticsearch cloud authentication credentials
     es_url=your_elasticsearch_url_here
@@ -82,8 +85,7 @@ Ensure you replace the placeholder values with your actual credentials.
 
     Interact with the chat interface to send queries to our Wyatt ChatGPT Assistant and receive responses.
 
-
-# FAFSA ChatGPT Assistant Overview
+## FAFSA ChatGPT Assistant Overview
 
 The FAFSA ChatGPT Assistant is designed to facilitate interactions with users seeking guidance on FAFSA processes via a ChatGPT-powered conversational interface. This assistant leverages the OpenAI API for generating responses and Elasticsearch for logging and retrieving conversation histories.
 
@@ -106,9 +108,13 @@ The FAFSA ChatGPT Assistant is designed to facilitate interactions with users se
 
 ### Conversational Flow
 
-1. **Thread Creation**: Generates a unique thread for new conversations or appends messages to existing threads based on the presence of a `thread_id`.
-2. **Message Handling**: Manages sending user queries to the OpenAI Assistant and retrieving responses.
-3. **Elasticsearch Logging**: Stores each conversation in Elasticsearch, including timestamps, thread IDs, and the exchange of messages, for historical reference and analysis.
+1. **Client-Side Identification**: When the user starts a conversation, a `conversation_uuid` and `user_id` are generated to uniquely identify the session and user across interactions.
+   
+2. **Thread Creation**: Initiates a new conversation thread for first-time queries or appends messages to existing threads using the `thread_id`.
+   
+3. **Message Handling**: Manages the exchange of messages between the user and the OpenAI Assistant, maintaining the context and continuity of the conversation.
+   
+4. **Elasticsearch Logging**: Archives each conversation in Elasticsearch, tagging them with `conversation_uuid` and `user_id` to construct a detailed history for analysis and continued dialogue.
 
 ### Running the Assistant
 
