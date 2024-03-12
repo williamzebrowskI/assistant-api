@@ -63,7 +63,7 @@
         let response = await fetch('https://openai-assistant-mnf3hilwwq-uk.a.run.app/query/', { // What I used for Docker.  For local -Open with Live Server- http://127.0.0.1:8002/query/ https://openai-assistant-mnf3hilwwq-uk.a.run.app/query/)
             method: 'POST',
             credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', "Access-Control-Allow-Origin": "https://benefitsdatatrust.github.io"},
             body: JSON.stringify(requestData)
         });
 
