@@ -1,14 +1,11 @@
 import asyncio
-from fastapi import FastAPI, HTTPException, Cookie
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from elasticsearch import Elasticsearch, AsyncElasticsearch
 from elastic_connector import ElasticConnector
 from pydantic import BaseModel, UUID4
 from typing import Optional
-from fastapi import Request
 from functools import partial
 import openai
-import typing
 from dotenv import load_dotenv
 import os
 from datetime import datetime
@@ -149,9 +146,8 @@ class OpenAIAssistant:
         messages = messages_response.data
         latest_message = messages[0]
 
-        # Add Query/Response to Elastic record
+        # Add Query/Response to Elastic Record
         doc = {"conversations": {f'User: {query}': f'Wyatt: {latest_message.content[0].text.value}'}}
-        print(conversation_uuid)
         await self.elastic_connector.update_document(conversation_uuid, doc)
 
         return latest_message.content[0].text.value, thread_id, message_id, conversation_uuid
