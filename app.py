@@ -8,6 +8,7 @@ from typing import Optional
 from fastapi import Request
 from functools import partial
 import openai
+import typing
 from dotenv import load_dotenv
 import os
 from datetime import datetime
@@ -28,19 +29,34 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://benefitsdatatrust.github.io",
     "http://localhost",
-    "http://0.0.0.0:8002"],  # allow_origins=["*"],
+    "http://0.0.0.0:8002"],
+    # allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "HEAD", "OPTIONS"],
     allow_headers=["Access-Control-Allow-Headers", 'Content-Type', 'Authorization', 'Access-Control-Allow-Origin'],
 )
+# app.add_middleware(
+#     CORSMiddleware,
+#     # allow_origins=[
+#     #     "http://127.0.0.1:5500",  # Add the client's origin here
+#     #     "https://benefitsdatatrust.github.io",
+#     #     "http://localhost",
+#     #     "http://127.0.0.1:8002",
+#     # ],
+#     allow_origins=["*"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
+
 
 ASSISTANT_ID = 'asst_n7DAUW1ZS8ATCv9mvaiLSXUx'
 
 class Query(BaseModel):
     question: str
     thread_id: Optional[str] = None
-    # conversation_uuid: Optional[str] = None
-    # user_id: Optional[str] = None
+    conversation_uuid: Optional[str] = None
+    user_id: Optional[str] = None
 
 class OpenAIAssistant:
     def __init__(self, assistant_id):
@@ -162,21 +178,16 @@ assistant = OpenAIAssistant(assistant_id=ASSISTANT_ID)
 
 # API
 @app.post("/query/", response_model=dict)
-async def query_openai(
-    query: Query,
-    conversation_uuid = Cookie(None, alias='BDT_ChatBot_Conversation_UUID'),
-    user_id = Cookie(None, alias='BDT_ChatBot_User_UUID')):
-    print(conversation_uuid)
-    print(user_id)
-
+async def query_openai(query: Query):
     try:
-        response, thread_id, message_id, conversation_uuid = await assistant.query_assistant(query.question, query.thread_id, conversation_uuid, user_id)
+        response, thread_id, message_id, conversation_uuid = await assistant.query_assistant(query.question, query.thread_id, query.conversation_uuid, query.user_id)
         return {
             "response": response, 
             "thread_id": thread_id,
             "message_id": message_id,
             "conversation_uuid": conversation_uuid,
-            "user_id": user_id
+            "user_id": query.user_id, 
+            "question": query.question
         }
     
     except Exception as e:

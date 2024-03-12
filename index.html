@@ -41,49 +41,51 @@
     SetWyattCookies(); // Call this function as soon as the DOM is fully loaded
     });
 
-  document.getElementById("queryForm").onsubmit = async function(event) {
-    
-    event.preventDefault();
-    let question = document.getElementById("question").value;
+    document.getElementById("queryForm").onsubmit = async function(event) {
+        event.preventDefault();
+        let question = document.getElementById("question").value;
 
-    // Add the user's question to the chat interface immediately
-    addMessageToChat("user", question); // Ensure this is called with "user" to display the user's message
+        const conversationUuid = getCookieValue('BDT_ChatBot_Conversation_UUID');
+        const userUuid = getCookieValue('BDT_ChatBot_User_UUID');
 
-    const conversationUuid = getCookieValue('BDT_ChatBot_Conversation_UUID');
-    const userUuid = getCookieValue('BDT_ChatBot_User_UUID');
-    console.log("conversationUuid:", conversationUuid);
-    console.log("userUuid:", userUuid);
+        addMessageToChat("user", question);
 
+        // Constructing the URL with query parameters
+        let apiUrl = `https://openai-assistant-mnf3hilwwq-uk.a.run.app/query/?conversation_uuid=${conversationUuid}&user_id=${userUuid}`; // http://127.0.0.1:8002
+        if (threadId) {
+        apiUrl += `&thread_id=${threadId}`;
+        }
 
-    // Prepare the request data; note that thread_id will be added if available
-    let requestData = {question: question, conversation_uuid: conversationUuid, user_id: userUuid, thread_id: threadId};
-    console.log("Sending data to server:", requestData);
+        let payload = {
+            question: question,
+            conversation_uuid: conversationUuid,
+            user_id: userUuid,
+            thread_id: threadId // Only add this if it's not undefined
+            };
 
-    try {
-        let response = await fetch('https://openai-assistant-mnf3hilwwq-uk.a.run.app/query/', { // What I used for Docker.  For local -Open with Live Server- http://127.0.0.1:8002/query/ https://openai-assistant-mnf3hilwwq-uk.a.run.app/query/)
+        try {
+            let response = await fetch(apiUrl, {
             method: 'POST',
             credentials: 'include',
-            headers: { 'Content-Type': 'application/json', "Access-Control-Allow-Origin": "https://benefitsdatatrust.github.io"},
-            body: JSON.stringify(requestData)
-        });
-
+            headers: { 'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+            });
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         let jsonResponse = await response.json();
-        addMessageToChat("assistant", jsonResponse.response); // This displays the assistant's response
+        addMessageToChat("assistant", jsonResponse.response);
 
+        // Handling thread_id similarly as before
         if (jsonResponse.thread_id) {
             threadId = jsonResponse.thread_id;
             localStorage.setItem("threadId", threadId);
         }
 
-    } catch (error) {
+        } catch (error) {
         console.error('Error:', error);
         addMessageToChat("assistant", "Error: Could not fetch the response.");
-    }
-    document.getElementById("question").value = ""; // Clear input field after sending
-};
-
-
+        }
+        document.getElementById("question").value = "";
+    };
 
   function addMessageToChat(sender, message) {
       let chatBody = document.getElementById("chatBody");
@@ -100,18 +102,6 @@
       chatBody.scrollTop = chatBody.scrollHeight; // Scroll to the bottom
   }
 
-
- // Cookie management functions added below
-//  function SetWyattCookies(){
-//     const hasBdtChatBotUserCookie = document.cookie.split('; ').find(row => row.startsWith('BDT_ChatBot_User_UUID' + '='));
-//     if (!hasBdtChatBotUserCookie) {
-//         setCookieIfNotExists('BDT_ChatBot_User_UUID', uuidv4(), 2); // Set for 2 years
-//     }
-//     const hasBdtChatBotConversationCookie = document.cookie.split('; ').find(row => row.startsWith('BDT_ChatBot_Conversation_UUID' + '='));
-//     if (!hasBdtChatBotConversationCookie) {
-//         setCookieIfNotExists('BDT_ChatBot_Conversation_UUID', uuidv4(), 2); // Set for 2 years
-//     }
-//   }
 
 function SetWyattCookies() {
     const hasBdtChatBotUserCookie = document.cookie.split('; ').find(row => row.startsWith('BDT_ChatBot_User_UUID' + '='));
