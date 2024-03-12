@@ -49,7 +49,7 @@
     // Add the user's question to the chat interface immediately
     addMessageToChat("user", question); // Ensure this is called with "user" to display the user's message
 
-    const conversationUuid = getCookieValue('BDT_ChatBot_Converstation_UUID');
+    const conversationUuid = getCookieValue('BDT_ChatBot_Conversation_UUID');
     const userUuid = getCookieValue('BDT_ChatBot_User_UUID');
     console.log("conversationUuid:", conversationUuid);
     console.log("userUuid:", userUuid);
@@ -102,18 +102,37 @@
 
 
  // Cookie management functions added below
- function SetWyattCookies(){
+//  function SetWyattCookies(){
+//     const hasBdtChatBotUserCookie = document.cookie.split('; ').find(row => row.startsWith('BDT_ChatBot_User_UUID' + '='));
+//     if (!hasBdtChatBotUserCookie) {
+//         setCookieIfNotExists('BDT_ChatBot_User_UUID', uuidv4(), 2); // Set for 2 years
+//     }
+//     const hasBdtChatBotConversationCookie = document.cookie.split('; ').find(row => row.startsWith('BDT_ChatBot_Conversation_UUID' + '='));
+//     if (!hasBdtChatBotConversationCookie) {
+//         setCookieIfNotExists('BDT_ChatBot_Conversation_UUID', uuidv4(), 2); // Set for 2 years
+//     }
+//   }
+
+function SetWyattCookies() {
     const hasBdtChatBotUserCookie = document.cookie.split('; ').find(row => row.startsWith('BDT_ChatBot_User_UUID' + '='));
     if (!hasBdtChatBotUserCookie) {
-        setCookieIfNotExists('BDT_ChatBot_User_UUID', uuidv4(), 2); // Set for 2 years
+        const userUuid = uuidv4(); 
+        setCookie('BDT_ChatBot_User_UUID', userUuid, 2); // Set for 2 years
     }
-    const hasBdtChatBotConversationCookie = document.cookie.split('; ').find(row => row.startsWith('BDT_ChatBot_Converstation_UUID' + '='));
+    
+    const hasBdtChatBotConversationCookie = document.cookie.split('; ').find(row => row.startsWith('BDT_ChatBot_Conversation_UUID' + '='));
     if (!hasBdtChatBotConversationCookie) {
-        setCookieIfNotExists('BDT_ChatBot_Converstation_UUID', uuidv4(), 2); // Set for 2 years
+        const conversationUuid = uuidv4();
+        setCookie('BDT_ChatBot_Conversation_UUID', conversationUuid, 2); // Set for 2 years
     }
-  }
+}
 
-
+// Helper function to set cookies with attributes
+function setCookie(cookieName, cookieValue, expiryYears) {
+    const date = new Date();
+    date.setFullYear(date.getFullYear() + expiryYears);
+    document.cookie = `${cookieName}=${cookieValue}; expires=${date.toUTCString()}; path=/; SameSite=Lax; Secure`; 
+}
 
   function uuidv4() {
     return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>

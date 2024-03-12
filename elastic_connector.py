@@ -1,4 +1,4 @@
-from elasticsearch import Elasticsearch, AsyncElasticsearch
+from elasticsearch import AsyncElasticsearch
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -20,6 +20,7 @@ class ElasticConnector():
 
     async def update_document(self, conversation_uuid, doc):
         try:
+            print(conversation_uuid)
             response = await self.es.update(index=f"{self.es_index}", id=f"{conversation_uuid}", doc=doc)
             print("Document updated successfully:", response)
         except Exception as e:

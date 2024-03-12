@@ -1,5 +1,5 @@
 import asyncio
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Cookie
 from fastapi.middleware.cors import CORSMiddleware
 from elasticsearch import Elasticsearch, AsyncElasticsearch
 from elastic_connector import ElasticConnector
@@ -13,6 +13,7 @@ import os
 from datetime import datetime
 load_dotenv()
 
+
 #logging.basicConfig(level=logging.INFO)
 
 api_key = os.getenv('OPENAI_API_KEY')
@@ -25,7 +26,9 @@ app = FastAPI(title="OpenAI Assistant API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://benefitsdatatrust.github.io"],  # allow_origins=["*"],
+    allow_origins=["https://benefitsdatatrust.github.io",
+    "http://localhost",
+    "http://localhost:8002"],  # allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -36,8 +39,8 @@ ASSISTANT_ID = 'asst_n7DAUW1ZS8ATCv9mvaiLSXUx'
 class Query(BaseModel):
     question: str
     thread_id: Optional[str] = None
-    conversation_uuid: Optional[UUID4] = None
-    user_id: Optional[UUID4] = None
+    # conversation_uuid: Optional[str] = None
+    # user_id: Optional[str] = None
 
 class OpenAIAssistant:
     def __init__(self, assistant_id):
@@ -124,7 +127,7 @@ class OpenAIAssistant:
             tuple: A tuple containing the assistant's response, the thread ID, and the message ID.
         """
 
-
+        print(f"thread_id = {thread_id}")
         loop = asyncio.get_event_loop()
         message_id = None
 
@@ -150,6 +153,7 @@ class OpenAIAssistant:
 
         # Add Query/Response to Elastic record
         doc = {"conversations": {f'User: {query}': f'Wyatt: {latest_message.content[0].text.value}'}}
+        print(conversation_uuid)
         await self.elastic_connector.update_document(conversation_uuid, doc)
 
         return latest_message.content[0].text.value, thread_id, message_id, conversation_uuid
@@ -158,15 +162,15 @@ assistant = OpenAIAssistant(assistant_id=ASSISTANT_ID)
 
 # API
 @app.post("/query/", response_model=dict)
-async def query_openai(request: Request, query: Query):
-
-    cookies = request.cookies
-    conversation_uuid = cookies.get('BDT_ChatBot_Converstation_UUID')
-    user_id = cookies.get('BDT_ChatBot_User_UUID')
+async def query_openai(
+    query: Query,
+    conversation_uuid = Cookie(None, alias='BDT_ChatBot_Conversation_UUID'),
+    user_id = Cookie(None, alias='BDT_ChatBot_User_UUID')):
+    print(conversation_uuid)
+    print(user_id)
 
     try:
         response, thread_id, message_id, conversation_uuid = await assistant.query_assistant(query.question, query.thread_id, conversation_uuid, user_id)
-
         return {
             "response": response, 
             "thread_id": thread_id,
