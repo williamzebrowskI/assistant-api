@@ -14,9 +14,6 @@ import os
 from datetime import datetime
 load_dotenv()
 
-
-#logging.basicConfig(level=logging.INFO)
-
 api_key = os.getenv('OPENAI_API_KEY')
 if not api_key:
     raise Exception("OPENAI_API_KEY not found in environment variables")
@@ -35,22 +32,9 @@ app.add_middleware(
     allow_methods=["GET", "POST", "HEAD", "OPTIONS"],
     allow_headers=["Access-Control-Allow-Headers", 'Content-Type', 'Authorization', 'Access-Control-Allow-Origin'],
 )
-# app.add_middleware(
-#     CORSMiddleware,
-#     # allow_origins=[
-#     #     "http://127.0.0.1:5500",  # Add the client's origin here
-#     #     "https://benefitsdatatrust.github.io",
-#     #     "http://localhost",
-#     #     "http://127.0.0.1:8002",
-#     # ],
-#     allow_origins=["*"],
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
 
 
-ASSISTANT_ID = 'asst_n7DAUW1ZS8ATCv9mvaiLSXUx'
+ASSISTANT_ID = os.getenv('ASSISTANT_ID')
 
 class Query(BaseModel):
     question: str
