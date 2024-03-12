@@ -3,12 +3,9 @@
 <img src="images/wyatt.jpg" alt="Wyatt" width="200"/>
 
 `FAFSA OpenAI Assistant API`
-
-`Benefits Data Trust`
-
-`Emerging Tech`
-
 ---
+
+`Benefits Data Trust - Emerging Tech`
 
 </div>
 
