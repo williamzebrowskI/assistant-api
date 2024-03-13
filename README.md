@@ -17,6 +17,22 @@
 
 The `fafsa-chatgpt-assistant` repository hosts the cutting-edge Assistants API designed to streamline FAFSA-related inquiries through a ChatGPT-powered conversational interface. It combines the prowess of OpenAI's GPT model with Elasticsearch's data indexing for an intuitive and efficient user experience.
 
+## Table of Contents
+- [Diagram Depiction](#diagram-depiction)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Setting Up a Virtual Environment](#setting-up-a-virtual-environment)
+  - [Configuration](#configuration)
+  - [Running the Application](#running-the-application)
+- [FAFSA ChatGPT Assistant Overview](#fafsa-chatgpt-assistant-overview)
+- [Key Components](#key-components)
+  - [FastAPI Setup](#fastapi-setup)
+  - [OpenAI Integration](#openai-integration)
+  - [Elasticsearch Connector](#elasticsearch-connector)
+  - [Conversational Flow](#conversational-flow)
+- [Running the Assistant](#running-the-assistant)
+- [Environment Configuration](#environment-configuration)
+- [Logging and Debugging](#logging-and-debugging)
 
 The following Diagram depicts the flow of a user's message from end to end.
 ![FAFSA Assistant API Diagram](images/flow.png)

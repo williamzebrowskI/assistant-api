@@ -86,6 +86,7 @@ class OpenAIAssistant:
         Asynchronously runs the assistant on the specified thread, generating a response.
 
         Args:
+            assistant_id (str): The ID of the assistant to run on the thread.
             thread_id (str): The ID of the thread to run the assistant on.
         
         Returns:
@@ -117,6 +118,7 @@ class OpenAIAssistant:
         Asynchronously queries the assistant, managing thread creation, message addition, and response generation.
 
         Args:
+            conversation_uuid (str): The unique identifier for the conversation.
             query (str): The user's query to process.
             thread_id (Optional[str]): The ID of an existing thread to add the query to, if any.
         
