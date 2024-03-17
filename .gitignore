@@ -8,3 +8,4 @@ consolidated_qa_pairs_3_8.json
 evaluate_assistant.ipynb
 .DS_store
 data.json
+converted_data.jsonl
