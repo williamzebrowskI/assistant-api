@@ -10,10 +10,10 @@ class ElasticConnector():
     """
     def __init__(self):
         # Initialization with environmental variables
-        self.es_url = os.getenv('es_url')
-        self.es_index = os.getenv('es_index')
-        self.es_port = os.getenv('es_port')
-        self.es_api_key = os.getenv('es_api_key')
+        self.es_url = os.getenv('ES_URL')
+        self.es_index = os.getenv('ES_INDEX')
+        self.es_port = os.getenv('ES_PORT')
+        self.es_api_key = os.getenv('ES_API_KEY')
          # Establish connection to Elasticsearch
         self.es = AsyncElasticsearch(hosts=[f"{self.es_url }:{self.es_port}"], api_key=f"{self.es_api_key }")
 

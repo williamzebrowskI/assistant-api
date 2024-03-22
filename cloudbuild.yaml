@@ -2,19 +2,24 @@ steps:
   # Build the container image
   - id: "build"
     name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/bdt-eng-play/openai-assistant:latest', '-f', 'Dockerfile', '.']
+    args: ['build', '-t', '$_ARTIFACT_REGISTRY/$PROJECT_ID/$_ARTIFACT_REPOSITORY/$_IMAGE_NAME:$_IMAGE_VERSION', '-f', 'Dockerfile', '.']
   
   # Push the container image to Container Registry
   - id: "push"
     name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/bdt-eng-play/openai-assistant:latest']
+    args: ['push', '$_ARTIFACT_REGISTRY/$PROJECT_ID/$_ARTIFACT_REPOSITORY/$_IMAGE_NAME:$_IMAGE_VERSION']
 
   # Deploy the image to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
-    args: ['run', 'deploy', 'openai-assistant', '--image', 'gcr.io/bdt-eng-play/openai-assistant:latest', '--allow-unauthenticated', '--region', 'us-east4', '--memory', '2G', '--min-instances', '1', '--max-instances', '8', '--port', '8002']
+    args: ['run', 'deploy', $_CLOUD_RUN_NAME, '--image', '$_ARTIFACT_REGISTRY/$PROJECT_ID/$_ARTIFACT_REPOSITORY/$_IMAGE_NAME:$_IMAGE_VERSION', '--region', 'us-east4']
     waitFor:
       - "push"
-
-images:
-  - gcr.io/bdt-eng-play/openai-assistant:latest
+substitutions:
+  _ARTIFACT_REGISTRY: 'us-east4-docker.pkg.dev'
+  _ARTIFACT_REPOSITORY: 'docker'
+  _IMAGE_VERSION: 'latest'
+  _IMAGE_NAME: 'openai-assistant'
+  _CLOUD_RUN_NAME: 'openai-assistant'
+options:
+  logging: CLOUD_LOGGING_ONLY
