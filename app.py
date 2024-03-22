@@ -29,7 +29,7 @@ app = FastAPI(title="OpenAI Assistant API")
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://benefitsdatatrust.github.io",
+    allow_origins=["https://studious-tribble-z4e46zp.pages.github.io/",
     "http://localhost",
     "http://0.0.0.0:8002"],
     #allow_origins=["*"],
@@ -167,17 +167,6 @@ class OpenAIAssistant:
         return latest_message.content[0].text.value, thread_id, message_id, conversation_uuid
 
 assistant = OpenAIAssistant(assistant_id=ASSISTANT_ID)
-
-@app.get("/", response_class=HTMLResponse)
-async def get_index():
-    pages_url = os.getenv('API_URI', 'default_value_if_not_set')
-
-    with open("index.html", "r", encoding="utf-8") as file:
-        html_content = file.read()
-
-    html_content = html_content.replace("{{ pages_url }}", pages_url)
-    
-    return HTMLResponse(content=html_content)
 
 @app.post("/query/", response_model=dict)
 async def query_openai(request: Request, query: Query):
