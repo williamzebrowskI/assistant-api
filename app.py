@@ -1,5 +1,5 @@
 import asyncio
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from elastic_connector import ElasticConnector
 from pydantic import BaseModel, UUID4
@@ -9,29 +9,37 @@ import openai
 from dotenv import load_dotenv
 import os
 from datetime import datetime
+import logging
+import sys
 load_dotenv()
 
-api_key = os.getenv('OPENAI_API_KEY')
-if not api_key:
-    raise Exception("OPENAI_API_KEY not found in environment variables")
+logging.basicConfig(level=logging.WARNING, format='%(asctime)s - %(levelname)s - %(message)s')
+
+api_key = os.environ.get('OPENAI_API_KEY', 'unassigned_openai_api_key')
 
 openai.api_key = api_key
 
+if api_key == 'unassigned_openai_api_key':
+    logging.warning('OPENAI_API_KEY is not set.')
+
+
 app = FastAPI(title="OpenAI Assistant API")
 
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://benefitsdatatrust.github.io",
     "http://localhost",
     "http://0.0.0.0:8002"],
-    # allow_origins=["*"],
+    #allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "HEAD", "OPTIONS"],
     allow_headers=["Access-Control-Allow-Headers", 'Content-Type', 'Authorization', 'Access-Control-Allow-Origin'],
 )
 
-
-ASSISTANT_ID = os.getenv('ASSISTANT_ID')
+ASSISTANT_ID = os.environ.get('ASSISTANT_ID', 'unassigned_assistant_id')
+if ASSISTANT_ID == 'unassigned_assistant_id':
+    logging.warning('ASSISTANT_ID is not set.')
 
 class Query(BaseModel):
     question: str
@@ -113,7 +121,7 @@ class OpenAIAssistant:
         run_status = await loop.run_in_executor(None, run_retrieve)
         return run_status
 
-    async def query_assistant(self, query, thread_id=None, conversation_uuid=None, user_id=None):
+    async def query_assistant(self, query, thread_id=None, conversation_uuid=None, user_id=None, client_ip=None):
         """
         Asynchronously queries the assistant, managing thread creation, message addition, and response generation.
 
@@ -132,7 +140,7 @@ class OpenAIAssistant:
         # If no thread exists, create a new one and log it to Elasticsearch
         if thread_id is None:
             thread_id = await self.create_thread(query)
-            doc = {"user_id": f"{user_id}", "thread_id": f"{thread_id}", "timestamp": datetime.now(), "conversations": {}}
+            doc = {"user_id": f"{user_id}", "client_ip": client_ip, "thread_id": f"{thread_id}", "timestamp": datetime.now(), "conversations": {}}
             await self.elastic_connector.push_to_index(conversation_uuid, doc)
         else:
             # If a thread exists, add the user's message to it
@@ -161,16 +169,18 @@ assistant = OpenAIAssistant(assistant_id=ASSISTANT_ID)
 
 # API
 @app.post("/query/", response_model=dict)
-async def query_openai(query: Query):
+async def query_openai(request: Request, query: Query):
+    client_ip = request.client.host
     try:
-        response, thread_id, message_id, conversation_uuid = await assistant.query_assistant(query.question, query.thread_id, query.conversation_uuid, query.user_id)
+        response, thread_id, message_id, conversation_uuid = await assistant.query_assistant(query.question, query.thread_id, query.conversation_uuid, query.user_id, client_ip=client_ip)
         return {
             "response": response, 
             "thread_id": thread_id,
             "message_id": message_id,
             "conversation_uuid": conversation_uuid,
             "user_id": query.user_id, 
-            "question": query.question
+            "question": query.question,
+            "client_ip": client_ip
         }
     
     except Exception as e:
