@@ -1,5 +1,6 @@
 import asyncio
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from elastic_connector import ElasticConnector
 from pydantic import BaseModel, UUID4
@@ -167,7 +168,17 @@ class OpenAIAssistant:
 
 assistant = OpenAIAssistant(assistant_id=ASSISTANT_ID)
 
-# API
+@app.get("/", response_class=HTMLResponse)
+async def get_index():
+    pages_url = os.getenv('API_URI', 'default_value_if_not_set')
+
+    with open("index.html", "r", encoding="utf-8") as file:
+        html_content = file.read()
+
+    html_content = html_content.replace("{{ pages_url }}", pages_url)
+    
+    return HTMLResponse(content=html_content)
+
 @app.post("/query/", response_model=dict)
 async def query_openai(request: Request, query: Query):
     client_ip = request.client.host

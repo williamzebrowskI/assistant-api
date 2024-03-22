@@ -36,6 +36,8 @@
 <script>
   // Retrieve an existing thread_id if available
   let threadId = localStorage.getItem("threadId");
+  const pagesUrl = "{{ pages_url }}";
+  console.log("Pages URL:", pagesUrl);
 
   document.addEventListener('DOMContentLoaded', function() {
     SetWyattCookies(); // Call this function as soon as the DOM is fully loaded
@@ -51,7 +53,7 @@
         addMessageToChat("user", question);
 
         // Constructing the URL with query parameters
-        let apiUrl = `http://wyatt-openai-play.bdtrust.org/query/?conversation_uuid=${conversationUuid}&user_id=${userUuid}`; // http://127.0.0.1:8002
+        let apiUrl = `${pagesUrl}/query/?conversation_uuid=${conversationUuid}&user_id=${userUuid}`; // http://127.0.0.1:8002
         if (threadId) {
         apiUrl += `&thread_id=${threadId}`;
         }
