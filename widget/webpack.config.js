@@ -23,7 +23,11 @@ module.exports = {
             presets: ['@babel/preset-env', '@babel/preset-react']
           }
         }
-      }
+      },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
+      },
     ]
   },
   devServer: {
@@ -33,6 +37,7 @@ module.exports = {
     compress: true,
     port: 3000,
   },
+  //TODO: reintroduce externals after local dev testing
   // externals: {
   //   react: 'react',
   //   'react-dom': 'react-dom',

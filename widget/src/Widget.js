@@ -6,19 +6,19 @@ const Widget = () => {
     const [question, setQuestion] = useState("");
 
     return (
-        <div className="chat__container">
-            <div className="chat__header">
+        <div className="chat-container">
+            <div className="chat-header">
                 <h2>OpenAI Assistant Chat</h2>
             </div>
-            <div className="chat__body">
-                {/* <div className="chat__body" ref={chatBodyRef}> */}
+            <div className="chat-body">
+                {/* <div className="chat-body" ref={chatBodyRef}> */}
                 {/* {messages.map((msg, index) => (
-                    <div key={index} className={msg.sender === "user" ? "message__user" : "message__assistant"}>
+                    <div key={index} className={msg.sender === "user" ? "message-user" : "message-assistant"}>
                         <p>{msg.message}</p>
                     </div>
                 ))} */}
             </div>
-            <div className="chat__footer">
+            <div className="chat-footer">
                 <form onSubmit={() => console.log('triggered submit') /* TODO: REPLACE WITH SUBMISSION HANDLER FUNCTION */}>
                     <input
                         type="text"
