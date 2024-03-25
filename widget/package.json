@@ -1,0 +1,23 @@
+{
+  "name": "fafsa-chatgpt-assistant_widget",
+  "version": "1.0.0",
+  "description": "The front-end of the fafsa-chatgpt-assitant; packages the chat widget UI for use as a react libary component.",
+  "main": "index.js",
+  "scripts": {
+    "start": "npm run develop"
+  },
+  "author": "",
+  "license": "ISC",
+  "peerDependencies": {
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.3",
+    "@babel/preset-env": "^7.24.3",
+    "@babel/preset-react": "^7.24.1",
+    "babel-loader": "^9.1.3",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4"
+  }
+}
