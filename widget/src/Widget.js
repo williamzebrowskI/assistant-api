@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import './styles.css';
 
 
-// <div className="chat__body" ref={chatBodyRef}>
-
 const Widget = () => {
     const [question, setQuestion] = useState("");
 
@@ -12,7 +10,8 @@ const Widget = () => {
             <div className="chat__header">
                 <h2>OpenAI Assistant Chat</h2>
             </div>
-            <div className="chat__body" >
+            <div className="chat__body">
+                {/* <div className="chat__body" ref={chatBodyRef}> */}
                 {/* {messages.map((msg, index) => (
                     <div key={index} className={msg.sender === "user" ? "message__user" : "message__assistant"}>
                         <p>{msg.message}</p>
