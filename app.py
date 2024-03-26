@@ -14,7 +14,6 @@ import logging
 import sys
 load_dotenv()
 
-logging.basicConfig(level=logging.WARNING, format='%(asctime)s - %(levelname)s - %(message)s')
 
 api_key = os.environ.get('OPENAI_API_KEY', 'unassigned_openai_api_key')
 
@@ -141,8 +140,7 @@ class OpenAIAssistant:
         # If no thread exists, create a new one and log it to Elasticsearch
         if thread_id is None:
             thread_id = await self.create_thread(query)
-            doc = {"user_id": f"{user_id}", "client_ip": client_ip, "thread_id": f"{thread_id}", "timestamp": datetime.now(), "conversations": {}}
-            await self.elastic_connector.push_to_index(conversation_uuid, doc)
+            await self.elastic_connector.push_to_index(conversation_uuid, user_id, client_ip, thread_id)
         else:
             # If a thread exists, add the user's message to it
             message_id = await self.add_message_to_thread(query, thread_id)
@@ -161,8 +159,11 @@ class OpenAIAssistant:
         latest_message = messages[0]
 
         # Log the query and response pair to the Elasticsearch record
-        doc = {"conversations": {f'User: {query}': f'Wyatt: {latest_message.content[0].text.value}'}}
-        await self.elastic_connector.update_document(conversation_uuid, doc)
+        await self.elastic_connector.update_document(
+            conversation_uuid=conversation_uuid,
+            user_query=query,  # The user's query
+            assistant_response=latest_message.content[0].text.value  # The assistant's response
+        )
 
         return latest_message.content[0].text.value, thread_id, message_id, conversation_uuid
 
