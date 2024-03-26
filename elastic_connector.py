@@ -32,7 +32,7 @@ class ElasticConnector():
          # Establish connection to Elasticsearch
         self.es = AsyncElasticsearch(hosts=[f"{self.es_url }:{self.es_port}"], api_key=f"{self.es_api_key }")
 
-    async def push_to_index(self, conversation_uuid, user_id, client_ip, thread_id):
+    async def push_to_index(self, conversation_uuid, user_id, client_ip, thread_id, assistant_id):
         """
         Asynchronously creates a new conversation document in Elasticsearch with initial metadata and an empty conversations list.
 
@@ -50,6 +50,7 @@ class ElasticConnector():
         doc = {
             "user_id": user_id,
             "client_ip": client_ip,
+            "assistant_id": assistant_id,
             "thread_id": thread_id,
             "timestamp": datetime.now(),
             "conversations": []
