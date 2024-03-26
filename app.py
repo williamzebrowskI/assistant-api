@@ -140,7 +140,7 @@ class OpenAIAssistant:
         # If no thread exists, create a new one and log it to Elasticsearch
         if thread_id is None:
             thread_id = await self.create_thread(query)
-            await self.elastic_connector.push_to_index(conversation_uuid, user_id, client_ip, thread_id)
+            await self.elastic_connector.push_to_index(conversation_uuid, user_id, client_ip, thread_id, self.assistant_id)
         else:
             # If a thread exists, add the user's message to it
             message_id = await self.add_message_to_thread(query, thread_id)
