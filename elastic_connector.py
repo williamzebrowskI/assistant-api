@@ -81,14 +81,19 @@ class ElasticConnector():
             }
 
         script = {
-            "script": {
-                "source": "ctx._source.conversations.add(params.conversation)",
-                "lang": "painless",
-                "params": {
-                    "conversation": conversation_entry
+                "script": {
+                    "source": """
+                        ctx._source.conversations.add(params.conversation);
+                        ctx._source.timestamp = params.timestamp; 
+                    """,
+                    "lang": "painless",
+                    "params": {
+                        "conversation": conversation_entry,
+                        "timestamp": datetime.now().isoformat()
+                    }
                 }
             }
-        }
+        
         try:
             response = await self.es.update(index=self.es_index, id=conversation_uuid, body=script)
             logging.info(f"Document updated successfully: {response}")
