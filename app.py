@@ -136,4 +136,4 @@ def handle_user_message(message):
     elastic_connector.update_document(conversation_uuid=conversation_uuid, user_query=user_input, assistant_response=text_value)
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, port=8002)
+    socketio.run(app, allow_unsafe_werkzeug=True, debug=True, port=8002)
