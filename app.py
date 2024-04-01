@@ -1,51 +1,33 @@
-import asyncio
-from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import HTMLResponse
-from fastapi.middleware.cors import CORSMiddleware
-from elastic_connector import ElasticConnector
-from pydantic import BaseModel, UUID4
-from typing import Optional
-from functools import partial
-import openai
-from dotenv import load_dotenv
 import os
-from datetime import datetime
-import logging
-import sys
+from openai import OpenAI, AssistantEventHandler
+from elastic_connector2 import ElasticConnector2
+from flask import Flask, render_template, request
+from flask_socketio import SocketIO
+from dotenv import load_dotenv
 load_dotenv()
 
+#Flask app and SocketIO setup
+app = Flask(__name__)
+socketio = SocketIO(
+    app,
+    cors_allowed_origins=["http://localhost:8003", "https://benefitsdatatrust.github.io", "http://127.0.0.1:8003"],
+    cors_credentials=True,
+    cors_allowed_headers="*",
+    manage_session=False,
+    logger=True,
+    engineio_logger=True
+    )
 
-api_key = os.environ.get('OPENAI_API_KEY', 'unassigned_openai_api_key')
+# Set up OpenAI client
+client = OpenAI()
+OpenAI.api_key = os.getenv('OPENAI_API_KEY')
 
-openai.api_key = api_key
+# Set up ElasticConnector
+elastic_connector = ElasticConnector2()
 
-if api_key == 'unassigned_openai_api_key':
-    logging.warning('OPENAI_API_KEY is not set.')
+# Set up OpenAI Assistant
+ASSISTANT_ID = os.getenv('ASSISTANT_ID')
 
-
-app = FastAPI(title="OpenAI Assistant API")
-
-# CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["https://studious-tribble-z4e46zp.pages.github.io/",
-    "http://localhost",
-    "http://0.0.0.0:8002"],
-    #allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "HEAD", "OPTIONS"],
-    allow_headers=["Access-Control-Allow-Headers", 'Content-Type', 'Authorization', 'Access-Control-Allow-Origin'],
-)
-
-ASSISTANT_ID = os.environ.get('ASSISTANT_ID', 'unassigned_assistant_id')
-if ASSISTANT_ID == 'unassigned_assistant_id':
-    logging.warning('ASSISTANT_ID is not set.')
-
-class Query(BaseModel):
-    question: str
-    thread_id: Optional[str] = None
-    conversation_uuid: Optional[str] = None
-    user_id: Optional[str] = None
 
 class OpenAIAssistant:
     def __init__(self, assistant_id):
@@ -56,137 +38,102 @@ class OpenAIAssistant:
             assistant_id (str): The unique identifier for the OpenAI Assistant.
         """
         self.assistant_id = assistant_id
-        self.client = openai
-        self.elastic_connector = ElasticConnector()
 
-    async def create_thread(self, query):
+class ThreadManager:
+    """
+    Manages conversation threads for the OpenAI Assistant. Responsible for creating new threads and maintaining the
+    state of an ongoing conversation.
+
+    Attributes:
+        thread_id (str): ID of the current conversation thread. None if no thread is active.
+        is_new_thread (bool): Flag indicating whether the current thread is a new thread.
+    """
+    def __init__(self):
         """
-        Asynchronously creates a new thread in the OpenAI Assistant.
-        Args:
-            query (str): The user's query to initialize the thread with.
-        
+        Initializes the ThreadManager with no active thread.
+        """
+        self.thread_id = None
+        self.is_new_thread = False
+
+    def get_thread(self):
+        """
+        Retrieves the current thread ID, creating a new thread if none exists.
+
         Returns:
-            str: The ID of the created thread.
+            str: The thread ID of the current or new conversation thread.
         """
-        loop = asyncio.get_event_loop()
-        thread_create = partial(self.client.beta.threads.create, messages=[{"role": "user", "content": query}])
-        thread = await loop.run_in_executor(None, thread_create)
-        return thread.id
+        if not self.thread_id:
+            thread = client.beta.threads.create()
+            self.thread_id = thread.id
+            self.is_new_thread = True
+        return self.thread_id
 
-    async def add_message_to_thread(self, query, thread_id):
+    def reset_thread(self):
         """
-        Asynchronously adds a message from the user to an existing thread.
+        Resets the current conversation thread, marking no active thread.
+        """
+        self.thread_id = None
+        self.is_new_thread = False
 
-        Args:
-            query (str): The user's query to add to the thread.
-            thread_id (str): The ID of the thread to add the message to.
-        
-        Returns:
-            str: The ID of the created message.
-        """
-        loop = asyncio.get_event_loop()
-        message_create = partial(self.client.beta.threads.messages.create, thread_id=thread_id, role="user", content=query)
-        message = await loop.run_in_executor(None, message_create)
-        return message.id
+class EventHandler(AssistantEventHandler):
+    """
+    Handles events triggered during the conversation with the OpenAI Assistant. This includes receiving text updates
+    from the assistant and handling any errors that occur.
 
-    async def run_thread(self, thread_id):
+    Inherits from AssistantEventHandler to provide custom event handling logic for the Flask-SocketIO integration.
+    """
+    def on_text_delta(self, delta, snapshot):
         """
-        Asynchronously runs the assistant on the specified thread, generating a response.
-
-        Args:
-            assistant_id (str): The ID of the assistant to run on the thread.
-            thread_id (str): The ID of the thread to run the assistant on.
-        
-        Returns:
-            object: The run object created by executing the assistant on the thread.
-        """
-        loop = asyncio.get_event_loop()
-        run_create = partial(self.client.beta.threads.runs.create, thread_id=thread_id, assistant_id=self.assistant_id)
-        run = await loop.run_in_executor(None, run_create)
-        return run
-
-    async def check_run_status(self, thread_id, run_id):
-        """
-        Asynchronously checks the status of a run on a thread.
-        Args:
-            thread_id (str): The ID of the thread.
-            run_id (str): The ID of the run to check the status of.
-        
-        Returns:
-            object: The status of the run.
-        """
-       
-        loop = asyncio.get_event_loop()
-        run_retrieve = partial(self.client.beta.threads.runs.retrieve, thread_id=thread_id, run_id=run_id)
-        run_status = await loop.run_in_executor(None, run_retrieve)
-        return run_status
-
-    async def query_assistant(self, query, thread_id=None, conversation_uuid=None, user_id=None, client_ip=None):
-        """
-        Asynchronously queries the assistant, managing thread creation, message addition, and response generation.
+        Handles text updates from the assistant, emitting them to the client through SocketIO.
 
         Args:
-            conversation_uuid (str): The unique identifier for the conversation.
-            query (str): The user's query to process.
-            thread_id (Optional[str]): The ID of an existing thread to add the query to, if any.
-        
-        Returns:
-            tuple: A tuple containing the assistant's response, the thread ID, and the message ID.
+            delta: Delta update containing the text changes.
+            snapshot: The current state of the message after applying the delta update.
         """
+        socketio.emit('assistant_message', {'text': delta.value}, namespace='/chat')
 
-        loop = asyncio.get_event_loop()
-        message_id = None
+    def on_error(self, error):
+        print(error)
 
-        # If no thread exists, create a new one and log it to Elasticsearch
-        if thread_id is None:
-            thread_id = await self.create_thread(query)
-            await self.elastic_connector.push_to_index(conversation_uuid, user_id, client_ip, thread_id, self.assistant_id)
-        else:
-            # If a thread exists, add the user's message to it
-            message_id = await self.add_message_to_thread(query, thread_id)
-
-         # Run the assistant on the thread to generate a response
-        run = await self.run_thread(thread_id)
-        
-        # Keep checking the status of the run until it is completed 
-        run_status = await self.check_run_status(thread_id, run.id)
-        while run_status.status != "completed":
-            run_status = await self.check_run_status(thread_id, run.id)
-
-        # Retrieve the latest message from the assistant
-        messages_response = await loop.run_in_executor(None, partial(self.client.beta.threads.messages.list, thread_id=thread_id))
-        messages = messages_response.data
-        latest_message = messages[0]
-
-        # Log the query and response pair to the Elasticsearch record
-        await self.elastic_connector.update_document(
-            conversation_uuid=conversation_uuid,
-            user_query=query,  # The user's query
-            assistant_response=latest_message.content[0].text.value  # The assistant's response
-        )
-
-        return latest_message.content[0].text.value, thread_id, message_id, conversation_uuid
-
+thread_manager = ThreadManager()
 assistant = OpenAIAssistant(assistant_id=ASSISTANT_ID)
+assistant_id = assistant.assistant_id
 
-@app.post("/query/", response_model=dict)
-async def query_openai(request: Request, query: Query):
-    client_ip = request.client.host
-    try:
-        response, thread_id, message_id, conversation_uuid = await assistant.query_assistant(query.question, query.thread_id, query.conversation_uuid, query.user_id, client_ip=client_ip)
-        return {
-            "response": response, 
-            "thread_id": thread_id,
-            "message_id": message_id,
-            "conversation_uuid": conversation_uuid,
-            "user_id": query.user_id, 
-            "question": query.question,
-            "client_ip": client_ip
-        }
-    
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+@app.route('/')
+def index():
+    return render_template('index_2.html')
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("app:app", host="0.0.0.0", port=8002, reload=True)
+@socketio.on('user_message', namespace='/chat')
+def handle_user_message(message):
+    user_input = message['text']
+    user_id = request.args.get('userId')
+    conversation_uuid = request.args.get('conversationId')
+    client_ip = request.remote_addr
+    print(f"User connected with ID: {user_id}; Conversation ID: {conversation_uuid}; Client IP: {request.remote_addr}")
+
+
+    thread_id = thread_manager.get_thread()
+
+    client.beta.threads.messages.create(thread_id=thread_id, role="user", content=user_input)
+
+    with client.beta.threads.runs.create_and_stream(
+        thread_id=thread_id,
+        assistant_id=assistant_id,
+        event_handler=EventHandler(),
+    ) as stream:
+        stream.until_done()
+        response = stream.get_final_messages()
+        for message in response:
+            for content_block in message.content:
+                if content_block.type == 'text':
+                    text_value = content_block.text.value
+
+    if thread_manager.is_new_thread:
+        elastic_connector.push_to_index(conversation_uuid, user_id, client_ip, thread_id, assistant_id)
+        thread_manager.is_new_thread = False 
+
+
+    elastic_connector.update_document(conversation_uuid=conversation_uuid, user_query=user_input, assistant_response=text_value)
+
+if __name__ == '__main__':
+    socketio.run(app, debug=True, port=8002)
