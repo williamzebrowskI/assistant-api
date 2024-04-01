@@ -10,13 +10,13 @@ load_dotenv()
 app = Flask(__name__)
 socketio = SocketIO(
     app,
-    cors_allowed_origins=["http://localhost:8003", "https://benefitsdatatrust.github.io", "http://127.0.0.1:8003"],
+    cors_allowed_origins=["http://127.0.0.1:5500", "http://localhost:8002", "https://benefitsdatatrust.github.io", "http://127.0.0.1:8002"],
     cors_credentials=True,
     cors_allowed_headers="*",
     manage_session=False,
     logger=True,
     engineio_logger=True
-    )
+)
 
 # Set up OpenAI client
 client = OpenAI()
@@ -136,4 +136,4 @@ def handle_user_message(message):
     elastic_connector.update_document(conversation_uuid=conversation_uuid, user_query=user_input, assistant_response=text_value)
 
 if __name__ == '__main__':
-    socketio.run(app, allow_unsafe_werkzeug=True, debug=True, port=8002)
+    socketio.run(app, debug=True, port=8002)
