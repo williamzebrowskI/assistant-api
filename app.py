@@ -3,6 +3,7 @@ from openai import OpenAI, AssistantEventHandler
 from elastic_connector import ElasticConnector
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO
+import logging
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -14,8 +15,8 @@ socketio = SocketIO(
     cors_credentials=True,
     cors_allowed_headers="*",
     manage_session=False,
-    logger=True,
-    engineio_logger=True
+    logger=False,
+    engineio_logger=False
 )
 
 # Set up OpenAI client
@@ -93,7 +94,7 @@ class EventHandler(AssistantEventHandler):
         socketio.emit('assistant_message', {'text': delta.value}, namespace='/chat')
 
     def on_error(self, error):
-        print(error)
+        logging.warning(error)
 
 thread_manager = ThreadManager()
 assistant = OpenAIAssistant(assistant_id=ASSISTANT_ID)
@@ -101,7 +102,7 @@ assistant_id = assistant.assistant_id
 
 @app.route('/')
 def index():
-    return render_template('index_2.html')
+    return render_template('index.html')
 
 @socketio.on('user_message', namespace='/chat')
 def handle_user_message(message):
@@ -109,8 +110,7 @@ def handle_user_message(message):
     user_id = request.args.get('userId')
     conversation_uuid = request.args.get('conversationId')
     client_ip = request.remote_addr
-    print(f"User connected with ID: {user_id}; Conversation ID: {conversation_uuid}; Client IP: {request.remote_addr}")
-
+    logging.info(f"User connected with ID: {user_id}; Conversation ID: {conversation_uuid}; Client IP: {request.remote_addr}")
 
     thread_id = thread_manager.get_thread()
 
@@ -128,12 +128,16 @@ def handle_user_message(message):
                 if content_block.type == 'text':
                     text_value = content_block.text.value
 
-    if thread_manager.is_new_thread:
-        elastic_connector.push_to_index(conversation_uuid, user_id, client_ip, thread_id, assistant_id)
-        thread_manager.is_new_thread = False 
-
-
-    elastic_connector.update_document(conversation_uuid=conversation_uuid, user_query=user_input, assistant_response=text_value)
+     # Method to update the conversation in Elasticsearch.
+    elastic_connector.push_or_update_conversation(
+        conversation_uuid=conversation_uuid,
+        user_id=user_id,
+        client_ip=client_ip,
+        thread_id=thread_id,
+        assistant_id=assistant.assistant_id,
+        user_query=user_input,
+        assistant_response=text_value
+    )
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, port=8002)
