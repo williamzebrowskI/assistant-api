@@ -32,34 +32,6 @@ class ElasticConnector():
          # Establish connection to Elasticsearch
         self.es = Elasticsearch(hosts=[f"{self.es_url }:{self.es_port}"], api_key=f"{self.es_api_key }")
 
-    def push_to_index(self, conversation_uuid, user_id, client_ip, thread_id, assistant_id):
-        """
-        Asynchronously creates a new conversation document in Elasticsearch with initial metadata and an empty conversations list.
-
-        This method initializes a new conversation document structure that includes the user's ID, the client's IP address, the thread's ID, and a timestamp marking the creation time. An empty list for `conversations` is also initialized to hold future user queries and assistant responses.
-
-        Args:
-            conversation_uuid (str): The unique identifier for the conversation document to be created.
-            user_id (str): The ID of the user initiating the conversation.
-            client_ip (str): The IP address of the client from where the request originated.
-            thread_id (str): The unique identifier of the thread associated with this conversation.
-
-        Raises:
-            Exception: If there is an error creating the conversation document in Elasticsearch, it prints an error message with details.
-        """
-        doc = {
-            "user_id": user_id,
-            "client_ip": client_ip,
-            "assistant_id": assistant_id,
-            "thread_id": thread_id,
-            "timestamp": datetime.now(),
-            "conversations": []
-        }
-        try:
-            response = self.es.index(index=self.es_index, id=conversation_uuid, document=doc)
-            logging.info(f"Document indexed successfully: {response}")
-        except Exception as e:
-            logging.info(f"Error pushing document to Elasticsearch: {e}")
 
     def update_document(self, conversation_uuid, user_query, assistant_response):
         """
@@ -99,3 +71,26 @@ class ElasticConnector():
             logging.info(f"Document updated successfully: {response}")
         except Exception as e:
             logging.info(f"Error updating document in Elasticsearch: {e}")
+    
+    def push_or_update_conversation(self, conversation_uuid, user_id, client_ip, thread_id, assistant_id, user_query, assistant_response):
+        # Check if the document already exists
+        exists = self.es.exists(index=self.es_index, id=conversation_uuid)
+        
+        if exists:
+            # Document exists, so update it
+            self.update_document(conversation_uuid, user_query, assistant_response)
+        else:
+            # Document doesn't exist, create it
+            doc = {
+                "user_id": user_id,
+                "client_ip": client_ip,
+                "assistant_id": assistant_id,
+                "thread_id": thread_id,
+                "timestamp": datetime.now(),
+                "conversations": [{"user_query": user_query, "assistant_response": assistant_response}]
+            }
+            try:
+                response = self.es.index(index=self.es_index, id=conversation_uuid, document=doc)
+                logging.info(f"Document indexed successfully: {response}")
+            except Exception as e:
+                logging.error(f"Error pushing document to Elasticsearch: {e}")
