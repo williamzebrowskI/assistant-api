@@ -1,4 +1,4 @@
-from elasticsearch import AsyncElasticsearch
+from elasticsearch import AsyncElasticsearch, Elasticsearch
 import os
 import logging
 from dotenv import load_dotenv
@@ -30,9 +30,9 @@ class ElasticConnector():
             logging.warning('Elastic Port is not set.')
 
          # Establish connection to Elasticsearch
-        self.es = AsyncElasticsearch(hosts=[f"{self.es_url }:{self.es_port}"], api_key=f"{self.es_api_key }")
+        self.es = Elasticsearch(hosts=[f"{self.es_url }:{self.es_port}"], api_key=f"{self.es_api_key }")
 
-    async def push_to_index(self, conversation_uuid, user_id, client_ip, thread_id, assistant_id):
+    def push_to_index(self, conversation_uuid, user_id, client_ip, thread_id, assistant_id):
         """
         Asynchronously creates a new conversation document in Elasticsearch with initial metadata and an empty conversations list.
 
@@ -56,12 +56,12 @@ class ElasticConnector():
             "conversations": []
         }
         try:
-            response = await self.es.index(index=self.es_index, id=conversation_uuid, document=doc)
+            response = self.es.index(index=self.es_index, id=conversation_uuid, document=doc)
             logging.info(f"Document indexed successfully: {response}")
         except Exception as e:
-            logging.error(f"Error pushing document to Elasticsearch: {e}")
+            logging.info(f"Error pushing document to Elasticsearch: {e}")
 
-    async def update_document(self, conversation_uuid, user_query, assistant_response):
+    def update_document(self, conversation_uuid, user_query, assistant_response):
         """
         Asynchronously appends a new interaction (a user query and the corresponding assistant response) to the `conversations` array of an existing document in the Elasticsearch index.
 
@@ -95,7 +95,7 @@ class ElasticConnector():
             }
         
         try:
-            response = await self.es.update(index=self.es_index, id=conversation_uuid, body=script)
+            response = self.es.update(index=self.es_index, id=conversation_uuid, body=script)
             logging.info(f"Document updated successfully: {response}")
         except Exception as e:
-            logging.error(f"Error updating document in Elasticsearch: {e}")
+            logging.info(f"Error updating document in Elasticsearch: {e}")
