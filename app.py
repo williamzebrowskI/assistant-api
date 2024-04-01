@@ -1,6 +1,6 @@
 import os
 from openai import OpenAI, AssistantEventHandler
-from elastic_connector2 import ElasticConnector2
+from elastic_connector import ElasticConnector
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO
 from dotenv import load_dotenv
@@ -23,7 +23,7 @@ client = OpenAI()
 OpenAI.api_key = os.getenv('OPENAI_API_KEY')
 
 # Set up ElasticConnector
-elastic_connector = ElasticConnector2()
+elastic_connector = ElasticConnector()
 
 # Set up OpenAI Assistant
 ASSISTANT_ID = os.getenv('ASSISTANT_ID')
