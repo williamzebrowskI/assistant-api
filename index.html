@@ -4,23 +4,24 @@
     <meta charset="UTF-8">
     <title>Chat with OpenAI</title>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f0f2f5; }
         .chat-container { max-width: 600px; margin: 20px auto; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
         .chat-header { background-color: #007bff; color: #ffffff; padding: 10px; text-align: center; }
-        .chat-body { background-color: #ffffff; padding: 10px; height: 400px; overflow-y: auto; }
+        .chat-body { background-color: #ffffff; padding: 10px; height: 400px; overflow-y: scroll; }
         .chat-footer { background-color: #f0f2f5; padding: 10px; display: flex; align-items: center; }
-        .message { margin-bottom: 15px; }
-        .user-message p, .assistant-message p { padding: 10px; display: inline-block; border-radius: 20px; }
-        .user-message p { background-color: #007bff; color: #ffffff; }
-        .assistant-message p { background-color: #e9ecef; }
+        .user-message, .assistant-message { padding: 10px; border-radius: 20px; margin-bottom: 10px; }
+        .user-message { background-color: #007bff; color: #ffffff; }
+        .assistant-message { background-color: #e9ecef; color: black; }
         #message { flex-grow: 1; margin-right: 10px; }
     </style>
 </head>
 <body>
     <div class="chat-container">
         <div class="chat-header">Chat with OpenAI</div>
-        <ul class="chat-body" id="messages"></ul>
+        <div class="chat-body" id="messages"></div>
         <div class="chat-footer">
             <input type="text" id="message" autocomplete="off">
             <button id="send">Send</button>
@@ -28,77 +29,45 @@
     </div>
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function() {
-            let userId = localStorage.getItem("userId");
-            let conversationId = localStorage.getItem("conversationId");
-
-            if (!userId) {
-                userId = crypto.randomUUID();
-                localStorage.setItem("userId", userId);
-            }
-
-            if (!conversationId) {
-                conversationId = crypto.randomUUID();
-                localStorage.setItem("conversationId", conversationId);
-            }
+            let userId = localStorage.getItem("userId") || crypto.randomUUID();
+            let conversationId = localStorage.getItem("conversationId") || crypto.randomUUID();
+            localStorage.setItem("userId", userId);
+            localStorage.setItem("conversationId", conversationId);
 
             var socket = io.connect('https://wyatt-openai-play.bdtrust.org/chat', {
-                query: {
-                    'userId': userId,
-                    'conversationId': conversationId
-                }
+                query: { 'userId': userId, 'conversationId': conversationId }
             });
 
-            socket.on('connect', function() {
-                console.log('Connected to the WebSocket server');
-            });
-
-            
             socket.on('assistant_message', function(data) {
                 const messagesList = document.getElementById("messages");
-        
-                // Create a new message element if there isn't an active one
-                if (!currentMessageElement) {
-                    currentMessageElement = document.createElement("li");
-                    currentMessageElement.classList.add("assistant-message");
-                    var pElement = document.createElement("p");
-                    currentMessageElement.appendChild(pElement);
-                    messagesList.appendChild(currentMessageElement);
+                let lastMessage = messagesList.lastElementChild;
+                if (!lastMessage || lastMessage.classList.contains("user-message")) {
+                    lastMessage = document.createElement("div");
+                    lastMessage.classList.add("assistant-message");
+                    messagesList.appendChild(lastMessage);
                 }
-        
-                // Append the incoming word to the current message element's text content
-                currentMessageElement.firstChild.textContent += data.text;
-        
+                
+                // Append incoming text to the last message element.
+                lastMessage.innerText += data.text; // Adjust this line if data.text is not the correct reference.
+                
                 messagesList.scrollTop = messagesList.scrollHeight; // Auto-scroll to the latest message
             });
-        
-            document.getElementById("send").onclick = function() {
-                var messageText = document.getElementById("message").value;
-                if (messageText.trim() === '') return; // Ignore empty messages
-        
-                // Emit the message to the server
-                // socket.emit('user_message', {'text': messageText});
-                socket.emit('user_message', {
-                    'text': messageText,
-                    'userId': userId,
-                    'conversationId': conversationId
-                });
-        
-                // Immediately display the user's message in the chat for feedback
-                let userMsgElement = document.createElement("li");
+
+            document.getElementById("send").addEventListener("click", function() {
+                var messageText = document.getElementById("message").value.trim();
+                if (!messageText) return;
+
+                socket.emit('user_message', { text: messageText, userId, conversationId });
+
+                const messagesList = document.getElementById("messages");
+                const userMsgElement = document.createElement("div");
                 userMsgElement.classList.add("user-message");
-                let pElement = document.createElement("p");
-                pElement.textContent = "You: " + messageText;
-                userMsgElement.appendChild(pElement);
-                document.getElementById("messages").appendChild(userMsgElement);
-                document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
-        
-                // Clear the input field after sending
-                document.getElementById("message").value = '';
-        
-                // Prepare for the next assistant message
-                currentMessageElement = null;
-            };
-    
+                userMsgElement.innerText = `You: ${messageText}`;
+                messagesList.appendChild(userMsgElement);
+
+                document.getElementById("message").value = ''; // Clear the input field after sending
+                messagesList.scrollTop = messagesList.scrollHeight; // Scroll to the bottom
+            });
         });
     </script>
 </body>
