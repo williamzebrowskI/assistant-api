@@ -42,39 +42,40 @@ class OpenAIAssistant:
 
 class ThreadManager:
     """
-    Manages conversation threads for the OpenAI Assistant. Responsible for creating new threads and maintaining the
-    state of an ongoing conversation.
-
+    Manages conversation threads, ensuring each conversation has a unique thread.
+    
     Attributes:
-        thread_id (str): ID of the current conversation thread. None if no thread is active.
-        is_new_thread (bool): Flag indicating whether the current thread is a new thread.
+        threads (dict): A dictionary mapping conversation UUIDs to their respective thread IDs.
+    
+    Methods:
+        get_thread(conversation_uuid): Retrieves or creates a unique thread ID for a given conversation.
     """
     def __init__(self):
         """
-        Initializes the ThreadManager with no active thread.
+        Initializes the ThreadManager with an empty dictionary to store conversation thread mappings.
         """
-        self.thread_id = None
-        self.is_new_thread = False
+        # Maps conversation_uuid to thread_id
+        self.threads = {}
 
-    def get_thread(self):
+    def get_thread(self, conversation_uuid):
         """
-        Retrieves the current thread ID, creating a new thread if none exists.
-
+        Retrieves the thread ID for a given conversation UUID. If the conversation does not have an associated
+        thread ID, a new thread is created, stored, and then returned.
+        
+        Args:
+            conversation_uuid (str): The unique identifier for a conversation.
+        
         Returns:
-            str: The thread ID of the current or new conversation thread.
+            str: The thread ID associated with the given conversation UUID.
         """
-        if not self.thread_id:
+        # If a thread_id exists for the conversation, return it
+        if conversation_uuid in self.threads:
+            return self.threads[conversation_uuid]
+        else:
+            # Otherwise, create a new thread_id, store it, and return it
             thread = client.beta.threads.create()
-            self.thread_id = thread.id
-            self.is_new_thread = True
-        return self.thread_id
-
-    def reset_thread(self):
-        """
-        Resets the current conversation thread, marking no active thread.
-        """
-        self.thread_id = None
-        self.is_new_thread = False
+            self.threads[conversation_uuid] = thread.id
+            return thread.id
 
 class EventHandler(AssistantEventHandler):
     """
@@ -112,7 +113,7 @@ def handle_user_message(message):
     client_ip = request.remote_addr
     logging.info(f"User connected with ID: {user_id}; Conversation ID: {conversation_uuid}; Client IP: {request.remote_addr}")
 
-    thread_id = thread_manager.get_thread()
+    thread_id = thread_manager.get_thread(conversation_uuid)
 
     client.beta.threads.messages.create(thread_id=thread_id, role="user", content=user_input)
 
