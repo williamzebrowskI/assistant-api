@@ -1,6 +1,11 @@
 import os
 from openai import OpenAI, AssistantEventHandler
 from elastic_connector import ElasticConnector
+from thread_manager import ThreadManager
+from event_handler import EventHandler
+from openai_assistant import OpenAIAssistant 
+from flask import session
+from flask_socketio import join_room
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO
 import logging
@@ -9,6 +14,7 @@ load_dotenv()
 
 #Flask app and SocketIO setup
 app = Flask(__name__)
+app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY')
 socketio = SocketIO(
     app,
     cors_allowed_origins=["http://127.0.0.1:5500", "http://localhost:8002", "https://benefitsdatatrust.github.io", "http://127.0.0.1:8002"],
@@ -26,84 +32,29 @@ OpenAI.api_key = os.getenv('OPENAI_API_KEY')
 # Set up ElasticConnector
 elastic_connector = ElasticConnector()
 
+# Set up ThreadManager
+thread_manager = ThreadManager(client=client)
+
 # Set up OpenAI Assistant
 ASSISTANT_ID = os.getenv('ASSISTANT_ID')
-
-
-class OpenAIAssistant:
-    def __init__(self, assistant_id):
-        """
-        Initializes the OpenAIAssistant instance.
-
-        Args:
-            assistant_id (str): The unique identifier for the OpenAI Assistant.
-        """
-        self.assistant_id = assistant_id
-
-class ThreadManager:
-    """
-    Manages conversation threads, ensuring each conversation has a unique thread.
-    
-    Attributes:
-        threads (dict): A dictionary mapping conversation UUIDs to their respective thread IDs.
-    
-    Methods:
-        get_thread(conversation_uuid): Retrieves or creates a unique thread ID for a given conversation.
-    """
-    def __init__(self):
-        """
-        Initializes the ThreadManager with an empty dictionary to store conversation thread mappings.
-        """
-        # Maps conversation_uuid to thread_id
-        self.threads = {}
-
-    def get_thread(self, conversation_uuid):
-        """
-        Retrieves the thread ID for a given conversation UUID. If the conversation does not have an associated
-        thread ID, a new thread is created, stored, and then returned.
-        
-        Args:
-            conversation_uuid (str): The unique identifier for a conversation.
-        
-        Returns:
-            str: The thread ID associated with the given conversation UUID.
-        """
-        # If a thread_id exists for the conversation, return it
-        if conversation_uuid in self.threads:
-            return self.threads[conversation_uuid]
-        else:
-            # Otherwise, create a new thread_id, store it, and return it
-            thread = client.beta.threads.create()
-            self.threads[conversation_uuid] = thread.id
-            return thread.id
-
-class EventHandler(AssistantEventHandler):
-    """
-    Handles events triggered during the conversation with the OpenAI Assistant. This includes receiving text updates
-    from the assistant and handling any errors that occur.
-
-    Inherits from AssistantEventHandler to provide custom event handling logic for the Flask-SocketIO integration.
-    """
-    def on_text_delta(self, delta, snapshot):
-        """
-        Handles text updates from the assistant, emitting them to the client through SocketIO.
-
-        Args:
-            delta: Delta update containing the text changes.
-            snapshot: The current state of the message after applying the delta update.
-        """
-        socketio.emit('assistant_message', {'text': delta.value}, namespace='/chat')
-
-    def on_error(self, error):
-        logging.warning(error)
-
-thread_manager = ThreadManager()
 assistant = OpenAIAssistant(assistant_id=ASSISTANT_ID)
 assistant_id = assistant.assistant_id
+
 
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@socketio.on('connect', namespace='/chat')
+def handle_connect():
+    user_id = request.args.get('userId')
+    if user_id:
+        join_room(user_id)
+        session['userId'] = user_id 
+
+@socketio.on('disconnect', namespace='/chat')
+def handle_disconnect():
+    logging.info(f"Client disconnected: {request.sid}")
 
 @socketio.on('user_message', namespace='/chat')
 def handle_user_message(message):
