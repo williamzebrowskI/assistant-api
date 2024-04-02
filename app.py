@@ -48,6 +48,7 @@ def index():
 @socketio.on('connect', namespace='/chat')
 def handle_connect():
     user_id = request.args.get('userId')
+    print(user_id)
     if user_id:
         join_room(user_id)
         session['userId'] = user_id 
@@ -59,19 +60,22 @@ def handle_disconnect():
 @socketio.on('user_message', namespace='/chat')
 def handle_user_message(message):
     user_input = message['text']
-    user_id = request.args.get('userId')
-    conversation_uuid = request.args.get('conversationId')
+    user_id = message.get('userId')
+    conversation_uuid = message.get('conversationId')
     client_ip = request.remote_addr
-    logging.info(f"User connected with ID: {user_id}; Conversation ID: {conversation_uuid}; Client IP: {request.remote_addr}")
+    
+    print(f"User connected with ID: {user_id}; Conversation ID: {conversation_uuid}; Client IP: {request.remote_addr}")
 
     thread_id = thread_manager.get_thread(conversation_uuid)
 
     client.beta.threads.messages.create(thread_id=thread_id, role="user", content=user_input)
 
+    event_handler = EventHandler(userId=user_id)
+
     with client.beta.threads.runs.create_and_stream(
         thread_id=thread_id,
         assistant_id=assistant_id,
-        event_handler=EventHandler(),
+        event_handler=event_handler,
     ) as stream:
         stream.until_done()
         response = stream.get_final_messages()
