@@ -57,7 +57,7 @@
                 var messageText = document.getElementById("message").value.trim();
                 if (!messageText) return;
 
-                socket.emit('user_message', { text: messageText, userId, conversationId });
+                socket.emit('user_message', { text: messageText, userId: userId, conversationId: conversationId });
 
                 const messagesList = document.getElementById("messages");
                 const userMsgElement = document.createElement("div");
