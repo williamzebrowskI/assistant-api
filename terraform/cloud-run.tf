@@ -28,6 +28,10 @@ resource "google_cloud_run_v2_service" "openai_assistant" {
         value = local.ws_vars["es_index"]
       }
       env {
+        name  = "API_URI"
+        value = local.ws_vars["api_uri"]
+      }
+      env {
         name = "OPENAI_API_KEY"
 
         value_source {
