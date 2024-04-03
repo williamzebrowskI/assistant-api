@@ -48,7 +48,6 @@ def index():
 @socketio.on('connect', namespace='/chat')
 def handle_connect():
     user_id = request.args.get('userId')
-    print(user_id)
     if user_id:
         join_room(user_id)
         session['userId'] = user_id 
@@ -62,9 +61,7 @@ def handle_user_message(message):
     user_input = message['text']
     user_id = message.get('userId')
     conversation_uuid = message.get('conversationId')
-    client_ip = request.remote_addr
-    
-    print(f"User connected with ID: {user_id}; Conversation ID: {conversation_uuid}; Client IP: {request.remote_addr}")
+    client_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(",")[0].strip()
 
     thread_id = thread_manager.get_thread(conversation_uuid)
 
