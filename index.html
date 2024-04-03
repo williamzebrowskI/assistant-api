@@ -16,6 +16,10 @@
         .user-message { background-color: #007bff; color: #ffffff; }
         .assistant-message { background-color: #e9ecef; color: black; }
         #message { flex-grow: 1; margin-right: 10px; }
+        .link-container {
+            margin-right: 5px; /* Adjust the space to your liking */
+            display: inline-block; /* Keeps the link inline but allows for margin */
+        }
     </style>
 </head>
 <body>
@@ -48,7 +52,11 @@
                 }
                 
                 // Append incoming text to the last message element.
-                lastMessage.innerText += data.text; // Adjust this line if data.text is not the correct reference.
+                lastMessage.innerText += data.text;
+
+                if (messageIsComplete()) {
+                    formatTextForHyperlinks(lastMessage);
+                }
                 
                 messagesList.scrollTop = messagesList.scrollHeight; // Auto-scroll to the latest message
             });
@@ -69,6 +77,44 @@
                 messagesList.scrollTop = messagesList.scrollHeight; // Scroll to the bottom
             });
         });
+
+            // This function replaces plain text URLs with clickable links.
+        function formatTextForHyperlinks(messageElement) {
+            let innerText = messageElement.innerText;
+            //  #added
+            let markdownConverted = convertMarkdownLinksToHtml(innerText);
+            let formattedHtml = linkify(markdownConverted);
+            // let finalHtml = convertImageLinksToImages(formattedHtml);
+            messageElement.innerHTML = formattedHtml; // Set formatted HTML with links.
+        }
+
+
+        function linkify(text) {
+            // This regex matches URLs that are not already part of an anchor tag
+            const urlPattern = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])(?![^<]*>|[^<>]*<\/a>)/gim;
+            return text.replace(urlPattern, function(match) {
+                // Now, we ensure that only plain text URLs are replaced
+                return `<span class="link-container"><a href="${match}" target="_blank">${match}</a></span>`;
+            });
+        }
+
+
+        function convertMarkdownLinksToHtml(text) {
+            const markdownLinkPattern = /\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g;
+            return text.replace(markdownLinkPattern, '<a href="$2" target="_blank">$1</a>');
+        }
+
+        function messageIsComplete() {
+        // Implement logic to determine if the current message stream is complete.
+            return true; // Placeholder return value.
+        }
+        // New function to convert image links to <img> tags
+        function convertImageLinksToImages(inputHtml) {
+            // This pattern looks for <a> tags wrapping URLs ending in image file extensions
+            var replacePatternImg = /<a href="(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|svg))" target="_blank">(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|svg))<\/a>/gim;
+            return inputHtml.replace(replacePatternImg, '<a href="$1" target="_blank"><img src="$1" style="max-width:100%;height:auto;"></a>');
+        }
+
     </script>
 </body>
 </html>
