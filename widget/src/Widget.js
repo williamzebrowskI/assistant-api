@@ -4,14 +4,12 @@ import './styles.css';
 import { setWyattCookies, getCookieValue } from '../helpers/uuidHelpers';
 
 // TODO: move all style attributes to css file
+// TODO: make TOU link dynamic
 
-const Widget = () => {
+const Widget = ({ termsOfUseUrl }) => {
     const [question, setQuestion] = useState("");
     const [messages, setMessages] = useState([]);
     const chatBodyRef = useRef(null);
-
-    console.log(question, 'question')
-    console.log(messages, 'messages')
 
     useEffect(() => {
         setWyattCookies();
@@ -76,31 +74,40 @@ const Widget = () => {
                 <div className="chat-header__icon">
                     {/* TODO: PLACEHOLDER FOR WYATT ICON */}
                 </div>
-                <div className='chat-header__text-wrapper'>
-                    <h2>Ask me your FAFSA questions!</h2>
-                </div>
+                <h2>Ask me your FAFSA questions!</h2>
             </div>
             <div className="chat-body" ref={chatBodyRef}>
                 {messages.map((msg, i) => (
-                    <div key={i} className={'message ' + (msg.sender === "user" ? "message-user" : "message-assistant")}>
+                    <div key={i} className={'message ' + (msg.sender === "user" ? "user-message" : "assistant-message")}>
                         <p>{msg.message}</p>
                     </div>
                 ))}
             </div>
             <div className="chat-footer">
-                <form onSubmit={(e) => handleFormSubmit(e)}>
-                    <input
-                        type="text"
-                        value={question}
-                        onChange={(e) => setQuestion(e.target.value)}
-                        placeholder="Type a message..."
-                        required
-                        style={{ width: "80%" }}
-                    />
-                    <input type="submit" value="Send" style={{ width: "18%" }} />
-                </form>
+                <div className='chat-footer__form-container'>
+                    <form onSubmit={(e) => handleFormSubmit(e)}>
+                        <div className='chat-footer__input-wrapper'>
+                            <input
+                                type="text"
+                                value={question}
+                                onChange={(e) => setQuestion(e.target.value)}
+                                placeholder="Ask your FAFSA questions..."
+                            />
+                            <button
+                                type="submit"
+                                disabled={question.length === 0}
+                                className={question.length === 0 ? 'disabled' : ''}>
+                                {/* TODO: REPLACE WITH ICON */}
+                            </button>
+                        </div>
+                    </form>
+                    {/* <button className='chat-footer__speech-to-text'></button> */}
+                </div>
+                <div className='chat-footer__tou'>
+                    <p>By chatting with Wyatt you agree to the <a href={termsOfUseUrl} target='_blank'>Terms of Use</a>.</p>
+                </div>
             </div>
-        </div>
+        </div >
     );
 };
 

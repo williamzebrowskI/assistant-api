@@ -6,7 +6,7 @@ import './styles.css';
 
 const App = () => (
     <div className='widget__wrapper'>
-        <Widget />
+        <Widget termsOfUseUrl='/' />
     </div>
 );
 

@@ -1,27 +1,37 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
 
 .chat-container {
+    font-family: "Noto Sans", sans-serif !important;
+    display: flex;
+    flex-direction: column;
     width: 100%;
     height: 100%;
-    margin: 20px auto;
+    background-color: #EDF5FC;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    font-family: "Noto Sans", sans-serif !important;
+    border-radius: 25px;
+    overflow: hidden;
+    padding-bottom: 14px;
 }
 
+/* CHAT HEADER */
+
 .chat-header {
-    background-color: #007bff;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2), 0px 0px 1px rgba(0, 0, 0, 0.1);
+    position: relative;
+    max-height: 125px;
+    z-index: 2;
+    background-color: #3399E1;
     color: #ffffff;
     display: flex;
-    align-content: center;
+    align-items: center;
     gap: 14px;
     padding: 24px;
+    box-sizing: border-box;
 }
 
 .chat-header h2 {
     font-family: "NotoSans-SemiBold", "Noto Sans", sans-serif;
     font-size: 26px;
-    line-height: 52px;
     font-weight: 600;
     margin: 0;
 }
@@ -33,39 +43,120 @@
     border-radius: 100%;
 }
 
-.chat-body {
-    background-color: #EDF5FC;
-    padding: 10px;
-    height: 400px;
-    overflow-y: auto;
-}
+/* CHAT BODY */
 
-.chat-footer {
-    background-color: #f0f2f5;
-    padding: 10px;
+.chat-body {
+    padding: 24px;
+    overflow-y: auto;
+    flex-grow: 1;
 }
 
 .message {
-    margin-bottom: 15px;
     border-radius: 45px;
-    background-color: #FFFFFF;
+    padding: 16px 20px;
+    max-width: 428px;
+    font-size: 20px;
+    line-height: 28px;
+    font-weight: 400;
+    clear: both;
+    margin-bottom: 24px;
+}
+
+.message p {
+    margin: 0;
+    font-size: 20px;
+    line-height: 28px;
+    font-weight: 400;
 }
 
 .user-message {
-    text-align: right;
-}
-
-.user-message p {
-    background-color: #007bff;
+    float: right;
     color: #ffffff;
-    padding: 10px;
-    display: inline-block;
-    border-radius: 20px;
+    background-color: #152E5F;
 }
 
-.assistant-message p {
-    background-color: #e9ecef;
-    padding: 10px;
-    display: inline-block;
-    border-radius: 20px;
+.assistant-message {
+    float: left;
+    background-color: #ffffff;
+    color: #000000;
+}
+
+/* FOOTER */
+
+.chat-footer {
+    padding: 0 32px;
+}
+
+.chat-footer__form-container {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.chat-footer__form-container form {
+    flex-grow: 1;
+}
+
+.chat-footer__input-wrapper {
+    box-sizing: border-box;
+    border-radius: 24px;
+    height: 48px;
+    background-color: #FFFFFF;
+    padding: 12px 0px 12px 20px;
+    position: relative;
+}
+
+.chat-footer input {
+    border: none;
+    outline: none;
+    padding: 0;
+    width: 100%;
+    display: block;
+    box-sizing: border-box;
+    height: 100%;
+    color: #000000;
+    font-family: 'Noto Sans', sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 500;
+}
+
+.chat-footer button {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #3399E1;
+    outline: none;
+    border: none;
+    cursor: pointer;
+}
+
+.chat-footer button.disabled {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #3399E1;
+    outline: none;
+    border: none;
+    cursor: auto;
+}
+
+.chat-footer__input-wrapper button {
+    position: absolute;
+    right: 0px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 6px 12px;
+    border: none;
+}
+
+.chat-footer__tou {
+    text-align: center;
+    color: #4A5468;
+    font-family: "Roboto", "Noto Sans", sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 0px;
+    text-align: center;
+    line-height: 20px;
 }

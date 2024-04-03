@@ -7,5 +7,6 @@ body {
 
 .widget__wrapper {
     max-width: 577px;
-    margin: 0 auto;
+    height: 700px;
+    margin: 20px auto;
 }
