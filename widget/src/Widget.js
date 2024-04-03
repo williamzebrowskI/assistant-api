@@ -5,8 +5,9 @@ import { setWyattCookies, getCookieValue } from '../helpers/uuidHelpers';
 
 // TODO: move all style attributes to css file
 // TODO: make TOU link dynamic
+// TODO: create unique session ID/corresponding cookie in outreach-opt-in-app to pass here and to GA4
 
-const Widget = ({ termsOfUseUrl }) => {
+const Widget = ({ termsOfUseUrl, sessionId }) => {
     const [question, setQuestion] = useState("");
     const [messages, setMessages] = useState([]);
     const chatBodyRef = useRef(null);
@@ -33,6 +34,8 @@ const Widget = ({ termsOfUseUrl }) => {
         let payload = {
             question,
             conversation_uuid: conversationUuid,
+            // TODO: add session_id to payload
+            // session_id: sessionId, -- site session
             user_id: userUuid,
             thread_id: threadId,
         };
