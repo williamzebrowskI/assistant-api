@@ -2,8 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Widget } from '../../src';
 
+import './styles.css';
+
 const App = () => (
-    <div>
+    <div className='widget__wrapper'>
         <Widget />
     </div>
 );
