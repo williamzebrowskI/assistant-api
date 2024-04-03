@@ -10,6 +10,9 @@ const Widget = () => {
     const [messages, setMessages] = useState([]);
     const chatBodyRef = useRef(null);
 
+    console.log(question, 'question')
+    console.log(messages, 'messages')
+
     useEffect(() => {
         setWyattCookies();
     }, []);
@@ -70,11 +73,16 @@ const Widget = () => {
     return (
         <div className="chat-container">
             <div className="chat-header">
-                <h2>OpenAI Assistant Chat</h2>
+                <div className="chat-header__icon">
+                    {/* TODO: PLACEHOLDER FOR WYATT ICON */}
+                </div>
+                <div className='chat-header__text-wrapper'>
+                    <h2>Ask me your FAFSA questions!</h2>
+                </div>
             </div>
             <div className="chat-body" ref={chatBodyRef}>
                 {messages.map((msg, i) => (
-                    <div key={i} className={msg.sender === "user" ? "message-user" : "message-assistant"}>
+                    <div key={i} className={'message ' + (msg.sender === "user" ? "message-user" : "message-assistant")}>
                         <p>{msg.message}</p>
                     </div>
                 ))}
