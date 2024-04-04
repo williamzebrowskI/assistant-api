@@ -15,7 +15,37 @@
         .user-message, .assistant-message { padding: 10px; border-radius: 20px; margin-bottom: 10px; }
         .user-message { background-color: #007bff; color: #ffffff; }
         .assistant-message { background-color: #e9ecef; color: black; }
+        .markdown-content strong, .assistant-message strong {
+            font-weight: bold; /* Ensure this rule is not being overridden */
+        }
         #message { flex-grow: 1; margin-right: 10px; }
+        /* Ensure unordered lists use disc markers */
+        .markdown-content ul {
+            list-style-type: disc; /* default, but ensuring it's set */
+        }
+
+        /* Ensure ordered lists use decimal markers */
+        .markdown-content ol {
+            list-style-type: decimal; /* default, but ensuring it's set */
+        }
+
+        /* Adjust spacing around lists for better layout */
+        .markdown-content ul, .markdown-content ol {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* Ensure list items inside markdown-content are styled consistently */
+        .markdown-content li {
+            line-height: 1.6; /* Improve readability */
+        }
+
+        /* Style adjustments for paragraphs to ensure consistent spacing */
+        .markdown-content p {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
     </style>
 </head>
 <body>
@@ -34,8 +64,20 @@
             localStorage.setItem("userId", userId);
             localStorage.setItem("conversationId", conversationId);
 
+            const urlParams = new URLSearchParams(window.location.search);
+            let referralUrl = urlParams.get('referralUrl'); 
+
+
             var socket = io.connect('https://wyatt-openai-play.bdtrust.org/chat', {
-                query: { 'userId': userId, 'conversationId': conversationId }
+                query: { 'userId': userId, 'conversationId': conversationId, "referralUrl": referralUrl}
+            });
+
+
+            document.getElementById("message").addEventListener("keydown", function(event) {
+                if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault();
+                    document.getElementById("send").click();
+                }
             });
 
             socket.on('assistant_message', function(data) {
@@ -45,19 +87,30 @@
                     lastMessage = document.createElement("div");
                     lastMessage.classList.add("assistant-message");
                     messagesList.appendChild(lastMessage);
+                    accumulatedMarkdown = '';
                 }
-                
-                // Append incoming text to the last message element.
-                lastMessage.innerText += data.text; // Adjust this line if data.text is not the correct reference.
-                
-                messagesList.scrollTop = messagesList.scrollHeight; // Auto-scroll to the latest message
+
+                accumulatedMarkdown += data.text;
+
+                lastMessage.innerHTML = marked.parse(accumulatedMarkdown);
+
+                messagesList.scrollTop = messagesList.scrollHeight;
             });
+
 
             document.getElementById("send").addEventListener("click", function() {
                 var messageText = document.getElementById("message").value.trim();
                 if (!messageText) return;
 
-                socket.emit('user_message', { text: messageText, userId: userId, conversationId: conversationId });
+                let currentPageUrl = window.location.href;
+
+                socket.emit('user_message', { 
+                    text: messageText, 
+                    userId: userId, 
+                    conversationId: conversationId,
+                    currentPageUrl: currentPageUrl, 
+                    referralUrl: referralUrl 
+                });
 
                 const messagesList = document.getElementById("messages");
                 const userMsgElement = document.createElement("div");
@@ -69,6 +122,14 @@
                 messagesList.scrollTop = messagesList.scrollHeight; // Scroll to the bottom
             });
         });
+
+        // New function to convert image links to <img> tags
+        function convertImageLinksToImages(inputHtml) {
+            // This pattern looks for <a> tags wrapping URLs ending in image file extensions
+            var replacePatternImg = /<a href="(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|svg))" target="_blank">(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|svg))<\/a>/gim;
+            return inputHtml.replace(replacePatternImg, '<a href="$1" target="_blank"><img src="$1" style="max-width:100%;height:auto;"></a>');
+        }
+
     </script>
 </body>
 </html>
