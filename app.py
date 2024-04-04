@@ -3,7 +3,6 @@ from openai import OpenAI
 from elastic_connector import ElasticConnector
 from thread_manager import ThreadManager
 from event_handler import EventHandler
-from utils import strip_markdown
 from openai_assistant import OpenAIAssistant 
 from flask import session
 from flask_socketio import join_room
