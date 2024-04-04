@@ -1,8 +1,9 @@
 import os
-from openai import OpenAI, AssistantEventHandler
+from openai import OpenAI
 from elastic_connector import ElasticConnector
 from thread_manager import ThreadManager
 from event_handler import EventHandler
+from utils import strip_markdown
 from openai_assistant import OpenAIAssistant 
 from flask import session
 from flask_socketio import join_room
@@ -41,6 +42,13 @@ assistant = OpenAIAssistant(assistant_id=ASSISTANT_ID)
 assistant_id = assistant.assistant_id
 
 
+def strip_markdown_basic(text):
+    text = text.replace('*', '')
+    text = text.replace('_', '')
+    text = text.replace('`', '')
+    text = text.replace('\n', ' ')
+    return text
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -61,6 +69,8 @@ def handle_user_message(message):
     user_input = message['text']
     user_id = message.get('userId')
     conversation_uuid = message.get('conversationId')
+    page_url = message.get('currentPageUrl', 'Unknown')
+    referral_url = message.get('referralUrl', 'Unknown')
     client_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(",")[0].strip()
 
     thread_id = thread_manager.get_thread(conversation_uuid)
@@ -81,7 +91,7 @@ def handle_user_message(message):
                 if content_block.type == 'text':
                     text_value = content_block.text.value
 
-     # Method to update the conversation in Elasticsearch.
+
     elastic_connector.push_or_update_conversation(
         conversation_uuid=conversation_uuid,
         user_id=user_id,
@@ -89,7 +99,9 @@ def handle_user_message(message):
         thread_id=thread_id,
         assistant_id=assistant.assistant_id,
         user_query=user_input,
-        assistant_response=text_value
+        assistant_response=text_value,
+        url=page_url,
+        referral_url=referral_url
     )
 
 if __name__ == '__main__':
