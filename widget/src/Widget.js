@@ -17,7 +17,6 @@ const Widget = ({ introMessage, onClick, sessionId }) => {
     }
 
     useEffect(() => {
-        console.log('checking engaged value')
         setHasEngaged(getCookieValue('BDT_ChatBot_User_UUID').length > 0)
     }, [clickedOpen])
 

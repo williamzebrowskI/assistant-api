@@ -8,9 +8,8 @@ import sendIcon from './images/send-icon.svg';
 import infoIcon from './images/info-icon.svg';
 import wyattAvatar from './images/wyatt-chat-avatar.svg'
 
-// TODO: move all style attributes to css file
-// TODO: create unique session ID/corresponding cookie in outreach-opt-in-app to pass here and to GA4
 // TODO: beta tag hover action (?)
+// TODO: add sessionId 
 
 const WidgetWindow = ({ introMessage, open, sessionId, clickedOpen }) => {
     const [question, setQuestion] = useState("");
@@ -20,9 +19,9 @@ const WidgetWindow = ({ introMessage, open, sessionId, clickedOpen }) => {
 
     useEffect(() => {
         if (clickedOpen) {
-            setWyattCookies(); // TODO: Check this step
+            setWyattCookies();
 
-            const newSocket = io.connect('http://localhost:8002', {
+            const newSocket = io.connect('https://wyatt-openai-play.bdtrust.org/chat', {
                 query: {
                     'userId': getCookieValue('BDT_ChatBot_User_UUID'),
                     'conversationId': getCookieValue('BDT_ChatBot_Conversation_UUID'),
@@ -99,7 +98,7 @@ const WidgetWindow = ({ introMessage, open, sessionId, clickedOpen }) => {
             <div className="chat-body" ref={chatBodyRef}>
                 {messages.map((msg, i) => (
                     <div key={i} className={'message ' + (msg.sender === "user" ? "user-message" : "assistant-message")}>
-                        {msg.message}
+                        <p>{msg.message}</p>
                     </div>
                 ))}
             </div>

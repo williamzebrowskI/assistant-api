@@ -41,9 +41,8 @@ module.exports = {
     compress: true,
     port: 3000,
   },
-  //TODO: reintroduce externals after local dev testing
-  // externals: {
-  //   react: 'react',
-  //   'react-dom': 'react-dom',
-  // },
+  externals: {
+    react: 'react',
+    'react-dom': 'react-dom',
+  },
 };
