@@ -18,7 +18,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY')
 socketio = SocketIO(
     app,
-    cors_allowed_origins=["http://127.0.0.1:5500","http://localhost:8000", "https://develop.getfafsahelp.org/", "http://localhost:3000", "http://localhost:8002", "https://benefitsdatatrust.github.io", "http://127.0.0.1:8002"],
+    cors_allowed_origins=["http://127.0.0.1:5500","http://localhost:8000", "https://develop.getfafsahelp.org/", "http://localhost:3000", "http://localhost:8002", "https://benefitsdatatrust.github.io", "http://127.0.0.1:8002", "https://deploy-preview-327--awesome-varahamihira-483edb.netlify.app"],
     cors_credentials=True,
     cors_allowed_headers="*",
     manage_session=False,
@@ -41,6 +41,9 @@ ASSISTANT_ID = os.getenv('ASSISTANT_ID')
 assistant = OpenAIAssistant(assistant_id=ASSISTANT_ID)
 assistant_id = assistant.assistant_id
 
+@app.route('/begin')
+def begin():
+    return render_template('index_begin.html')
 
 @app.route('/')
 def index():
@@ -59,9 +62,9 @@ def handle_disconnect():
 
 @socketio.on('user_message', namespace='/chat')
 def handle_user_message(message):
-    user_input = message['text']
-    user_id = message.get('userId')
-    conversation_uuid = message.get('conversationId')
+    user_input = message.get('text', 'Unknown')
+    user_id = message.get('userId', 'Unknown')
+    conversation_uuid = message.get('conversationId', 'Unknown')
     page_url = message.get('currentPageUrl', 'Unknown')
     referral_url = message.get('referralUrl', 'Unknown')
     session_id_ga = message.get('sessionId', 'Unknown')
