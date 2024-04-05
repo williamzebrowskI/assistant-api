@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <title>Chat with OpenAI</title>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -30,7 +32,7 @@
             background-color: #ffffff;
             padding: 10px;
             height: 400px;
-            overflow-y: auto;
+            overflow-y: scroll;
         }
 
         .chat-footer {
@@ -40,29 +42,63 @@
             align-items: center;
         }
 
-        .message {
-            margin-bottom: 15px;
-        }
-
-        .user-message p,
-        .assistant-message p {
+        .user-message,
+        .assistant-message {
             padding: 10px;
-            display: inline-block;
             border-radius: 20px;
+            margin-bottom: 10px;
         }
 
-        .user-message p {
+        .user-message {
             background-color: #007bff;
             color: #ffffff;
         }
 
-        .assistant-message p {
+        .assistant-message {
             background-color: #e9ecef;
+            color: black;
+        }
+
+        .markdown-content strong,
+        .assistant-message strong {
+            font-weight: bold;
+            /* Ensure this rule is not being overridden */
         }
 
         #message {
             flex-grow: 1;
             margin-right: 10px;
+        }
+
+        /* Ensure unordered lists use disc markers */
+        .markdown-content ul {
+            list-style-type: disc;
+            /* default, but ensuring it's set */
+        }
+
+        /* Ensure ordered lists use decimal markers */
+        .markdown-content ol {
+            list-style-type: decimal;
+            /* default, but ensuring it's set */
+        }
+
+        /* Adjust spacing around lists for better layout */
+        .markdown-content ul,
+        .markdown-content ol {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* Ensure list items inside markdown-content are styled consistently */
+        .markdown-content li {
+            line-height: 1.6;
+            /* Improve readability */
+        }
+
+        /* Style adjustments for paragraphs to ensure consistent spacing */
+        .markdown-content p {
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -70,7 +106,7 @@
 <body>
     <div class="chat-container">
         <div class="chat-header">Chat with OpenAI</div>
-        <ul class="chat-body" id="messages"></ul>
+        <div class="chat-body" id="messages"></div>
         <div class="chat-footer">
             <input type="text" id="message" autocomplete="off">
             <button id="send">Send</button>
@@ -78,78 +114,77 @@
     </div>
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function () {
-            let userId = localStorage.getItem("userId");
-            let conversationId = localStorage.getItem("conversationId");
+            let userId = localStorage.getItem("userId") || crypto.randomUUID();
+            let conversationId = localStorage.getItem("conversationId") || crypto.randomUUID();
+            localStorage.setItem("userId", userId);
+            localStorage.setItem("conversationId", conversationId);
 
-            if (!userId) {
-                userId = crypto.randomUUID();
-                localStorage.setItem("userId", userId);
-            }
+            const urlParams = new URLSearchParams(window.location.search);
+            let referralUrl = urlParams.get('referralUrl');
 
-            if (!conversationId) {
-                conversationId = crypto.randomUUID();
-                localStorage.setItem("conversationId", conversationId);
-            }
 
             var socket = io.connect('https://wyatt-openai-play.bdtrust.org/chat', {
-                query: {
-                    'userId': userId,
-                    'conversationId': conversationId
+                query: { 'userId': userId, 'conversationId': conversationId, "referralUrl": referralUrl }
+            });
+
+
+            document.getElementById("message").addEventListener("keydown", function (event) {
+                if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault();
+                    document.getElementById("send").click();
                 }
             });
-
-            socket.on('connect', function () {
-                console.log('Connected to the WebSocket server');
-            });
-
 
             socket.on('assistant_message', function (data) {
                 const messagesList = document.getElementById("messages");
-
-                // Create a new message element if there isn't an active one
-                if (!currentMessageElement) {
-                    currentMessageElement = document.createElement("li");
-                    currentMessageElement.classList.add("assistant-message");
-                    var pElement = document.createElement("p");
-                    currentMessageElement.appendChild(pElement);
-                    messagesList.appendChild(currentMessageElement);
+                let lastMessage = messagesList.lastElementChild;
+                if (!lastMessage || lastMessage.classList.contains("user-message")) {
+                    lastMessage = document.createElement("div");
+                    lastMessage.classList.add("assistant-message");
+                    messagesList.appendChild(lastMessage);
+                    accumulatedMarkdown = '';
                 }
 
-                // Append the incoming word to the current message element's text content
-                currentMessageElement.firstChild.textContent += data.text;
+                accumulatedMarkdown += data.text;
 
-                messagesList.scrollTop = messagesList.scrollHeight; // Auto-scroll to the latest message
+                lastMessage.innerHTML = marked.parse(accumulatedMarkdown);
+
+                messagesList.scrollTop = messagesList.scrollHeight;
             });
 
-            document.getElementById("send").onclick = function () {
-                var messageText = document.getElementById("message").value;
-                if (messageText.trim() === '') return; // Ignore empty messages
 
-                // Emit the message to the server
-                // socket.emit('user_message', {'text': messageText});
+            document.getElementById("send").addEventListener("click", function () {
+                var messageText = document.getElementById("message").value.trim();
+                if (!messageText) return;
+
+                let currentPageUrl = window.location.href;
+
                 socket.emit('user_message', {
-                    'text': messageText,
-                    'userId': userId,
-                    'conversationId': conversationId
+                    text: messageText,
+                    userId: userId,
+                    conversationId: conversationId,
+                    currentPageUrl: currentPageUrl,
+                    referralUrl: referralUrl
                 });
 
-                // Immediately display the user's message in the chat for feedback
-                let userMsgElement = document.createElement("li");
+                const messagesList = document.getElementById("messages");
+                const userMsgElement = document.createElement("div");
                 userMsgElement.classList.add("user-message");
-                let pElement = document.createElement("p");
-                pElement.textContent = "You: " + messageText;
-                userMsgElement.appendChild(pElement);
-                document.getElementById("messages").appendChild(userMsgElement);
-                document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
+                userMsgElement.innerText = `You: ${messageText}`;
+                messagesList.appendChild(userMsgElement);
 
-                // Clear the input field after sending
-                document.getElementById("message").value = '';
-
-                // Prepare for the next assistant message
-                currentMessageElement = null;
-            };
-
+                document.getElementById("message").value = ''; // Clear the input field after sending
+                messagesList.scrollTop = messagesList.scrollHeight; // Scroll to the bottom
+            });
         });
+
+        // New function to convert image links to <img> tags
+        function convertImageLinksToImages(inputHtml) {
+            // This pattern looks for <a> tags wrapping URLs ending in image file extensions
+            var replacePatternImg = /<a href="(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|svg))" target="_blank">(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|svg))<\/a>/gim;
+            return inputHtml.replace(replacePatternImg, '<a href="$1" target="_blank"><img src="$1" style="max-width:100%;height:auto;"></a>');
+        }
+
     </script>
 </body>
 

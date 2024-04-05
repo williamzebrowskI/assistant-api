@@ -88,3 +88,11 @@ resource "google_compute_region_network_endpoint_group" "fafsagpt_neg" {
   }
 }
 
+resource "cloudflare_record" "cloudflare_record" {
+  zone_id = local.ws_vars["zone_id"]
+  name    = local.ws_vars["subdomain"]
+  proxied = true
+  type    = "A"
+  value   = google_compute_global_address.fafsagpt_ip_address.address
+  ttl     = 1
+}
