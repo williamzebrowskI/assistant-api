@@ -21,14 +21,18 @@ const WidgetWindow = ({ introMessage, open, sessionId, clickedOpen }) => {
         if (clickedOpen) {
             setWyattCookies();
 
-            const newSocket = io.connect('https://wyatt-openai-play.bdtrust.org/chat', {
+            // const newSocket = io.connect('https://wyatt-openai-play.bdtrust.org/chat', {
+            const newSocket = io.connect('http://localhost:8002/chat', {
+
                 query: {
-                    'userId': getCookieValue('BDT_ChatBot_User_UUID'),
+                    'userId': getCookieValue('BDT_ChatBot_User_UUID'), // KEY FOR CHAT PERSISTENCE
                     'conversationId': getCookieValue('BDT_ChatBot_Conversation_UUID'),
                     'referralUrl': window.location.search,
                     // 'sessionId': sessionId,
                 }
             });
+
+            console.log(newSocket, 'socket in useEffect')
 
             setSocket(newSocket);
 
@@ -40,7 +44,9 @@ const WidgetWindow = ({ introMessage, open, sessionId, clickedOpen }) => {
 
     useEffect(() => {
         if (socket.on) {
+            console.log('socket.on')
             socket.on('assistant_message', (data) => {
+                console.log(data, 'data from socket')
                 addMessageToChat("assistant", data.text);
             });
 
@@ -73,9 +79,11 @@ const WidgetWindow = ({ introMessage, open, sessionId, clickedOpen }) => {
     };
 
     const addMessageToChat = (sender, message) => {
+        console.log('adding message to chat: ', message)
         if (sender === "assistant") {
             message = convertImageLinksToImages(message);
         }
+
 
         setMessages((prevMessages) => [...prevMessages, { sender, message }]);
 
@@ -89,7 +97,7 @@ const WidgetWindow = ({ introMessage, open, sessionId, clickedOpen }) => {
     return (
         <div className={open ? 'chat-container' : 'chat-container chat-container__closed'}>
             <div className="chat-header">
-                <div className='beta-tag'>Beta <img src={infoIcon} /></div>
+                {/* <div className='beta-tag'>Beta <img src={infoIcon} /></div> */}
                 <div className="chat-header__icon">
                     <img src={wyattAvatar} />
                 </div>
