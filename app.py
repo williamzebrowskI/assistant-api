@@ -3,7 +3,8 @@ from openai import OpenAI
 from elastic_connector import ElasticConnector
 from thread_manager import ThreadManager
 from event_handler import EventHandler
-from openai_assistant import OpenAIAssistant 
+from openai_assistant import OpenAIAssistant
+from utils import strip_markdown
 from flask import session
 from flask_socketio import join_room
 from flask import Flask, render_template, request
@@ -41,13 +42,6 @@ assistant = OpenAIAssistant(assistant_id=ASSISTANT_ID)
 assistant_id = assistant.assistant_id
 
 
-def strip_markdown_basic(text):
-    text = text.replace('*', '')
-    text = text.replace('_', '')
-    text = text.replace('`', '')
-    text = text.replace('\n', ' ')
-    return text
-
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -70,6 +64,7 @@ def handle_user_message(message):
     conversation_uuid = message.get('conversationId')
     page_url = message.get('currentPageUrl', 'Unknown')
     referral_url = message.get('referralUrl', 'Unknown')
+    session_id_ga = message.get('sessionId', 'Unknown')
     client_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(",")[0].strip()
 
     thread_id = thread_manager.get_thread(conversation_uuid)
@@ -90,15 +85,17 @@ def handle_user_message(message):
                 if content_block.type == 'text':
                     text_value = content_block.text.value
 
+    strip_md_from_resp = strip_markdown(text_value)
 
     elastic_connector.push_or_update_conversation(
         conversation_uuid=conversation_uuid,
+        session_id=session_id_ga,
         user_id=user_id,
         client_ip=client_ip,
         thread_id=thread_id,
         assistant_id=assistant.assistant_id,
         user_query=user_input,
-        assistant_response=text_value,
+        assistant_response=strip_md_from_resp,
         url=page_url,
         referral_url=referral_url
     )
