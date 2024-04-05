@@ -17,7 +17,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY')
 socketio = SocketIO(
     app,
-    cors_allowed_origins=["http://127.0.0.1:5500", "http://localhost:8002", "https://benefitsdatatrust.github.io", "http://127.0.0.1:8002"],
+    cors_allowed_origins=["http://127.0.0.1:5500","http://localhost:8000", "https://develop.getfafsahelp.org/", "http://localhost:3000", "http://localhost:8002", "https://benefitsdatatrust.github.io", "http://127.0.0.1:8002"],
     cors_credentials=True,
     cors_allowed_headers="*",
     manage_session=False,

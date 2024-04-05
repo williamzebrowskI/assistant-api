@@ -41,8 +41,8 @@ module.exports = {
     compress: true,
     port: 3000,
   },
-  externals: {
-    react: 'react',
-    'react-dom': 'react-dom',
-  },
+  // externals: {
+  //   react: 'react',
+  //   'react-dom': 'react-dom',
+  // },
 };

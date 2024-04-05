@@ -11,7 +11,7 @@ const Widget = ({ introMessage, onClick, sessionId }) => {
     const [hasEngaged, setHasEngaged] = useState(false);
 
     const handleButtonClick = () => {
-        if (typeof onClick === 'function') onClick();
+        if (typeof onClick === 'function') onClick(open);
         setOpen(!open);
         if (!clickedOpen) setClickedOpen(true);
     }
