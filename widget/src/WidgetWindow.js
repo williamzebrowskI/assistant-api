@@ -97,7 +97,7 @@ const WidgetWindow = ({ introMessage, open, sessionId }) => {
             <div className="chat-body" ref={chatBodyRef}>
                 {messages.map((msg, i) => (
                     <div key={i} className={'message ' + (msg.sender === "user" ? "user-message" : "assistant-message")}>
-                        <p>{msg.message}</p>
+                        {msg.message}
                     </div>
                 ))}
             </div>
