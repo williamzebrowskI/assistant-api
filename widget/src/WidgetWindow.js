@@ -5,6 +5,7 @@ import io from 'socket.io-client';
 import { setWyattCookies, getCookieValue } from '../helpers/uuidHelpers';
 
 import sendIcon from './images/send-icon.svg';
+import infoIcon from './images/info-icon.svg';
 import wyattAvatar from './images/wyatt-chat-avatar.svg'
 
 // TODO: move all style attributes to css file
@@ -87,6 +88,7 @@ const WidgetWindow = ({ introMessage, sessionId }) => {
     return (
         <div className="chat-container">
             <div className="chat-header">
+                <div className='beta-tag'>Beta <img src={infoIcon} /></div>
                 <div className="chat-header__icon">
                     <img src={wyattAvatar} />
                 </div>
