@@ -12,30 +12,32 @@ import wyattAvatar from './images/wyatt-chat-avatar.svg'
 // TODO: create unique session ID/corresponding cookie in outreach-opt-in-app to pass here and to GA4
 // TODO: beta tag hover action (?)
 
-const WidgetWindow = ({ introMessage, open, sessionId }) => {
+const WidgetWindow = ({ introMessage, open, sessionId, clickedOpen }) => {
     const [question, setQuestion] = useState("");
     const [messages, setMessages] = useState([{ sender: "assistant", message: introMessage }]);
     const [socket, setSocket] = useState({});
     const chatBodyRef = useRef(null);
 
     useEffect(() => {
-        setWyattCookies(); // Check this step
+        if (clickedOpen) {
+            setWyattCookies(); // TODO: Check this step
 
-        const newSocket = io.connect('http://localhost:8002', {
-            query: {
-                'userId': getCookieValue('BDT_ChatBot_User_UUID'),
-                'conversationId': getCookieValue('BDT_ChatBot_Conversation_UUID'),
-                'referralUrl': window.location.search,
-                // 'sessionId': sessionId,
-            }
-        });
+            const newSocket = io.connect('http://localhost:8002', {
+                query: {
+                    'userId': getCookieValue('BDT_ChatBot_User_UUID'),
+                    'conversationId': getCookieValue('BDT_ChatBot_Conversation_UUID'),
+                    'referralUrl': window.location.search,
+                    // 'sessionId': sessionId,
+                }
+            });
 
-        setSocket(newSocket);
+            setSocket(newSocket);
 
-        return () => {
-            newSocket.disconnect();
-        };
-    }, []);
+            return () => {
+                newSocket.disconnect();
+            };
+        }
+    }, [clickedOpen]);
 
     useEffect(() => {
         if (socket.on) {

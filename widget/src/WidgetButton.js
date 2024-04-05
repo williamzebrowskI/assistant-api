@@ -6,8 +6,6 @@ import closeIcon from './images/close-icon.svg';
 const WidgetButton = ({ open, handleButtonClick, hasEngaged }) => {
     const [pillVisible, setPillVisible] = useState(false);
 
-    console.log(hasEngaged, 'has engaged value')
-
     useEffect(() => {
         const toggleVisibility = () => {
             setPillVisible(true);
