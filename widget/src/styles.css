@@ -240,6 +240,30 @@ a:focus-visible {
 
 /* WIDGET BUTTON */
 
-.widget-button {
+button.widget-button {
     margin-top: 8px;
+    outline: none;
+    border: none;
+    cursor: pointer;
+}
+
+.widget-button__wrapper {
+    border-radius: 50%;
+    height: 60px;
+    width: 60px;
+    overflow: hidden;
+}
+
+.widget-button__wrapper>img {
+    height: 100%;
+}
+
+.widget-button__close {
+    background-color: #3399E1;
+}
+
+.widget-button__close>img {
+    height: 18px;
+    width: 18px;
+    height: 100%;
 }
