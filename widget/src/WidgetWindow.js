@@ -9,11 +9,10 @@ import infoIcon from './images/info-icon.svg';
 import wyattAvatar from './images/wyatt-chat-avatar.svg'
 
 // TODO: move all style attributes to css file
-// TODO: make TOU link dynamic
 // TODO: create unique session ID/corresponding cookie in outreach-opt-in-app to pass here and to GA4
+// TODO: beta tag hover action (?)
 
-
-const WidgetWindow = ({ introMessage, sessionId }) => {
+const WidgetWindow = ({ introMessage, open, sessionId }) => {
     const [question, setQuestion] = useState("");
     const [messages, setMessages] = useState([{ sender: "assistant", message: introMessage }]);
     const [socket, setSocket] = useState({});
@@ -27,6 +26,7 @@ const WidgetWindow = ({ introMessage, sessionId }) => {
                 'userId': getCookieValue('BDT_ChatBot_User_UUID'),
                 'conversationId': getCookieValue('BDT_ChatBot_Conversation_UUID'),
                 'referralUrl': window.location.search,
+                // 'sessionId': sessionId,
             }
         });
 
@@ -86,7 +86,7 @@ const WidgetWindow = ({ introMessage, sessionId }) => {
     };
 
     return (
-        <div className="chat-container">
+        <div className={open ? 'chat-container' : 'chat-container chat-container__closed'}>
             <div className="chat-header">
                 <div className='beta-tag'>Beta <img src={infoIcon} /></div>
                 <div className="chat-header__icon">

@@ -5,7 +5,7 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 100%;
+    height: 450px;
     background-color: #EDF5FC;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border-radius: 25px;
@@ -13,32 +13,20 @@
     padding-bottom: 14px;
 }
 
-.beta-tag {
-    border-radius: 0px 22.5px 0px 18px;
-    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2), 0px 0px 1px rgba(0, 0, 0, 0.1);
-    opacity: 1;
-    background-color: rgba(32, 113, 189, 1);
-    color: white;
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 90px;
-    height: 35px;
-    padding: 8px;
-    text-align: center;
-    text-transform: uppercase;
-    font-family: "NotoSans-Bold", "Noto Sans", sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-    overflow: hidden;
-    box-sizing: border-box;
+.chat-container__closed {
+    display: none;
 }
 
-.beta-tag img {
-    height: 12px;
-    width: 12px;
-    margin-left: 2px;
+.complete-widget__container {
+    width: 450px;
+    position: absolute;
+    bottom: 36px;
+    right: 36px;
+    display: flex;
+    flex-direction: column;
+    align-items: end;
 }
+
 
 /* CHAT HEADER */
 
@@ -71,6 +59,33 @@
     overflow: hidden;
     background-color: #FFCF4D;
     border-radius: 100%;
+}
+
+.beta-tag {
+    border-radius: 0px 22.5px 0px 18px;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2), 0px 0px 1px rgba(0, 0, 0, 0.1);
+    opacity: 1;
+    background-color: rgba(32, 113, 189, 1);
+    color: white;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 90px;
+    height: 35px;
+    padding: 8px;
+    text-align: center;
+    text-transform: uppercase;
+    font-family: "NotoSans-Bold", "Noto Sans", sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.beta-tag img {
+    height: 12px;
+    width: 12px;
+    margin-left: 2px;
 }
 
 /* CHAT BODY */
@@ -221,4 +236,10 @@ a:focus-visible {
 
 .chat-footer__tou p {
     margin: 0;
+}
+
+/* WIDGET BUTTON */
+
+.widget-button {
+    margin-top: 8px;
 }
