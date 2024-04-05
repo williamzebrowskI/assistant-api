@@ -156,13 +156,12 @@
 
                 let currentPageUrl = window.location.href;
 
-                const urlParams = new URLSearchParams(window.location.search);
-                let referralUrl = urlParams.get('referralUrl');
+                let referralUrl = document.referrer;
 
                 socket.emit('user_message', {
                     text: messageText,
                     userId: userId,
-                    sessionId: sesssionId,
+                    // sessionId: sesssionId,
                     conversationId: conversationId,
                     currentPageUrl: currentPageUrl,
                     referralUrl: referralUrl
