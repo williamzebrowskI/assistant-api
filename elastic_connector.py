@@ -86,7 +86,7 @@ class ElasticConnector():
         except Exception as e:
             logging.info(f"Error updating document in Elasticsearch: {e}")
     
-    def push_or_update_conversation(self, conversation_uuid, user_id, client_ip, thread_id, assistant_id, user_query, assistant_response, url, referral_url):
+    def push_or_update_conversation(self, conversation_uuid, user_id, client_ip, thread_id, assistant_id, user_query, assistant_response, url, referral_url, session_id):
         """
         Creates a new conversation document or updates an existing one in the Elasticsearch index.
         If the document exists, it appends a new interaction to the 'conversations' array. 
@@ -125,6 +125,7 @@ class ElasticConnector():
 
             doc = {
                 "user_id": user_id,
+                "session_id": session_id,
                 "url": url,
                 "referral_url": referral_url,
                 "client_ip": client_ip,
