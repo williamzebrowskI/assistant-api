@@ -119,12 +119,9 @@
             localStorage.setItem("userId", userId);
             localStorage.setItem("conversationId", conversationId);
 
-            const urlParams = new URLSearchParams(window.location.search);
-            let referralUrl = urlParams.get('referralUrl');
-
 
             var socket = io.connect('https://wyatt-openai-play.bdtrust.org/chat', {
-                query: { 'userId': userId, 'conversationId': conversationId, "referralUrl": referralUrl }
+                query: { 'userId': userId, 'conversationId': conversationId }
             });
 
 
@@ -159,9 +156,13 @@
 
                 let currentPageUrl = window.location.href;
 
+                const urlParams = new URLSearchParams(window.location.search);
+                let referralUrl = urlParams.get('referralUrl');
+
                 socket.emit('user_message', {
                     text: messageText,
                     userId: userId,
+                    sessionId: sesssionId,
                     conversationId: conversationId,
                     currentPageUrl: currentPageUrl,
                     referralUrl: referralUrl
