@@ -31,7 +31,8 @@
 
 .chat-header h2 {
     font-family: "NotoSans-SemiBold", "Noto Sans", sans-serif;
-    font-size: 26px;
+    font-size: 20px;
+    line-height: 52px;
     font-weight: 600;
     margin: 0;
 }
@@ -146,8 +147,6 @@ a:focus-visible {
 }
 
 .chat-footer button.disabled {
-    width: 36px;
-    height: 36px;
     border-radius: 50%;
     background-color: #3399E1;
     outline: none;
@@ -156,8 +155,8 @@ a:focus-visible {
 }
 
 .chat-footer__input-wrapper button {
-    width: 48px;
-    height: 48px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     background-color: #3399E1;
     outline: none;
@@ -174,20 +173,24 @@ a:focus-visible {
     justify-content: center;
 }
 
-.chat-footer__input-wrapper button svg {
+.chat-footer__input-wrapper button img {
     width: 18px;
     height: 18px;
     position: relative;
-    right: 5px;
+    right: 1px;
 }
 
 .chat-footer__tou {
     text-align: center;
     color: #4A5468;
     font-family: "Roboto", "Noto Sans", sans-serif;
-    font-size: 16px;
+    font-size: 12px;
+    line-height: 16px;
     font-weight: 500;
-    letter-spacing: 0px;
-    text-align: center;
-    line-height: 20px;
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+.chat-footer__tou p {
+    margin: 0;
 }
