@@ -1,69 +1,84 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './styles.css';
 
+import io from 'socket.io-client';
+
 import { setWyattCookies, getCookieValue } from '../helpers/uuidHelpers';
+
+import sendIcon from './images/send-icon.svg';
+// import wyattAvatar from './images/wyatt_chat_avatar.png'
+import wyattAvatar from './images/wyatt-chat-avatar.svg'
 
 // TODO: move all style attributes to css file
 // TODO: make TOU link dynamic
 // TODO: create unique session ID/corresponding cookie in outreach-opt-in-app to pass here and to GA4
 
-const Widget = ({ termsOfUseUrl, sessionId }) => {
+
+const Widget = ({ termsOfUseUrl, introMessage, sessionId }) => {
     const [question, setQuestion] = useState("");
-    const [messages, setMessages] = useState([]);
+    const [messages, setMessages] = useState([{ sender: "assistant", message: introMessage }]);
+    const [socket, setSocket] = useState({});
     const chatBodyRef = useRef(null);
 
     useEffect(() => {
-        setWyattCookies();
+        setWyattCookies(); // Check this step
+
+        const newSocket = io.connect('http://localhost:8002', {
+            query: {
+                'userId': getCookieValue('BDT_ChatBot_User_UUID'),
+                'conversationId': getCookieValue('BDT_ChatBot_Conversation_UUID'),
+                'referralUrl': window.location.search,
+            }
+        });
+
+        setSocket(newSocket);
+
+        return () => {
+            newSocket.disconnect();
+        };
     }, []);
+
+    useEffect(() => {
+        if (socket.on) {
+            socket.on('assistant_message', (data) => {
+                addMessageToChat("assistant", data.text);
+            });
+
+            return () => {
+                socket.off('assistant_message');
+            };
+        }
+    }, [socket]);
+
+    const convertImageLinksToImages = (inputText) => {
+        const replacePatternImg = /<a href="(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|svg))" target="_blank">(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|svg))<\/a>/gim;
+        return inputText.replace(replacePatternImg, '<a href="$1" target="_blank"><img src="$1" style="max-width:100%;height:auto;"></a>');
+    };
 
     const handleFormSubmit = async (e) => {
         e.preventDefault();
 
-        const conversationUuid = getCookieValue('BDT_ChatBot_Conversation_UUID');
-        const userUuid = getCookieValue('BDT_ChatBot_User_UUID');
-
         addMessageToChat("user", question);
 
-        let apiUrl = `https://wyatt-openai-play.bdtrust.org/query/?conversation_uuid=${conversationUuid}&user_id=${userUuid}`;
-        let threadId = localStorage.getItem("threadId");
+        socket.emit('user_message', {
+            text: question,
+            userId: getCookieValue('BDT_ChatBot_User_UUID'),
+            conversationId: getCookieValue('BDT_ChatBot_Conversation_UUID'),
+            currentPageUrl: window.location.href,
+            referralUrl: window.location.search,
+        });
 
-        if (threadId) {
-            apiUrl += `&thread_id=${threadId}`;
-        }
-
-        let payload = {
-            question,
-            conversation_uuid: conversationUuid,
-            // TODO: add session_id to payload
-            // session_id: sessionId, -- site session
-            user_id: userUuid,
-            thread_id: threadId,
-        };
-
-        try {
-            let response = await fetch(apiUrl, {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            let jsonResponse = await response.json();
-            addMessageToChat("assistant", jsonResponse.response);
-
-            if (jsonResponse.thread_id) {
-                threadId = jsonResponse.thread_id;
-                localStorage.setItem("threadId", threadId);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            addMessageToChat("assistant", "Error: Could not fetch the response.");
-        }
         setQuestion('');
+
     };
 
     const addMessageToChat = (sender, message) => {
+        if (sender === "assistant") {
+            message = convertImageLinksToImages(message);
+        }
+
         setMessages((prevMessages) => [...prevMessages, { sender, message }]);
+
         setTimeout(() => {
             if (chatBodyRef.current) {
                 chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
@@ -75,7 +90,7 @@ const Widget = ({ termsOfUseUrl, sessionId }) => {
         <div className="chat-container">
             <div className="chat-header">
                 <div className="chat-header__icon">
-                    {/* TODO: PLACEHOLDER FOR WYATT ICON */}
+                    <img src={wyattAvatar} />
                 </div>
                 <h2>Ask me your FAFSA questions!</h2>
             </div>
@@ -100,7 +115,7 @@ const Widget = ({ termsOfUseUrl, sessionId }) => {
                                 type="submit"
                                 disabled={question.length === 0}
                                 className={question.length === 0 ? 'disabled' : ''}>
-                                {/* TODO: REPLACE WITH ICON */}
+                                <img src={sendIcon} />
                             </button>
                         </div>
                     </form>
