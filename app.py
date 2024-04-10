@@ -81,7 +81,10 @@ def handle_user_message(message):
         assistant_id=assistant_id,
         event_handler=event_handler,
     ) as stream:
-        stream.until_done()
+        # stream.until_done()
+        for text in stream.text_deltas:
+            pass
+        #Grab the final response from the assistant
         response = stream.get_final_messages()
         for message in response:
             for content_block in message.content:
