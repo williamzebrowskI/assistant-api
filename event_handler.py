@@ -39,6 +39,9 @@ class EventHandler(AssistantEventHandler):
         # Perform a late import for socketio here
         from app import socketio
 
+        # Check if the delta contains any annotations and remove them
+        delta.annotations = ""
+
         socketio.emit('assistant_message', {'text': delta.value}, room=self.userId, namespace='/chat')
     
     def on_error(self, error):
