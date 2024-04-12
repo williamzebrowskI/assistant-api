@@ -1,4 +1,4 @@
-from elasticsearch import AsyncElasticsearch, Elasticsearch
+from elasticsearch import Elasticsearch
 import os
 import logging
 from dotenv import load_dotenv

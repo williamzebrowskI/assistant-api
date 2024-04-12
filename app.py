@@ -41,13 +41,13 @@ ASSISTANT_ID = os.getenv('ASSISTANT_ID')
 assistant = OpenAIAssistant(assistant_id=ASSISTANT_ID)
 assistant_id = assistant.assistant_id
 
-@app.route('/begin')
-def begin():
-    return render_template('index_begin.html')
+# @app.route('/begin')
+# def begin():
+#     return render_template('index_begin.html')
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+# @app.route('/')
+# def index():
+#     return render_template('index.html')
 
 @socketio.on('connect', namespace='/chat')
 def handle_connect():
