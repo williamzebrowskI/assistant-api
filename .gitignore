@@ -11,6 +11,5 @@ terraform/.terraform/environment
 terraform/.terraform/providers/registry.terraform.io/cloudflare/cloudflare/4.27.0/darwin_arm64/terraform-provider-cloudflare_v4.27.0
 terraform/.terraform/providers/registry.terraform.io/hashicorp/google/5.22.0/darwin_arm64/terraform-provider-google_v5.22.0_x5
 /data
-index.html
 index_begin.html
 .venv/
