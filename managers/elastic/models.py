@@ -5,13 +5,14 @@ import uuid
 # Contents: Class definitions for each model type, used throughout the project to maintain data structure.
 
 class User:
-    def __init__(self, client_ip, session_id, user_id, url, user_query, index=None):
+    def __init__(self, client_ip, session_id, user_id, url, referral_url, user_query, index=None):
         self.client_ip = client_ip
         self.session_id = session_id
         self.user_id = user_id
         self.url = url
         self.user_query = user_query
         self.index = index
+        self.referral_url = referral_url
        
 
     def to_dict(self):
@@ -20,6 +21,7 @@ class User:
             "session_id": self.session_id,
             "user_id": self.user_id,
             "url": self.url,
+            "referral_url": self.referral_url,
             "user_query": self.user_query,
             "index": self.index
         }
