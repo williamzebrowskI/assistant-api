@@ -68,7 +68,7 @@ def handle_user_message(message):
         strip_md_from_resp = md_stripper.strip(text_value)
 
         # Initialize User and AssistantResponse objects
-        user = User(client_ip, session_id_ga, user_id, page_url, user_input)
+        user = User(client_ip, session_id_ga, user_id, page_url, referral_url, user_input)
         assistant_response = AssistantResponse(assistant_id, 'openAI', thread_id, strip_md_from_resp,start_turn_timestamp=response_start_time.isoformat(), end_respond_timestamp=response_end_time.isoformat())
 
         # Document existence check and processing
