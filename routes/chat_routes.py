@@ -42,6 +42,7 @@ def handle_user_message(message):
     session_id_ga = message.get('sessionId', 'Unknown')
     client_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(",")[0].strip()
 
+    start_turn_timestamp = datetime.now().isoformat()
 
     try:
         thread_id = thread_manager.get_thread(conversation_uuid)
@@ -49,7 +50,7 @@ def handle_user_message(message):
         client.beta.threads.messages.create(thread_id=thread_id, role="user", content=user_input)
 
         event_handler = EventHandler(userId=user_id)
-        response_start_time = datetime.now()
+        start_response_timestamp = datetime.now()
 
         with client.beta.threads.runs.stream(
             thread_id=thread_id,
@@ -69,7 +70,7 @@ def handle_user_message(message):
 
         # Initialize User and AssistantResponse objects
         user = User(client_ip, session_id_ga, user_id, page_url, referral_url, user_input)
-        assistant_response = AssistantResponse(assistant_id, 'openAI', thread_id, strip_md_from_resp,start_turn_timestamp=response_start_time.isoformat(), end_respond_timestamp=response_end_time.isoformat())
+        assistant_response = AssistantResponse(assistant_id, 'openAI', thread_id, strip_md_from_resp, start_turn_timestamp, start_response_timestamp=start_response_timestamp, end_respond_timestamp=response_end_time)
 
         # Document existence check and processing
         if not elastic_manager.document_exists(conversation_uuid):

@@ -17,39 +17,41 @@ class User:
 
     def to_dict(self):
         return {
+            "index": self.index,
             "client_ip": self.client_ip,
             "session_id": self.session_id,
             "user_id": self.user_id,
             "url": self.url,
             "referral_url": self.referral_url,
             "user_query": self.user_query,
-            "index": self.index
         }
 
 class AssistantResponse:
-    def __init__(self, assistant_id, assistant_type, thread_id, assistant_response, start_turn_timestamp=None, end_respond_timestamp=None, index=None):
+    def __init__(self, assistant_id, assistant_type, thread_id, assistant_response, start_turn_timestamp=None, start_response_timestamp = None,end_respond_timestamp=None, index=None):
         self.assistant_id = assistant_id
         self.assistant_type = assistant_type
         self.thread_id = thread_id
         self.assistant_response = assistant_response
-        self.start_turn_timestamp = start_turn_timestamp if start_turn_timestamp else datetime.now().isoformat()
-        self.end_respond_timestamp = end_respond_timestamp if end_respond_timestamp else datetime.now().isoformat()
+        self.start_response_timestamp = start_response_timestamp
+        self.start_turn_timestamp = start_turn_timestamp
+        self.end_respond_timestamp = end_respond_timestamp
         self.index = index
 
     def to_dict(self):
         return {
+            "start_turn_timestamp": self.start_turn_timestamp,
+            "index": self.index,
             "assistant_id": self.assistant_id,
             "assistant_type": self.assistant_type,
             "thread_id": self.thread_id,
             "assistant_response": self.assistant_response,
-            "start_turn_timestamp": self.start_turn_timestamp,
-            "start_turn_timestamp": self.start_turn_timestamp,
+            "start_respond_timestamp": self.start_response_timestamp,
             "end_respond_timestamp": self.end_respond_timestamp,
             "feedback": {
                 "feedback_num": 0,
                 "feedback_timestamp": datetime.now().isoformat()
             },
-            "index": self.index
+            
         }
 
 class Conversation:
