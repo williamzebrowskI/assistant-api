@@ -67,15 +67,13 @@ def handle_user_message(message):
         user = User(msg_data)
         assistant_response = AssistantResponse(assistant_id, 'openAI', thread_id, strip_md_from_resp, start_turn_timestamp, start_response_timestamp=start_response_timestamp, end_respond_timestamp=response_end_time)
 
+
         # Document existence check and processing
         if not elastic_manager.document_exists(msg_data.conversation_uuid):
             elastic_manager.start_conversation(msg_data, "Conversation about FAFSA", msg_data.partner_id)
-            # elastic_manager.start_conversation(msg_data)
 
-        
         # Add turn to conversation
         elastic_manager.add_turn(msg_data, user, assistant_response)
-        # elastic_manager.add_turn(msg_data.conversation_uuid, user, assistant_response)
 
     except Exception as e:
         error_message = f"An error occurred: {str(e)}"

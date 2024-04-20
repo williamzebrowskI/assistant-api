@@ -4,7 +4,7 @@ import uuid
 
 # Purpose: Defines data models (User, AssistantResponse, Conversation, Turn) used in Elasticsearch documents.
 # Contents: Class definitions for each model type, used throughout the project to maintain data structure.
-# , client_ip, session_id, user_id, url, referral_url, user_query, index=None
+
 class User:
     def __init__(self, msg_data: MessageData, index=None):
         self.client_ip = msg_data.client_ip
@@ -14,8 +14,6 @@ class User:
         self.user_query = msg_data.user_input
         self.index = index
         self.referral_url = msg_data.referral_url
-       
-# , msg_data.session_id_ga, msg_data.user_id, msg_data.page_url, msg_data.referral_url, msg_data.user_input
 
     def to_dict(self):
         return {
@@ -87,7 +85,7 @@ class Turn:
     def __init__(self, user: User, assistant: AssistantResponse, conversation_uuid, index):
         self.turn_id = str(uuid.uuid4())
         self.conversation_uuid = conversation_uuid
-        self.turn_timestamp = datetime.now().isoformat()
+        self.turn_timestamp = datetime.now()
         self.user = user.to_dict()
         self.assistant = assistant.to_dict()
         self.index = index
@@ -114,7 +112,7 @@ class Turn:
             "lang": "painless",
             "params": {
                 "turn": self.to_dict(),
-                "last_updated_timestamp": datetime.now().isoformat()
+                "last_updated_timestamp": datetime.now()
             }
         }
 
