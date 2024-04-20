@@ -1,19 +1,21 @@
 from datetime import datetime
+from ws.message_data import MessageData
 import uuid
 
 # Purpose: Defines data models (User, AssistantResponse, Conversation, Turn) used in Elasticsearch documents.
 # Contents: Class definitions for each model type, used throughout the project to maintain data structure.
-
+# , client_ip, session_id, user_id, url, referral_url, user_query, index=None
 class User:
-    def __init__(self, client_ip, session_id, user_id, url, referral_url, user_query, index=None):
-        self.client_ip = client_ip
-        self.session_id = session_id
-        self.user_id = user_id
-        self.url = url
-        self.user_query = user_query
+    def __init__(self, msg_data: MessageData, index=None):
+        self.client_ip = msg_data.client_ip
+        self.session_id = msg_data.session_id_ga
+        self.user_id = msg_data.user_id
+        self.url = msg_data.page_url
+        self.user_query = msg_data.user_input
         self.index = index
-        self.referral_url = referral_url
+        self.referral_url = msg_data.referral_url
        
+# , msg_data.session_id_ga, msg_data.user_id, msg_data.page_url, msg_data.referral_url, msg_data.user_input
 
     def to_dict(self):
         return {
@@ -55,11 +57,12 @@ class AssistantResponse:
         }
 
 class Conversation:
-    def __init__(self, conversation_uuid, initial_session_id, initial_user_id, assistant_type, title):
+    def __init__(self, conversation_uuid, initial_session_id, initial_user_id, assistant_type, title, partner_id):
         self.conversation_id = conversation_uuid
         self.initial_session_id = initial_session_id
         self.initial_user_id = initial_user_id
         self.assistant_type = assistant_type
+        self.partner_id = partner_id
         self.title = title
         self.start_timestamp = datetime.now().isoformat()
         self.last_updated_timestamp = self.start_timestamp
@@ -72,6 +75,7 @@ class Conversation:
             "initial_session_id": self.initial_session_id,
             "initial_user_id": self.initial_user_id,
             "assistant_type": self.assistant_type,
+            "partner_id": self.partner_id,
             "title": self.title,
             "start_timestamp": self.start_timestamp,
             "last_updated_timestamp": self.last_updated_timestamp,

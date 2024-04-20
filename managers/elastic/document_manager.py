@@ -8,9 +8,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class DocumentManager(BaseElasticConnector):
-    def __init__(self, index_name):
+    def __init__(self):
         super().__init__()
-        self.index_name = index_name
  
     def create_document(self, conversation_uuid, body):
 
