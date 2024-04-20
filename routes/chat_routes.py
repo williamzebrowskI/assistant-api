@@ -65,8 +65,16 @@ def handle_user_message(message):
 
         # Initialize User and AssistantResponse objects
         user = User(msg_data)
-        assistant_response = AssistantResponse(assistant_id, 'openAI', thread_id, strip_md_from_resp, start_turn_timestamp, start_response_timestamp=start_response_timestamp, end_respond_timestamp=response_end_time)
-
+        # assistant_response = AssistantResponse(assistant_id, 'openAI', thread_id, strip_md_from_resp, start_turn_timestamp, start_response_timestamp=start_response_timestamp, end_respond_timestamp=response_end_time)
+        assistant_response = AssistantResponse(
+            assistant_id=assistant_id,
+            assistant_type='openAI',
+            thread_id=thread_id,
+            assistant_response=strip_md_from_resp,
+            start_turn_timestamp=start_turn_timestamp,
+            start_response_timestamp=start_response_timestamp,
+            end_respond_timestamp=response_end_time
+        )
 
         # Document existence check and processing
         if not elastic_manager.document_exists(msg_data.conversation_uuid):

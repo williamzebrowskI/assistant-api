@@ -27,14 +27,14 @@ class User:
         }
 
 class AssistantResponse:
-    def __init__(self, assistant_id, assistant_type, thread_id, assistant_response, start_turn_timestamp=None, start_response_timestamp = None,end_respond_timestamp=None, index=None):
-        self.assistant_id = assistant_id
-        self.assistant_type = assistant_type
-        self.thread_id = thread_id
-        self.assistant_response = assistant_response
-        self.start_response_timestamp = start_response_timestamp
-        self.start_turn_timestamp = start_turn_timestamp
-        self.end_respond_timestamp = end_respond_timestamp
+    def __init__(self, index=None, **kwargs):
+        self.assistant_id = kwargs.get('assistant_id')
+        self.thread_id = kwargs.get('thread_id')
+        self.assistant_response = kwargs.get('assistant_response')
+        self.assistant_type = kwargs.get('assistant_type', 'openAI')
+        self.start_turn_timestamp = kwargs.get('start_turn_timestamp')
+        self.start_response_timestamp = kwargs.get('start_response_timestamp')
+        self.end_respond_timestamp = kwargs.get('end_respond_timestamp')
         self.index = index
 
     def to_dict(self):
@@ -51,7 +51,6 @@ class AssistantResponse:
                 "feedback_num": 0,
                 "feedback_timestamp": datetime.now().isoformat()
             },
-            
         }
 
 class Conversation:
