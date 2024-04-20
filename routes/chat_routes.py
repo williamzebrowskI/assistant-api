@@ -65,7 +65,6 @@ def handle_user_message(message):
 
         # Initialize User and AssistantResponse objects
         user = User(msg_data)
-        # assistant_response = AssistantResponse(assistant_id, 'openAI', thread_id, strip_md_from_resp, start_turn_timestamp, start_response_timestamp=start_response_timestamp, end_respond_timestamp=response_end_time)
         assistant_response = AssistantResponse(
             assistant_id=assistant_id,
             assistant_type='openAI',
