@@ -37,15 +37,14 @@ def handle_user_message(message):
 
     msg_data = MessageData(message, request)
 
-    start_turn_timestamp = datetime.now().isoformat()
-
     try:
         thread_id = thread_manager.get_thread(msg_data.conversation_uuid)
 
         client.beta.threads.messages.create(thread_id=thread_id, role="user", content=msg_data.user_input)
 
         event_handler = EventHandler(userId=msg_data.user_id)
-        start_response_timestamp = datetime.now()
+        
+        start_response_timestamp = datetime.now().isoformat()
 
         with client.beta.threads.runs.stream(
             thread_id=thread_id,
@@ -55,7 +54,7 @@ def handle_user_message(message):
             for text in stream.text_deltas:
                 pass
             response = stream.get_final_messages()
-            response_end_time = datetime.now()
+            response_end_time = datetime.now().isoformat()
             for message in response:
                 for content_block in message.content:
                     if content_block.type == 'text':
@@ -70,7 +69,6 @@ def handle_user_message(message):
             assistant_type='openAI',
             thread_id=thread_id,
             assistant_response=strip_md_from_resp,
-            start_turn_timestamp=start_turn_timestamp,
             start_response_timestamp=start_response_timestamp,
             end_respond_timestamp=response_end_time
         )

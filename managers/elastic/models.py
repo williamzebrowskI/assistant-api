@@ -32,14 +32,12 @@ class AssistantResponse:
         self.thread_id = kwargs.get('thread_id')
         self.assistant_response = kwargs.get('assistant_response')
         self.assistant_type = kwargs.get('assistant_type', 'openAI')
-        self.start_turn_timestamp = kwargs.get('start_turn_timestamp')
         self.start_response_timestamp = kwargs.get('start_response_timestamp')
         self.end_respond_timestamp = kwargs.get('end_respond_timestamp')
         self.index = index
 
     def to_dict(self):
         return {
-            "start_turn_timestamp": self.start_turn_timestamp,
             "index": self.index,
             "assistant_id": self.assistant_id,
             "assistant_type": self.assistant_type,
@@ -84,7 +82,7 @@ class Turn:
     def __init__(self, user: User, assistant: AssistantResponse, conversation_uuid, index):
         self.turn_id = str(uuid.uuid4())
         self.conversation_uuid = conversation_uuid
-        self.turn_timestamp = datetime.now()
+        self.turn_timestamp = datetime.now().isoformat()
         self.user = user.to_dict()
         self.assistant = assistant.to_dict()
         self.index = index
@@ -111,7 +109,7 @@ class Turn:
             "lang": "painless",
             "params": {
                 "turn": self.to_dict(),
-                "last_updated_timestamp": datetime.now()
+                "last_updated_timestamp": datetime.now().isoformat()
             }
         }
 
