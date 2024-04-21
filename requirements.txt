@@ -1,7 +1,7 @@
 elasticsearch==8.13.0
 Flask==3.0.3
 flask_socketio==5.3.6
-openai==1.17.0
+openai==1.23.2
 python-dotenv==1.0.1
-gunicorn==21.2.0
+gunicorn==22.0.0
 eventlet==0.36.1
