@@ -25,7 +25,7 @@ class MessageData:
 
     @property
     def partner_id(self):
-        return self.message.get('partner', 'Unknown')
+        return self.message.get('partnerId', 'Unknown')
 
     @property
     def session_id_ga(self):
