@@ -13,7 +13,8 @@ class AppConfig:
                 "https://develop.getfafsahelp.org", "https://www.getfafsahelp.org", 
                 "http://localhost:3000", "http://localhost:8002", 
                 "https://benefitsdatatrust.github.io", "http://127.0.0.1:8002", 
-                "https://deploy-preview-327--awesome-varahamihira-483edb.netlify.app"
+                "https://deploy-preview-327--awesome-varahamihira-483edb.netlify.app",
+                "https://deploy-preview-345--awesome-varahamihira-483edb.netlify.app"
             ],
             cors_credentials=True,
             cors_allowed_headers="*",
