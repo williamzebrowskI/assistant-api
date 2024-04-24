@@ -19,7 +19,7 @@ class EventHandler(AssistantEventHandler):
     def on_text_delta(self, delta, snapshot):
         """
         Emits text updates received from the OpenAI Assistant to the appropriate client through SocketIO, 
-        using the user's unique identifier to target the correct room.
+        using the user's unique identifier to target the correct room. 
         """
         # Perform a late import for socketio here
         from ws.flask_config import config

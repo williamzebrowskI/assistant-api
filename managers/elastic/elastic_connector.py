@@ -1,5 +1,5 @@
 # Purpose: Establishes connection to Elasticsearch and contains the BaseElasticConnector class which includes basic connection setup and error logging specific to Elasticsearch operations.
-# Contents: Initialization of the Elasticsearch client, log_error method.
+# Contents: Initialization of the Elasticsearch client, log_error method.  
 
 import os
 import logging
