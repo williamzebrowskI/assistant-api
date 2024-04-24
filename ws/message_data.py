@@ -1,5 +1,5 @@
 class MessageData:
-    """Class to extract data from the message and request object."""
+    """Class to extract data from the message and request object. """
     def __init__(self, message, request):
         self.message = message
         self.request = request
