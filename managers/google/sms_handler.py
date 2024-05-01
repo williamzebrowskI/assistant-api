@@ -10,7 +10,7 @@ from managers.elastic.elastic_connector import BaseElasticConnector
 from dotenv import load_dotenv
 load_dotenv()
 
-fafsa_server_url = os.getenv("FAFSA_SERVER_URL")
+fafsa_server_url = os.getenv("BASE_URL")
 
 class SMSHandler:
     def __init__(self, api_url):
@@ -33,7 +33,7 @@ class SMSHandler:
                 "query": message_body
             }
             
-            response = requests.post(fafsa_server_url, headers=headers, json=payload)
+            response = requests.post(f"{fafsa_server_url}/answer_faq", headers=headers, json=payload)
             response_data = response.json()["response"]
             return response_data
         except Exception as e:
