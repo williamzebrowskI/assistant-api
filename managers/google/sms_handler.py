@@ -33,7 +33,7 @@ class SMSHandler:
                 "query": message_body
             }
             
-            response = requests.post(f"{FAFSA_SERVER_URL}/answer_faq", headers=headers, json=payload)
+            response = requests.post(f"https://{FAFSA_SERVER_URL}/answer_faq", headers=headers, json=payload)
             response_data = response.json()["response"]
             return response_data
         except Exception as e:
