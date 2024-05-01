@@ -15,7 +15,6 @@ class BaseElasticConnector:
         self.es_api_key = os.getenv('ES_API_KEY')
         self.es_index = os.getenv('ES_INDEX', 'conversations')
 
-#TODO: # constructs URL - ave utility function to set for you.  No protocol on system.  always enforce HTTPS.  Use function to join. 
         try: 
             self.es = Elasticsearch(
                 hosts=[UrlUtility.create_url(f"{self.es_url}:{self.es_port}")],
