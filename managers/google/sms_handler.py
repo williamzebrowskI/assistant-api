@@ -8,9 +8,8 @@ from managers.elastic.document_manager import DocumentManager
 from managers.elastic.search_manager import SearchManager
 from managers.elastic.elastic_connector import BaseElasticConnector
 from dotenv import load_dotenv
+from utils.url_utility import UrlUtility
 load_dotenv()
-
-FAFSA_SERVER_URL = os.getenv("BASE_URL")
 
 class SMSHandler:
     def __init__(self, api_url):
@@ -27,13 +26,14 @@ class SMSHandler:
         conversation_history = conversation_history or []
 
         try:
+            FAFSA_SERVER_URL = os.getenv("BASE_URL")
             headers = {'Content-Type': 'application/json'}
             payload = {
                 "conversation_history": {"messages": conversation_history},
                 "query": message_body
             }
             
-            response = requests.post(f"https://{FAFSA_SERVER_URL}/answer_faq", headers=headers, json=payload)
+            response = requests.post(UrlUtility.create_url(f"{FAFSA_SERVER_URL}/answer_faq"), headers=headers, json=payload)
             response_data = response.json()["response"]
             return response_data
         except Exception as e:

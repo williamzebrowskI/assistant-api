@@ -5,6 +5,7 @@ import os
 import logging
 from elasticsearch import Elasticsearch
 from dotenv import load_dotenv
+from utils.url_utility import UrlUtility
 load_dotenv()
 
 class BaseElasticConnector:
@@ -14,9 +15,9 @@ class BaseElasticConnector:
         self.es_api_key = os.getenv('ES_API_KEY')
         self.es_index = os.getenv('ES_INDEX', 'conversations')
 
-        try:
+        try: 
             self.es = Elasticsearch(
-                hosts=[f"https://{self.es_url}:{self.es_port}"],
+                hosts=[UrlUtility.create_url(f"{self.es_url}:{self.es_port}")],
                 api_key=self.es_api_key
             )
         except Exception as e:

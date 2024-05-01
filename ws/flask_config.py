@@ -1,6 +1,20 @@
 from flask import Flask
 from flask_socketio import SocketIO
 import os
+import logging
+from dotenv import load_dotenv
+load_dotenv()
+
+
+class CorsUtility:
+    @staticmethod
+    def get_cors():
+        cors_allowed_origins = os.getenv('CORS_ALLOWED_ORIGINS')
+        if cors_allowed_origins is not None:
+            cors_allowed_origins = [origin.strip() for origin in cors_allowed_origins.split(',')]
+            logging.info(cors_allowed_origins)
+        return cors_allowed_origins
+
 
 class AppConfig:
     def __init__(self):
@@ -8,14 +22,7 @@ class AppConfig:
         self.app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY')
         self.socketio = SocketIO(
             self.app,
-            cors_allowed_origins=[
-                "http://127.0.0.1:5500", "http://localhost:8000", 
-                "https://develop.getfafsahelp.org", "https://www.getfafsahelp.org", 
-                "http://localhost:3000", "http://localhost:8002", 
-                "https://benefitsdatatrust.github.io", "http://127.0.0.1:8002", 
-                "https://deploy-preview-327--awesome-varahamihira-483edb.netlify.app",
-                "https://deploy-preview-345--awesome-varahamihira-483edb.netlify.app"
-            ],
+            cors_allowed_origins=CorsUtility.get_cors,
             cors_credentials=True,
             cors_allowed_headers="*",
             manage_session=False,
