@@ -16,7 +16,7 @@ class BaseElasticConnector:
 
         try:
             self.es = Elasticsearch(
-                hosts=[f"{self.es_url}:{self.es_port}"],
+                hosts=[f"https://{self.es_url}:{self.es_port}"],
                 api_key=self.es_api_key
             )
         except Exception as e:
