@@ -18,8 +18,8 @@ os.environ['PYTHONDONTWRITEBYTECODE'] = '1'
 
 md_stripper = MarkdownStripper()
 elastic_manager = ConversationManager()
-fafsa_server_url = os.getenv("BASE_URL")
-sms_message_handler = SMSHandler(api_url=fafsa_server_url)
+FAFSA_SERVER_URL = os.getenv("BASE_URL")
+sms_message_handler = SMSHandler(api_url=FAFSA_SERVER_URL)
 
 # SocketIO event handlers
 @config.socketio.on('connect', namespace='/chat')
