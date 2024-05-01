@@ -25,11 +25,9 @@ class DocumentManager(BaseElasticConnector):
             raise
 
     def update_document(self, conversation_uuid, script):
-
         try:
             response = self.es.update(index=self.es_index, id=conversation_uuid, body={"script": script})
             logging.info(f"Document {conversation_uuid} updated successfully. Response: {response}")
-
         except Exception as e:
             error_msg = f"Failed to update document {conversation_uuid}: {str(e)}"
             logging.error(error_msg)
