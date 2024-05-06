@@ -23,3 +23,5 @@ assistant_id = assistant.assistant_id
 
 # Set up Flask app
 app_instance = config.app
+
+from routes import chat_routes
