@@ -1,6 +1,7 @@
 # from flask_config import config
 from openai import AssistantEventHandler
 import logging
+import re
 
 class EventHandler(AssistantEventHandler):
     """
@@ -16,7 +17,7 @@ class EventHandler(AssistantEventHandler):
         super().__init__()
         self.userId = userId
 
-    def on_text_delta(self, delta, snapshot):
+    def on_text_delta(self, delta, snapshot) -> None:
         """
         Emits text updates received from the OpenAI Assistant to the appropriate client through SocketIO, 
         using the user's unique identifier to target the correct room. 
@@ -25,9 +26,14 @@ class EventHandler(AssistantEventHandler):
         from ws.flask_config import config
 
         # Check if the delta contains any annotations and remove them
-        delta.annotations = ""
+        annotation_pattern = re.compile(r"【\d+:\d+†[^】]*】")
 
-        config.socketio.emit('assistant_message', {'text': delta.value}, room=self.userId, namespace='/chat')
+        config.socketio.emit(
+            'assistant_message', 
+            {'text': re.sub(annotation_pattern, '', delta.value)},
+            room=self.userId, 
+            namespace='/chat'
+        )
     
 
     def on_error(self, error):

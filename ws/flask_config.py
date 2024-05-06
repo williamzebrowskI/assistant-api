@@ -12,7 +12,6 @@ class CorsUtility:
         cors_allowed_origins = os.getenv('CORS_ALLOWED_ORIGINS')
         if cors_allowed_origins is not None:
             cors_allowed_origins = [origin.strip() for origin in cors_allowed_origins.split(',')]
-            logging.info(cors_allowed_origins)
         return cors_allowed_origins
 
 

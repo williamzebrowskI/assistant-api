@@ -55,8 +55,10 @@ def handle_user_message(message):
 
         with client.beta.threads.runs.stream(
             thread_id=thread_id,
+            additional_instructions="Respond with information only related to FAFSA.",
             assistant_id=assistant_id,
             event_handler=event_handler,
+            tool_choice={"type": "file_search"}
         ) as stream:
             for text in stream.text_deltas:
                 pass

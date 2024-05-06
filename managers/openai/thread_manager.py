@@ -24,6 +24,6 @@ class ThreadManager(DocumentManager):
         
         except Exception as e:
             error_msg = f"Failed to create thread for UUID '{conversation_uuid}': {e}"
-            logging.info(error_msg, exc_info=True)
+            logging.error(error_msg, exc_info=True)
             self.log_error(conversation_uuid, error_msg)
             raise
