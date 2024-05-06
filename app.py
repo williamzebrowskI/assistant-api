@@ -23,10 +23,3 @@ assistant_id = assistant.assistant_id
 
 # Set up Flask app
 app_instance = config.app
-
-# Import routes
-from routes.chat_routes import *
-
-# Run the app
-if __name__ == '__main__':
-    config.socketio.run(config.app, debug=True, host='0.0.0.0', port=8002)
