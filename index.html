@@ -120,7 +120,10 @@
             localStorage.setItem("conversationId", conversationId);
 
 
-            var socket = io.connect('http://127.0.0.1:8002/chat', {
+            var socket = io.connect('https://wyatt-openai-play.bdtrust.org/chat', {
+                'reconnection': true,
+                'reconnectionDelay': 1000, // waits 1 second before attempting to reconnect
+                'reconnectionAttempts': 60, // will attempt to reconnect 5 times
                 query: { 'userId': userId, 'conversationId': conversationId }
             });
 
