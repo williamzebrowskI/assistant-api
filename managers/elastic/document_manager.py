@@ -61,7 +61,9 @@ class DocumentManager(BaseElasticConnector):
             }
         }
         try:
-            self.update_document(conversation_uuid, script)
+            self.es.update(index=self.es_index, id=conversation_uuid, body={"script": script})
+            logging.info("Error logged to Elasticsearch for conversation UUID %s", conversation_uuid)
+            # self.update_document(conversation_uuid, script)/
         except Exception as ex:
             error_msg = logging.error("Failed to log error to Elasticsearch for conversation UUID %s: %s", conversation_uuid, ex)
             self.log_error(conversation_uuid, error_msg)
