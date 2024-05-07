@@ -7,7 +7,7 @@ from ws.flask_config import config
 from ws.message_data import MessageData
 from managers.openai.event_manager import EventHandler
 from managers.elastic.conversation_manager import ConversationManager
-from managers.elastic.models import User, AssistantResponse
+from managers.elastic.models import User, AssistantResponse, Conversation, Turn
 from managers.google.sms_handler import SMSHandler
 from utils.markdown_stripper import MarkdownStripper
 from app import thread_manager, elastic_manager, client, assistant_id, app_instance
@@ -30,9 +30,15 @@ def handle_connect():
         session['userId'] = user_id
         logging.info(f"User {user_id} connected with session {request.sid}.")
 
+@config.socketio.on('heartbeat', namespace='/chat')
+def handle_heartbeat(message):
+    # logging.info(f"Heartbeat received: {message}")
+    pass
+
 @config.socketio.on('disconnect', namespace='/chat')
 def handle_disconnect():
     try:
+        pass
         logging.info(f"Client {request.sid} disconnected")
     except Exception as e:
         logging.error(f"Disconnect error: {str(e)}")
@@ -82,11 +88,6 @@ def handle_user_message(message):
             end_respond_timestamp=response_end_time
         )
 
-        # Document existence check and processing
-        if not elastic_manager.document_exists(msg_data.conversation_uuid):
-            elastic_manager.start_conversation(msg_data, "Conversation about FAFSA", msg_data.partner_id, assistant_type)
-
-        # Add turn to conversation
         elastic_manager.add_turn(msg_data, user, assistant_response)
 
     except Exception as e:
@@ -94,6 +95,7 @@ def handle_user_message(message):
         logging.error(error_message)
         elastic_manager.log_error(msg_data.conversation_uuid, error_message)
         config.socketio.emit('server_message', {'text': 'An error occurred, please try again later.'}, room=msg_data.user_id, namespace='/chat')
+
 
 @app_instance.route('/sms', methods=['POST'])
 def receive_sms():
@@ -161,9 +163,7 @@ def receive_sms():
         error_message = f"An error occurred: {str(e)}"
         logging.error(error_message)
         elastic_manager.log_error(msg_data.conversation_uuid, error_message)
-        return jsonify(
-            {
-                'status': f'{error_message}',
-                'message': 'Failed to process your message'
-            }
-        )
+        return jsonify({
+            'status': 'temporarily unavailable',
+            'message': 'Service is temporarily unavailable, please try again later.'
+        })
