@@ -37,23 +37,23 @@ def setup_logging():
         root_logger.addHandler(console_handler)
     except Exception as e:
         # Logging setup failure
-        print("Failed to set up logging: {}".format(e))  # Using print because logging might not be configured properly yet
+        logging.error(f"Failed to set up logging: {e}")
 
 def on_starting(server):
     try:
         setup_logging()
         logging.info("Server is starting 🚀")
     except Exception as e:
-        logging.error("Failed during server start: {}".format(e))
+        logging.error(f"Failed during server start: {e}")
 
 def when_ready(server):
     try:
         logging.info("Successful! Server is ready to receive traffic. 🤗")
     except Exception as e:
-        logging.error("Failed when server was ready: {}".format(e))
+        logging.error(f"Failed when server was ready: {e}")
 
 def on_exit(server):
     try:
         logging.info("Server is shutting down.")
     except Exception as e:
-        logging.error("Failed during server shutdown: {}".format(e))
+        logging.error(f"Failed during server shutdown: {e}")

@@ -27,28 +27,46 @@ class ConversationManager(DocumentManager):
             self.log_error(conversation_uuid, error_msg)
             raise RuntimeError(error_msg) from e
 
-
-    def add_turn(self, msg_data: MessageData, user: User, assistant: AssistantResponse):
-        """Adds a turn to an existing conversation."""
+    def add_turn(self, msg_data: MessageData, user: User, assistant: AssistantResponse, upsert_body=None):
+        """Adds a turn to an existing conversation or starts a new one if it doesn't exist."""
         conversation_uuid = msg_data.conversation_uuid
         try:
-            if not self.document_exists(conversation_uuid):
-                self.start_conversation(msg_data, "Conversation about FAFSA", msg_data.partner_id)
+            # Fetch the current index if the conversation exists, otherwise start at 0
+            current_index = self.get_current_index(conversation_uuid) if self.document_exists(conversation_uuid) else 0
+            user.index = current_index
+            assistant.index = current_index
 
-            current_index = self.get_current_index(conversation_uuid)
-            user.index = user.index if user.index is not None else current_index
-            assistant.index = assistant.index if assistant.index is not None else current_index
-
+            # Create the turn
             turn = Turn(user, assistant, conversation_uuid, current_index)
             script = turn.update_script()
-            
-            self.update_document(conversation_uuid, script)
+
+            # Prepare an upsert body that includes the conversation and the current turn
+            if not self.document_exists(conversation_uuid):
+                # Create a new conversation object with the first turn
+                conversation = Conversation(
+                    conversation_uuid, 
+                    msg_data.session_id_ga, 
+                    msg_data.user_id, 
+                    assistant.assistant_type, 
+                    "Conversation about FAFSA", 
+                    msg_data.partner_id
+                )
+                conversation.turns = [turn.to_dict()]  # Include the first turn
+                upsert_body = conversation.to_dict()
+            else:
+                # If the conversation already exists, prepare only the current turn as part of the upsert
+                upsert_body = {
+                    "turns": [turn.to_dict()]
+                }
+
+            # Perform the upsert operation
+            self.update_document(conversation_uuid, script, upsert_body)
+
         except Exception as e:
             error_msg = f"Error adding turn to conversation {conversation_uuid}: {str(e)}"
             logging.error(error_msg)
             self.log_error(conversation_uuid, error_msg)
             raise
-
 
     def get_current_index(self, conversation_uuid):
         """Returns the current index of the conversation."""
