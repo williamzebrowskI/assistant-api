@@ -5,8 +5,12 @@ resource "google_cloudbuild_trigger" "openai_assistant_trigger" {
   disabled        = false
   filename        = "cloudbuild.yaml"
   included_files = [
-    "*.py",
-    "index.html",
+    "managers/**",
+    "routes/**",
+    "utils/**",
+    "ws/**",
+    "widget/**",
+    "app.py",
     "requirements.txt",
     "cloudbuild.yaml",
     "Dockerfile",
@@ -21,7 +25,7 @@ resource "google_cloudbuild_trigger" "openai_assistant_trigger" {
 
   ]
   approval_config {
-    approval_required = true
+    approval_required = local.ws_vars["approval"]
   }
 
   repository_event_config {

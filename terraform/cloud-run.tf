@@ -32,6 +32,14 @@ resource "google_cloud_run_v2_service" "openai_assistant" {
         value = local.ws_vars["api_uri"]
       }
       env {
+        name  = "BASE_URL"
+        value = local.ws_vars["base_url"]
+      }
+      env {
+        name  = "CORS_ALLOWED_ORIGINS"
+        value = local.ws_vars["cors"]
+      }
+      env {
         name = "OPENAI_API_KEY"
 
         value_source {
@@ -47,6 +55,16 @@ resource "google_cloud_run_v2_service" "openai_assistant" {
         value_source {
           secret_key_ref {
             secret  = "es_api_key"
+            version = "latest"
+          }
+        }
+      }
+      env {
+        name = "FLASK_SECRET_KEY"
+
+        value_source {
+          secret_key_ref {
+            secret  = "wyatt_ai_flask_secret_key"
             version = "latest"
           }
         }

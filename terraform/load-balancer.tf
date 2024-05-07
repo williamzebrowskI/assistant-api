@@ -38,21 +38,48 @@ resource "google_compute_target_https_proxy" "fafsagpt_proxy" {
 
 # google_compute_url_map.fafsagpt_url_map:
 resource "google_compute_url_map" "fafsagpt_url_map" {
+  default_url_redirect {
+    https_redirect         = true
+    redirect_response_code = "MOVED_PERMANENTLY_DEFAULT"
+    strip_query            = false
+  }
+
+  host_rule {
+    hosts        = ["wyatt-openai-play.bdtrust.org"]
+    path_matcher = "wyatt-openai-play"
+  }
+
   name            = "fafsagpt-lb"
-  default_service = google_compute_backend_service.fafsagpt_backend.self_link
   project         = local.ws_vars["project-id"]
+
+  path_matcher {
+    default_service = google_compute_backend_service.fafsagpt_backend.self_link
+    name            = "wyatt-openai-play"
+
+    route_rules {
+      priority = 100
+
+      route_action {
+        weighted_backend_services {
+          backend_service = google_compute_backend_service.fafsagpt_backend.self_link
+          weight          = 100
+        }
+      }
+    }
+  }
 }
 
 # google_compute_backend_service.fafsagpt_backend
 resource "google_compute_backend_service" "fafsagpt_backend" {
   description           = "Backend service for fafsagpt load balancer"
-  enable_cdn            = true
+  enable_cdn            = false
   load_balancing_scheme = "EXTERNAL_MANAGED"
   locality_lb_policy    = "ROUND_ROBIN"
   name                  = "fafsagpt-backend"
   port_name             = "http"
   project               = local.ws_vars["project-id"]
   protocol              = "HTTPS"
+  security_policy       = google_compute_security_policy.armor_policy.id
   session_affinity      = "NONE"
   timeout_sec           = 30
 
@@ -95,4 +122,20 @@ resource "cloudflare_record" "cloudflare_record" {
   type    = "A"
   value   = google_compute_global_address.fafsagpt_ip_address.address
   ttl     = 1
+}
+
+resource "google_compute_global_forwarding_rule" "fafsa_fe_http" {
+  ip_protocol           = "TCP"
+  ip_version            = "IPV4"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+  name                  = "fafsa-fe-http"
+  port_range            = "80-80"
+  project               = local.ws_vars["project-id"]
+  target                = google_compute_target_http_proxy.fafsa_lb_target_proxy_2.id
+}
+
+resource "google_compute_target_http_proxy" "fafsa_lb_target_proxy_2" {
+  name    = "fafsa-lb-target-proxy-2"
+  project = local.ws_vars["project-id"]
+  url_map = google_compute_url_map.fafsagpt_url_map.id
 }
