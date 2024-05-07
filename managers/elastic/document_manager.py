@@ -24,9 +24,16 @@ class DocumentManager(BaseElasticConnector):
                 self.log_error(conversation_uuid, error_msg)
             raise
 
-    def update_document(self, conversation_uuid, script):
+    def update_document(self, conversation_uuid, script, upsert_body=None):
         try:
-            response = self.es.update(index=self.es_index, id=conversation_uuid, body={"script": script})
+            response = self.es.update(
+                index=self.es_index, 
+                id=conversation_uuid, 
+                body={
+                    "script": script,
+                    "upsert": upsert_body
+                }
+            )
             logging.info(f"Document {conversation_uuid} updated successfully. Response: {response}")
         except Exception as e:
             error_msg = f"Failed to update document {conversation_uuid}: {str(e)}"
@@ -63,7 +70,6 @@ class DocumentManager(BaseElasticConnector):
         try:
             self.es.update(index=self.es_index, id=conversation_uuid, body={"script": script})
             logging.info("Error logged to Elasticsearch for conversation UUID %s", conversation_uuid)
-            # self.update_document(conversation_uuid, script)/
         except Exception as ex:
             error_msg = logging.error("Failed to log error to Elasticsearch for conversation UUID %s: %s", conversation_uuid, ex)
             self.log_error(conversation_uuid, error_msg)
