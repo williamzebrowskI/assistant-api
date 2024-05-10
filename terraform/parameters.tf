@@ -41,7 +41,7 @@ locals {
       zone_id     = "e97957d24b2e45b7b42884d8cc64e9b4"
       approval    = "true"
       base_url    = "fafsa-nonprod.bdtrust.org"
-      cors        = "https://develop.getfafsahelp.org, https://deploy-preview-327--awesome-varahamihira-483edb.netlify.app, https://deploy-preview-345--awesome-varahamihira-483edb.netlify.app"
+      cors        = "https://develop.getfafsahelp.org, https://deploy-preview-327--awesome-varahamihira-483edb.netlify.app, https://deploy-preview-345--awesome-varahamihira-483edb.netlify.app, https://preview-build-northstar--getfafsahelp.netlify.app/"
 
     }
 
@@ -55,13 +55,13 @@ locals {
       address     = "34.111.16.227"
       vpc         = "projects/bdt-chatbot-prod/locations/us-east4/connectors/cloud-run-vpc-connector"
       secret-id   = "814123834976"
-      es_url      = "https://1d87119333f04525afd6c68643317e9c.us-east4.gcp.elastic-cloud.com"
+      es_url      = "1d87119333f04525afd6c68643317e9c.us-east4.gcp.elastic-cloud.com"
       es_index    = "search-wyatt-ai"
-      api_uri     = "https://wyatt-openai.bdtrust.org"
+      api_uri     = "wyatt-openai.bdtrust.org"
       subdomain   = "wyatt-openai"
       zone_id     = "e97957d24b2e45b7b42884d8cc64e9b4"
       approval    = "true"
-      base_url    = "fafsa-openai.bdtrust.org"
+      base_url    = "fafsa-nonprod.bdtrust.org"
       cors        = "https://www.getfafsahelp.org"
     }
 
