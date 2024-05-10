@@ -45,8 +45,8 @@ resource "google_compute_url_map" "fafsagpt_url_map" {
   }
 
   host_rule {
-    hosts        = ["wyatt-openai-play.bdtrust.org"]
-    path_matcher = "wyatt-openai-play"
+    hosts        = ["${local.ws_vars["subdomain"]}.bdtrust.org"]
+    path_matcher = local.ws_vars["subdomain"]
   }
 
   name            = "fafsagpt-lb"
@@ -54,7 +54,7 @@ resource "google_compute_url_map" "fafsagpt_url_map" {
 
   path_matcher {
     default_service = google_compute_backend_service.fafsagpt_backend.self_link
-    name            = "wyatt-openai-play"
+    name            = local.ws_vars["subdomain"]
 
     route_rules {
       priority = 100

@@ -62,7 +62,7 @@ locals {
       zone_id     = "e97957d24b2e45b7b42884d8cc64e9b4"
       approval    = "true"
       base_url    = "fafsa-nonprod.bdtrust.org"
-      cors        = "https://www.getfafsahelp.org"
+      cors        = "https://getfafsahelp.org"
     }
 
   }
