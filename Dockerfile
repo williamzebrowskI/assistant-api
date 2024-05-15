@@ -15,4 +15,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 8002
 
 # Run app.py when the container launches
-CMD ["gunicorn", "--config", "/usr/src/app/ws/gunicorn_config.py", "--worker-class", "eventlet", "-w", "1", "app:app_instance", "-b", "0.0.0.0:8002"]
+CMD ["gunicorn", "--config", "/usr/src/app/ws/gunicorn_config.py", "--worker-class", "eventlet", "-w", "1", "app.main:app_instance", "-b", "0.0.0.0:8002"]

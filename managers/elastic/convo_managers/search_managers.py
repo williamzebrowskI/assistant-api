@@ -1,5 +1,6 @@
-from managers.elastic.elastic_connector import BaseElasticConnector
-from managers.elastic.document_manager import DocumentManager
+from managers.elastic.es_connector.elastic_connect import BaseElasticConnector
+from managers.elastic.convo_managers.document_managers import DocumentManager
+from managers.elastic.logger.error_log import ErrorLogger
 import logging
 
 document_manager = DocumentManager()
@@ -7,7 +8,7 @@ document_manager = DocumentManager()
 class SearchManager(BaseElasticConnector):
     def __init__(self):
         super().__init__()
-        self.document_manager = document_manager
+        self.error_logger = ErrorLogger()
 
     def get_conversation_history(self, conversation_uuid):
             """Retrieve the entire conversation document by UUID."""
@@ -26,7 +27,7 @@ class SearchManager(BaseElasticConnector):
                 else:
                     return []
             except Exception as e:
-                error_message = f"Failed to fetch conversation by UUID {conversation_uuid}: {str(e)}"
-                logging.error(error_message)
-                self.document_manager.log_error(conversation_uuid, error_message)
-                raise Exception(f"Error retrieving conversation history: {error_message}") from e
+                error_msg = f"Failed to fetch conversation by UUID {conversation_uuid}: {str(e)}"
+                logging.error(error_msg)
+                self.error_logger.log_error(conversation_uuid, error_msg)
+                raise Exception(f"Error retrieving conversation history: {error_msg}") from e

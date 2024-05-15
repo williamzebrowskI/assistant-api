@@ -22,19 +22,23 @@ class EventHandler(AssistantEventHandler):
         Emits text updates received from the OpenAI Assistant to the appropriate client through SocketIO, 
         using the user's unique identifier to target the correct room. 
         """
-        # Perform a late import for socketio here
-        from ws.flask_config import config
+        try:
+            from ws.flask_config import config
 
-        # Check if the delta contains any annotations and remove them
-        annotation_pattern = re.compile(r"【\d+:\d+†[^】]*】")
+            # Check if the delta contains any annotations and remove them
+            annotation_pattern = re.compile(r"【\d+:\d+†[^】]*】")
 
-        config.socketio.emit(
-            'assistant_message', 
-            {'text': re.sub(annotation_pattern, '', delta.value)},
-            room=self.userId, 
-            namespace='/chat'
-        )
+            config.socketio.emit(
+                'assistant_message', 
+                {'text': re.sub(annotation_pattern, '', delta.value)},
+                room=self.userId, 
+                namespace='/chat'
+            )
+        except Exception as e:
+            logging.error(f"An error occurred while processing text delta: {e}")
     
-
     def on_error(self, error):
-        logging.error("An error occurred: %s", error)
+        """
+        Handles any errors that occur during the interaction with the OpenAI Assistant.
+        """
+        logging.error(f"An error occurred: {error}")

@@ -3,20 +3,18 @@ import hashlib
 import uuid
 import requests
 import logging
-from managers.elastic.conversation_manager import ConversationManager
-from managers.elastic.document_manager import DocumentManager
-from managers.elastic.search_manager import SearchManager
-from managers.elastic.elastic_connector import BaseElasticConnector
-from dotenv import load_dotenv
+from managers.elastic.convo_managers.conversation_managers import ConversationManager
+from managers.elastic.convo_managers.search_managers import SearchManager
+from managers.elastic.es_connector.elastic_connect import BaseElasticConnector
+from managers.elastic.logger.error_log import ErrorLogger
 from utils.url_utility import UrlUtility
-load_dotenv()
 
 class SMSHandler:
     def __init__(self, api_url):
         self.conversation_manager = ConversationManager()
         self.elastic_connector = BaseElasticConnector()
-        self.document_manager = DocumentManager()
         self.elastic_manager = SearchManager()
+        self.error_logger = ErrorLogger()
         self.api_url = api_url
         self.conversation_histories = {}
 
@@ -32,14 +30,13 @@ class SMSHandler:
                 "conversation_history": {"messages": conversation_history},
                 "query": message_body
             }
-            
             response = requests.post(UrlUtility.create_url(f"{FAFSA_SERVER_URL}/answer_faq"), headers=headers, json=payload)
             response_data = response.json()["response"]
             return response_data
         except Exception as e:
             error_message = f"Error sending message to API: {str(e)}"
             logging.error(error_message)
-            self.document_manager.log_error(conversation_uuid, error_message)
+            self.error_logger.log_error(conversation_uuid, error_message)
             raise Exception("Failed to send message due to internal server error")
 
 
