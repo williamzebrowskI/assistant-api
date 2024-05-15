@@ -4,9 +4,7 @@
 import os
 import logging
 from elasticsearch import Elasticsearch
-from dotenv import load_dotenv
 from utils.url_utility import UrlUtility
-load_dotenv()
 
 class BaseElasticConnector:
     def __init__(self):

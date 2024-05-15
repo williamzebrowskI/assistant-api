@@ -10,13 +10,17 @@ from managers.elastic.logger.error_logger import ErrorLogger
 from managers.elastic.managers.conversation_manager import ConversationManager
 from models.models import User, AssistantResponse
 from managers.google.sms_handler import SMSHandler
+from app.main import app_instance
 from utils.markdown_stripper import MarkdownStripper
-from app.main import thread_manager, elastic_manager, client, assistant_id, app_instance
+from app.main import thread_manager, elastic_manager, client, assistant_id
+from dotenv import load_dotenv
+load_dotenv()
 
 os.environ['PYTHONDONTWRITEBYTECODE'] = '1'
 
 md_stripper = MarkdownStripper()
 error_logger = ErrorLogger()
+elastic_manager = ConversationManager()
 FAFSA_SERVER_URL = os.getenv("BASE_URL")
 sms_message_handler = SMSHandler(api_url=FAFSA_SERVER_URL)
 
@@ -58,7 +62,7 @@ def handle_user_message(message):
                 msg_data.partner_id,
                 assistant_type
             )
-
+            
         thread_id = thread_manager.get_thread(msg_data.conversation_uuid)
 
         client.beta.threads.messages.create(thread_id=thread_id, role="user", content=msg_data.user_input)

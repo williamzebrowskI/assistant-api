@@ -5,10 +5,9 @@ runs.ipynb
 evaluate_assistant.ipynb
 .DS_store
 terraform/.terraform/
-/data
 index_begin.html
 .venv/
-elastic_ai.ipynb
 .vscode/
 index.html
+/tests
 terraform/.terraform.lock.hcl
