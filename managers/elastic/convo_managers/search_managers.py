@@ -1,6 +1,6 @@
-from managers.elastic.connector.elastic_connector import BaseElasticConnector
-from managers.elastic.managers.document_manager import DocumentManager
-from managers.elastic.logger.error_logger import ErrorLogger
+from managers.elastic.es_connector.elastic_connect import BaseElasticConnector
+from managers.elastic.convo_managers.document_managers import DocumentManager
+from managers.elastic.logger.error_log import ErrorLogger
 import logging
 
 document_manager = DocumentManager()

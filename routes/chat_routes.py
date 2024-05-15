@@ -6,8 +6,8 @@ from flask_socketio import join_room
 from ws.flask_config import config
 from ws.message_data import MessageData
 from managers.openai.managers.event_manager import EventHandler
-from managers.elastic.logger.error_logger import ErrorLogger
-from managers.elastic.managers.conversation_manager import ConversationManager
+from managers.elastic.logger.error_log import ErrorLogger
+from managers.elastic.convo_managers.conversation_managers import ConversationManager
 from models.models import User, AssistantResponse
 from managers.google.sms_handler import SMSHandler
 from utils.markdown_stripper import MarkdownStripper

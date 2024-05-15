@@ -1,8 +1,8 @@
 # Purpose: Manages document CRUD operations in Elasticsearch that are generic and not specifically tied to conversations alone.
 # Contents: Methods for creating, updating, and checking documents.
 
-from ..connector.elastic_connector import BaseElasticConnector
-from ..logger.error_logger import ErrorLogger
+from managers.elastic.es_connector.elastic_connect import BaseElasticConnector
+from managers.elastic.logger.error_log import ErrorLogger
 import logging
 
 class DocumentManager(BaseElasticConnector):

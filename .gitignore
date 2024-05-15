@@ -8,6 +8,6 @@ terraform/.terraform/
 index_begin.html
 .venv/
 .vscode/
-index.html
+# index.html
 /tests
 terraform/.terraform.lock.hcl

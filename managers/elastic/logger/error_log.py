@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from managers.elastic.connector.elastic_connector import BaseElasticConnector
+from managers.elastic.es_connector.elastic_connect import BaseElasticConnector
 
 class ErrorLogger(BaseElasticConnector):
     def log_error(self, conversation_uuid, error_message):

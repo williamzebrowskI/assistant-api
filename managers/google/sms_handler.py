@@ -3,11 +3,10 @@ import hashlib
 import uuid
 import requests
 import logging
-from managers.elastic.managers.conversation_manager import ConversationManager
-from managers.elastic.managers.document_manager import DocumentManager
-from managers.elastic.managers.search_manager import SearchManager
-from managers.elastic.connector.elastic_connector import BaseElasticConnector
-from managers.elastic.logger.error_logger import ErrorLogger
+from managers.elastic.convo_managers.conversation_managers import ConversationManager
+from managers.elastic.convo_managers.search_managers import SearchManager
+from managers.elastic.es_connector.elastic_connect import BaseElasticConnector
+from managers.elastic.logger.error_log import ErrorLogger
 from utils.url_utility import UrlUtility
 
 class SMSHandler:

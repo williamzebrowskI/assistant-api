@@ -4,8 +4,8 @@
 import logging
 from models.models import Conversation, Turn, User, AssistantResponse
 from ws.message_data import MessageData
-from managers.elastic.logger.error_logger import ErrorLogger
-from managers.elastic.managers.document_manager import DocumentManager
+from managers.elastic.logger.error_log import ErrorLogger
+from managers.elastic.convo_managers.document_managers import DocumentManager
 
 class ConversationManager(DocumentManager):
     def __init__(self):

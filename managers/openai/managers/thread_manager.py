@@ -1,6 +1,6 @@
 from openai import OpenAI
-from managers.elastic.logger.error_logger import ErrorLogger
-from managers.elastic.managers.document_manager import DocumentManager 
+from managers.elastic.logger.error_log import ErrorLogger
+from managers.elastic.convo_managers.document_managers import DocumentManager 
 import logging
 
 

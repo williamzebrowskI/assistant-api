@@ -4,7 +4,7 @@ from openai import OpenAI
 from ws.flask_config import config
 from managers.openai.managers.thread_manager import ThreadManager
 from managers.openai.managers.assistant_manager import OpenAIAssistant
-from managers.elastic.managers.conversation_manager import ConversationManager
+from managers.elastic.convo_managers.conversation_managers import ConversationManager
 from dotenv import load_dotenv
 load_dotenv()
 
