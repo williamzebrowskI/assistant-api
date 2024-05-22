@@ -14,18 +14,20 @@ class ConversationManager(DocumentManager):
         self.error_logger = ErrorLogger()
     
     def start_conversation(self, msg_data: MessageData, title: str, partner_id: str, assistant_type: str):
-        conversation_uuid = msg_data.conversation_uuid
-        initial_session_id = msg_data.session_id_ga
-        initial_user_id = msg_data.user_id
+                conversation_uuid = msg_data.conversation_uuid
+                initial_session_id = msg_data.session_id_ga
+                initial_user_id = msg_data.user_id
 
-        try:
-            conversation = Conversation(conversation_uuid, initial_session_id, initial_user_id, assistant_type, title, partner_id)
-            self.create_document(conversation_uuid, asdict(conversation))
-        except Exception as e:
-            error_msg = f"Failed to start conversation {conversation_uuid}: {e}"
-            logging.error(error_msg)
-            self.error_logger.log_error(conversation_uuid, error_msg)
-            raise RuntimeError(error_msg) from e
+                try:
+                    conversation = Conversation(
+                        conversation_uuid, initial_session_id, initial_user_id, assistant_type, title, partner_id, turns=[]
+                    )
+                    self.create_document(conversation_uuid, asdict(conversation))
+                except Exception as e:
+                    error_msg = f"Failed to start conversation {conversation_uuid}: {e}"
+                    logging.error(error_msg)
+                    self.error_logger.log_error(conversation_uuid, error_msg)
+                    raise RuntimeError(error_msg) from e
 
     def add_turn(self, msg_data: MessageData, user: User, assistant: AssistantResponse, upsert_body=None):
         conversation_uuid = msg_data.conversation_uuid
