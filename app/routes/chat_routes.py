@@ -48,13 +48,10 @@ def handle_disconnect():
 
 @config.socketio.on('user_message', namespace='/chat')
 def handle_user_message(message):
-
     assistant_type = "OpenAI"
-
     msg_data = MessageData(message, request)
 
     try:
-
         if not elastic_manager.document_exists(msg_data.conversation_uuid):
             elastic_manager.start_conversation(
                 msg_data,
@@ -62,13 +59,11 @@ def handle_user_message(message):
                 msg_data.partner_id,
                 assistant_type
             )
-            
-        thread_id = thread_manager.get_thread(msg_data.conversation_uuid)
 
+        thread_id = thread_manager.get_thread(msg_data.conversation_uuid)
         client.beta.threads.messages.create(thread_id=thread_id, role="user", content=msg_data.user_input)
 
         event_handler = EventHandler(userId=msg_data.user_id)
-        
         start_response_timestamp = datetime.now().isoformat()
 
         with client.beta.threads.runs.stream(
@@ -86,21 +81,20 @@ def handle_user_message(message):
                 for content_block in message.content:
                     if content_block.type == 'text':
                         text_value = content_block.text.value
+                        strip_md_from_resp = md_stripper.strip(text_value)
 
-        strip_md_from_resp = md_stripper.strip(text_value)
+                        # Initialize User and AssistantResponse objects
+                        user = User.from_message_data(msg_data)
+                        assistant_response = AssistantResponse(
+                            assistant_id=assistant_id,
+                            assistant_type=assistant_type,
+                            thread_id=thread_id,
+                            assistant_response=strip_md_from_resp,
+                            start_response_timestamp=start_response_timestamp,
+                            end_respond_timestamp=response_end_time
+                        )
 
-        # Initialize User and AssistantResponse objects
-        user = User(msg_data)
-        assistant_response = AssistantResponse(
-            assistant_id=assistant_id,
-            assistant_type=assistant_type,
-            thread_id=thread_id,
-            assistant_response=strip_md_from_resp,
-            start_response_timestamp=start_response_timestamp,
-            end_respond_timestamp=response_end_time
-        )
-
-        elastic_manager.add_turn(msg_data, user, assistant_response)
+                        elastic_manager.add_turn(msg_data, user, assistant_response)
 
     except Exception as e:
         error_message = f"An error occurred: {str(e)}"
@@ -108,10 +102,8 @@ def handle_user_message(message):
         error_logger.log_error(msg_data.conversation_uuid, error_message)
         config.socketio.emit('server_message', {'text': 'An error occurred, please try again later.'}, room=msg_data.user_id, namespace='/chat')
 
-
 @app_instance.route('/sms', methods=['POST'])
 def receive_sms():
-
     data = request.get_json()
 
     # Generate or Retrieve ConversationUUID
@@ -123,7 +115,7 @@ def receive_sms():
         'conversationId': conversation_uuid,
         'currentPageUrl': None,
         'referralUrl': None,
-        'partnerId': None,
+        'partnerId': None,  # Ensure partnerId is included
         'sessionId': None
     }
 
@@ -132,7 +124,7 @@ def receive_sms():
     assistant_type = "Google"
 
     # Create User object
-    user = User(msg_data)
+    user = User.from_message_data(msg_data)
 
     try:
         if not sms_message_handler.conversation_manager.document_exists(conversation_uuid):
@@ -166,11 +158,11 @@ def receive_sms():
         )
         return jsonify(
             {
-            'user_id': data.get('From', ''),
-            'message': api_response
+                'user_id': data.get('From', ''),
+                'message': api_response
             }
-         )
-    
+        )
+
     except Exception as e:
         error_message = f"An error occurred: {str(e)}"
         logging.error(error_message)

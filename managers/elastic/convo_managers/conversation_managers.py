@@ -2,6 +2,7 @@
 # Contents: Uses models and DocumentManager methods to implement conversation-specific logic.
 
 import logging
+from dataclasses import asdict
 from models.models import Conversation, Turn, User, AssistantResponse
 from ws.message_data import MessageData
 from managers.elastic.logger.error_log import ErrorLogger
@@ -13,14 +14,13 @@ class ConversationManager(DocumentManager):
         self.error_logger = ErrorLogger()
     
     def start_conversation(self, msg_data: MessageData, title: str, partner_id: str, assistant_type: str):
-        """Starts a new conversation using the data provided in MessageData instance."""
         conversation_uuid = msg_data.conversation_uuid
         initial_session_id = msg_data.session_id_ga
         initial_user_id = msg_data.user_id
 
         try:
             conversation = Conversation(conversation_uuid, initial_session_id, initial_user_id, assistant_type, title, partner_id)
-            self.create_document(conversation_uuid, conversation.to_dict())
+            self.create_document(conversation_uuid, asdict(conversation))
         except Exception as e:
             error_msg = f"Failed to start conversation {conversation_uuid}: {e}"
             logging.error(error_msg)
@@ -34,28 +34,12 @@ class ConversationManager(DocumentManager):
             user.index = current_index
             assistant.index = current_index
 
-            # Create the turn
-            turn = Turn(
-                user,
-                assistant,
-                conversation_uuid,
-                current_index
-            )
+            turn = Turn.from_user_and_assistant(user, assistant, conversation_uuid, current_index)
 
             script = turn.update_script()
+            upsert_body = {"turns": [asdict(turn)]}
 
-            upsert_body = {
-                "turns": [
-                    turn.to_dict()
-                ]
-            }
-
-            self.update_document(
-                conversation_uuid,
-                script,
-                upsert_body
-            )
-
+            self.update_document(conversation_uuid, script, upsert_body)
         except Exception as e:
             error_msg = f"Error adding turn to conversation {conversation_uuid}: {str(e)}"
             logging.error(error_msg)
@@ -63,12 +47,10 @@ class ConversationManager(DocumentManager):
             raise
 
     def get_current_index(self, conversation_uuid):
-        """Returns the current index of the conversation."""
         try:
             doc = self.es.get(index=self.es_index, id=conversation_uuid)
             turns = doc['_source'].get('turns', [])
-            return len(turns)
-        
+            return len(turns) if turns is not None else 0
         except Exception as e:
             error_msg = f"Failed to fetch current index for conversation {conversation_uuid}: {str(e)}"
             logging.error(error_msg)

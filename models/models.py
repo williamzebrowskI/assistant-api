@@ -1,101 +1,71 @@
 from datetime import datetime
-from ws.message_data import MessageData
+from dataclasses import dataclass, asdict
 import uuid
 
-# Purpose: Defines data models (User, AssistantResponse, Conversation, Turn) used in Elasticsearch documents.
-# Contents: Class definitions for each model type, used throughout the project to maintain data structure.
-
+@dataclass
 class User:
-    def __init__(self, msg_data: MessageData, index=None):
-        self.client_ip = msg_data.client_ip
-        self.session_id = msg_data.session_id_ga
-        self.user_id = msg_data.user_id
-        self.url = msg_data.page_url
-        self.user_query = msg_data.user_input
-        self.index = index
-        self.referral_url = msg_data.referral_url
+    client_ip: str
+    session_id: str
+    user_id: str
+    url: str
+    user_query: str
+    index: int = None
+    referral_url: str = None
 
-    def to_dict(self):
-        return {
-            "index": self.index,
-            "client_ip": self.client_ip,
-            "session_id": self.session_id,
-            "user_id": self.user_id,
-            "url": self.url,
-            "referral_url": self.referral_url,
-            "user_query": self.user_query,
-        }
+    @classmethod
+    def from_message_data(cls, msg_data, index=None):
+        return cls(
+            client_ip=msg_data.client_ip,
+            session_id=msg_data.session_id_ga,
+            user_id=msg_data.user_id,
+            url=msg_data.page_url,
+            user_query=msg_data.user_input,
+            index=index,
+            referral_url=msg_data.referral_url
+        )
 
+@dataclass
 class AssistantResponse:
-    def __init__(self, index=None, **kwargs):
-        self.assistant_id = kwargs.get('assistant_id')
-        self.thread_id = kwargs.get('thread_id')
-        self.assistant_response = kwargs.get('assistant_response')
-        self.assistant_type = kwargs.get('assistant_type', 'openAI')
-        self.start_response_timestamp = kwargs.get('start_response_timestamp')
-        self.end_respond_timestamp = kwargs.get('end_respond_timestamp')
-        self.index = index
+    assistant_id: str = None
+    thread_id: str = None
+    assistant_response: str = None
+    assistant_type: str = 'openAI'
+    start_response_timestamp: str = None
+    end_respond_timestamp: str = None
+    index: int = None
 
-    def to_dict(self):
-        return {
-            "index": self.index,
-            "assistant_id": self.assistant_id,
-            "assistant_type": self.assistant_type,
-            "thread_id": self.thread_id,
-            "assistant_response": self.assistant_response,
-            "start_respond_timestamp": self.start_response_timestamp,
-            "end_respond_timestamp": self.end_respond_timestamp,
-            "feedback": {
-                "feedback_num": 0,
-                "feedback_timestamp": datetime.now().isoformat()
-            },
-        }
-
+@dataclass
 class Conversation:
-    def __init__(self, conversation_uuid, initial_session_id, initial_user_id, assistant_type, title, partner_id):
-        self.conversation_id = conversation_uuid
-        self.initial_session_id = initial_session_id
-        self.initial_user_id = initial_user_id
-        self.assistant_type = assistant_type
-        self.partner_id = partner_id
-        self.title = title
-        self.start_timestamp = datetime.now().isoformat()
-        self.last_updated_timestamp = self.start_timestamp
-        self.debug_stack = []
-        self.turns = []
+    conversation_id: str
+    initial_session_id: str
+    initial_user_id: str
+    assistant_type: str
+    partner_id: str
+    title: str
+    start_timestamp: str = datetime.now().isoformat()
+    last_updated_timestamp: str = start_timestamp
+    debug_stack: list = None
+    turns: list = None
 
-    def to_dict(self):
-        return {
-            "conversation_id": self.conversation_id,
-            "initial_session_id": self.initial_session_id,
-            "initial_user_id": self.initial_user_id,
-            "assistant_type": self.assistant_type,
-            "partner_id": self.partner_id,
-            "title": self.title,
-            "start_timestamp": self.start_timestamp,
-            "last_updated_timestamp": self.last_updated_timestamp,
-            "debug_stack": self.debug_stack,
-            "turns": self.turns
-        }
-    
+@dataclass
 class Turn:
-    def __init__(self, user: User, assistant: AssistantResponse, conversation_uuid, index):
-        self.turn_id = str(uuid.uuid4())
-        self.conversation_uuid = conversation_uuid
-        self.turn_timestamp = datetime.now().isoformat()
-        self.user = user.to_dict()
-        self.assistant = assistant.to_dict()
-        self.index = index
+    turn_id: str
+    conversation_uuid: str
+    turn_timestamp: str
+    user: dict
+    assistant: dict
+    index: int
 
-    def to_dict(self):
-        return {
-            "turn_id": self.turn_id,
-            "conversation_id": self.conversation_uuid,
-            "turn_timestamp": self.turn_timestamp,
-            "user": self.user,
-            "assistant": self.assistant,
-            "index": self.index
-        }
+    @classmethod
+    def from_user_and_assistant(cls, user, assistant, conversation_uuid, index):
+        return cls(
+            turn_id=str(uuid.uuid4()),
+            conversation_uuid=conversation_uuid,
+            turn_timestamp=datetime.now().isoformat(),
+            user=asdict(user),
+            assistant=asdict(assistant),
+            index=index
+        )
 
     def update_script(self):
         return {
@@ -108,9 +78,7 @@ class Turn:
             """,
             "lang": "painless",
             "params": {
-                "turn": self.to_dict(),
+                "turn": asdict(self),
                 "last_updated_timestamp": datetime.now().isoformat()
             }
         }
-
-
