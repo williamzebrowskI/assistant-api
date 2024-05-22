@@ -6,3 +6,4 @@ python-dotenv==1.0.1
 gunicorn==22.0.0
 eventlet==0.36.1
 requests==2.31.0
+attr==0.3.2
