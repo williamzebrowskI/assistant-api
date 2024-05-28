@@ -1,5 +1,5 @@
 from datetime import datetime
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 import uuid
 
 @dataclass
@@ -33,6 +33,10 @@ class AssistantResponse:
     start_response_timestamp: str = None
     end_respond_timestamp: str = None
     index: int = None
+    feedback: dict = field(default_factory=lambda: {
+        "feedback_num": 0,
+        "feedback_timestamp": datetime.now().isoformat()
+    })
 
 @dataclass
 class Conversation:

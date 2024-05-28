@@ -1,30 +1,47 @@
 # Purpose: Manages document CRUD operations in Elasticsearch that are generic and not specifically tied to conversations alone.
 # Contents: Methods for creating, updating, and checking documents.
 
+import logging
+from typing import Optional, Dict, Any
+from contextlib import contextmanager
 from managers.elastic.es_connector.elastic_connect import BaseElasticConnector
 from managers.elastic.logger.error_log import ErrorLogger
-import logging
 
 class DocumentManager(BaseElasticConnector):
-    def __init__(self):
+    def __init__(self, error_logger: Optional[ErrorLogger] = None):
         super().__init__()
-        self.error_logger = ErrorLogger()
- 
-    def create_document(self, conversation_uuid, body):
+        self.error_logger = error_logger or ErrorLogger()
 
+    @contextmanager
+    def handle_errors(self, conversation_uuid: str, action: str):
         try:
+            yield
+        except Exception as e:
+            error_msg = f"{action} for document {conversation_uuid}: {e}"
+            logging.error(error_msg)
+            self.error_logger.log_error(conversation_uuid, error_msg)
+            raise RuntimeError(error_msg) from e
+
+    def create_document(self, conversation_uuid: str, body: Dict[str, Any]) -> None:
+        """
+        Creates a document in Elasticsearch.
+
+        :param conversation_uuid: UUID of the conversation.
+        :param body: Body of the document.
+        """
+        with self.handle_errors(conversation_uuid, "Failed to create document"):
             response = self.es.index(index=self.es_index, id=conversation_uuid, body=body)
             logging.info(f"Document {conversation_uuid} created successfully. Response: {response}")
 
-        except Exception as e:
-            error_msg = f"Failed to create document {conversation_uuid}: {str(e)}"
-            logging.error(error_msg)
-            if conversation_uuid:
-                self.error_logger.log_error(conversation_uuid, error_msg)
-            raise
+    def update_document(self, conversation_uuid: str, script: Dict[str, Any], upsert_body: Optional[Dict[str, Any]] = None) -> None:
+        """
+        Updates a document in Elasticsearch.
 
-    def update_document(self, conversation_uuid, script, upsert_body=None):
-        try:
+        :param conversation_uuid: UUID of the conversation.
+        :param script: Script to update the document.
+        :param upsert_body: Optional upsert body.
+        """
+        with self.handle_errors(conversation_uuid, "Failed to update document"):
             response = self.es.update(
                 index=self.es_index, 
                 id=conversation_uuid, 
@@ -34,17 +51,15 @@ class DocumentManager(BaseElasticConnector):
                 }
             )
             logging.info(f"Document {conversation_uuid} updated successfully. Response: {response}")
-        except Exception as e:
-            error_msg = f"Failed to update document {conversation_uuid}: {str(e)}"
-            logging.error(error_msg)
-            self.error_logger.log_error(conversation_uuid, error_msg)
-            raise
 
-    def document_exists(self, conversation_uuid):
-        try:
-            return self.es.exists(index=self.es_index, id=conversation_uuid)
-        except Exception as e:
-            error_msg = f"Failed to check if document {conversation_uuid} exists: {str(e)}"
-            logging.error(error_msg)
-            self.error_logger.log_error(conversation_uuid, error_msg)
-            raise
+    def document_exists(self, conversation_uuid: str) -> bool:
+        """
+        Checks if a document exists in Elasticsearch.
+
+        :param conversation_uuid: UUID of the conversation.
+        :return: True if the document exists, False otherwise.
+        """
+        with self.handle_errors(conversation_uuid, "Failed to check if document exists"):
+            exists = self.es.exists(index=self.es_index, id=conversation_uuid)
+            logging.info(f"Document {conversation_uuid} exists: {exists}")
+            return exists
