@@ -116,7 +116,7 @@
             localStorage.setItem("conversationId", conversationId);
 
 
-            var socket = io.connect('https://wyatt-openai-play.bdtrust.org/chat', {
+            var socket = io.connect('https://wyatt-openai-stage.bdtrust.org/chat', {
                 query: { 'userId': userId, 'conversationId': conversationId }
             });
 

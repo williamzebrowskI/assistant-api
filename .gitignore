@@ -11,3 +11,5 @@ index_begin.html
 # index.html
 /tests
 terraform/.terraform.lock.hcl
+poetry.lock
+managers/google/nlp

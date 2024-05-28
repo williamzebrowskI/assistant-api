@@ -47,52 +47,38 @@ The following Diagram depicts the flow of a user's message from end to end.
     cd fafsa-chatgpt-assistant
     ```
 
-2. **Create a virtual environment:**
-    ```bash
-    python -m venv venv
+2. **Create a `.env` File**:
+    Create a `.env` file in the root of your project and fill it with your OpenAI and Elasticsearch credentials:
+
     ```
-
-3. **Activate the virtual environment:**
-    - On Windows:
-        ```bash
-        .\venv\Scripts\activate
-        ```
-    - On MacOS/Linux:
-        ```bash
-        source venv/bin/activate
-        ```
-
-4. **Install the required packages:**
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-### Configuration
-
-Create a `.env` file in the root of your project and fill it with your OpenAI and Elasticsearch credentials:
-
     OPENAI_API_KEY=your_openai_api_key_here
     ASSISTANT_ID=your_assistants_id_here
-
     # Elasticsearch cloud authentication credentials
-    es_url=your_elasticsearch_url_here
-    es_port=your_elasticsearch_port_here
-    es_index=your_elasticsearch_index_name_here
-    es_api_key=your_elasticsearch_api_key_here
+    ES_URL=your_elasticsearch_url_here
+    ES_PORT=your_elasticsearch_port_here
+    ES_INDEX=your_elasticsearch_index_name_here
+    ES_API_KEY=your_elasticsearch_api_key_here
+    ```
 
-Ensure you replace the placeholder values with your actual credentials.
+    Ensure you replace the placeholder values with your actual credentials.
 
 ### Running the Application
 
-1. **Start the FastAPI server:**
-    Run the following command in your terminal where your virtual environment is activated:
-    ```bash
-    python app.py
-    ```
-    Wait for the FastAPI server to start up. You should see a message indicating the server is running, usually on `http://127.0.0.1:8000`.
+1. **Build the Docker Image**:
+    Use the `--no-cache` option to ensure a fresh build:
 
-2. **Accessing the Chat Interface:**
-    Once the server is up and running, open the `HTML.index` file in a web browser to see the chat interface. This file should be located in your project directory. If you're using an IDE that supports live previews, you can also use that feature to open the file.
+    ```bash
+    docker build --no-cache -t fafsa-openai .
+    ```
+
+2. **Run the Docker Container**:
+
+    ```bash
+    docker run -p 8002:8002 fafsa-openai
+    ```
+
+3. **Accessing the Chat Interface:**
+    Once the server is up and running, open the `index.html` file in a web browser to see the chat interface. This file should be located in your project directory. If you're using an IDE that supports live previews, you can also use that feature to open the file.
 
     Interact with the chat interface to send queries to our Wyatt ChatGPT Assistant and receive responses.
 

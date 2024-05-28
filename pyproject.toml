@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "fafsa-chatgpt-assistant"
+version = "1.0.0"
+description = "A Backend application leverging OpenAI AssistantAPI"
+authors = ["William Zebrowski <38896109+williamzebrowskI@users.noreply.github.com>"]
+license = "Benefits Data Trust LLC"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+elasticsearch = "8.13.0"
+flask = "3.0.3"
+flask-socketio = "5.3.6"
+openai = "1.23.2"
+python-dotenv = "1.0.1"
+gunicorn = "22.0.0"
+eventlet = "0.36.1"
+requests = "2.31.0"
+attr = "0.3.2"
+scikit-learn = "^1.5.0"
+joblib = "^1.4.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

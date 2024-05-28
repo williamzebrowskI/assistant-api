@@ -8,6 +8,7 @@ from ws.message_data import MessageData
 from managers.openai.managers.event_manager import EventHandler
 from managers.elastic.logger.error_log import ErrorLogger
 from managers.elastic.convo_managers.conversation_managers import ConversationManager
+# from managers.google.nlp.intent_classifier import IntentClassifier
 from models.models import User, AssistantResponse
 from managers.google.sms_handler import SMSHandler
 from app.main import app_instance
@@ -23,6 +24,8 @@ error_logger = ErrorLogger()
 elastic_manager = ConversationManager()
 FAFSA_SERVER_URL = os.getenv("BASE_URL")
 sms_message_handler = SMSHandler(api_url=FAFSA_SERVER_URL)
+
+# intent_classifier = IntentClassifier()
 
 # SocketIO event handlers
 @config.socketio.on('connect', namespace='/chat')
@@ -115,7 +118,7 @@ def receive_sms():
         'conversationId': conversation_uuid,
         'currentPageUrl': None,
         'referralUrl': None,
-        'partnerId': None,  # Ensure partnerId is included
+        'partnerId': None, 
         'sessionId': None
     }
 
@@ -138,7 +141,6 @@ def receive_sms():
         else:
             logging.info(f"Existing UUID retrieved for the conversation: {conversation_uuid}")
 
-        # Send message to API with conversation history
         api_response = sms_message_handler.send_message_to_api(msg_data.user_input, conversation_uuid)
 
         # Create AssistantResponse object
