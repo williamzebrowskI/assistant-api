@@ -4,23 +4,32 @@ FROM python:3.11-slim
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
+# Install curl and other dependencies
+RUN apt-get update && apt-get install -y curl
+
 # Install Poetry
+ENV POETRY_HOME=/opt/poetry
+ENV PATH="$POETRY_HOME/bin:$PATH"
 RUN curl -sSL https://install.python-poetry.org | python3 - && \
-    python3 -m venv /opt/poetry && \
-    /opt/poetry/bin/pip install poetry && \
-    ln -s /opt/poetry/bin/poetry /usr/local/bin/poetry
+    poetry config virtualenvs.create false
 
 # Copy the current directory contents
 COPY . ./
 
-# Install dependencies
-RUN poetry install
+# Install dependencies using Poetry
+RUN poetry install --only main
 
-# Ensure the virtual environment's bin directory is in the PATH
-ENV PATH="/usr/src/app/.venv/bin:$PATH"
+RUN poetry run pip list
 
-# Make port 8000 available to the world outside this container
+RUN poetry run which gunicorn
+
+# Debug: Check if gunicorn is in the PATH after installation
+RUN which gunicorn || echo "Gunicorn not found in PATH"
+
+# Make port 8002 available to the world outside this container
 EXPOSE 8002
 
+CMD ["poetry", "run", "gunicorn", "--config", "ws/gunicorn_config.py", "--worker-class", "eventlet", "-w", "1", "app.main:app_instance", "-b", "0.0.0.0:8002"]
+
 # Run app.py when the container launches
-CMD ["gunicorn", "--config", "/usr/src/app/ws/gunicorn_config.py", "--worker-class", "eventlet", "-w", "1", "app.main:app_instance", "-b", "0.0.0.0:8002"]
+# CMD ["gunicorn", "--config", "ws/gunicorn_config.py", "--worker-class", "eventlet", "-w", "1", "app.main:app_instance", "-b", "0.0.0.0:8002"]

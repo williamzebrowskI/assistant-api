@@ -58,6 +58,7 @@ The following Diagram depicts the flow of a user's message from end to end.
     ES_PORT=your_elasticsearch_port_here
     ES_INDEX=your_elasticsearch_index_name_here
     ES_API_KEY=your_elasticsearch_api_key_here
+    CORS_ALLOWED_ORIGINS="http://127.0.0.1:8002"
     ```
 
     Ensure you replace the placeholder values with your actual credentials.
