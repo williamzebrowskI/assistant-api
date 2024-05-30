@@ -16,7 +16,7 @@ class MessageData:
         return self._get_value_or_unknown('userId')
 
     @property
-    def conversation_uuid(self):
+    def conversation_id(self):
         return self._get_value_or_unknown('conversationId')
 
     @property
