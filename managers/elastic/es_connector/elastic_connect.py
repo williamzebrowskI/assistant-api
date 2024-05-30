@@ -5,13 +5,14 @@ import os
 import logging
 from elasticsearch import Elasticsearch
 from utils.url_utility import UrlUtility
+from ws.flask_config import config
 
 class BaseElasticConnector:
     def __init__(self):
-        self.es_url = os.getenv('ES_URL', 'localhost')
-        self.es_port = os.getenv('ES_PORT', 9200)
-        self.es_api_key = os.getenv('ES_API_KEY')
-        self.es_index = os.getenv('ES_INDEX', 'conversations')
+        self.es_url = config.config.ES_URL
+        self.es_port = config.config.ES_PORT
+        self.es_api_key = config.config.ES_API_KEY
+        self.es_index = config.config.ES_INDEX
 
         try: 
             self.es = Elasticsearch(

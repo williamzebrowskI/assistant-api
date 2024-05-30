@@ -12,12 +12,33 @@ class CorsUtility:
         if cors_allowed_origins is not None:
             cors_allowed_origins = [origin.strip() for origin in cors_allowed_origins.split(',')]
         return cors_allowed_origins
+    
+class VarConfig:
+    SECRET_KEY = getenv('FLASK_SECRET_KEY', 'default_secret_key')
+    OPENAI_API_KEY = getenv('OPENAI_API_KEY')
+    ASSISTANT_ID = getenv('ASSISTANT_ID')
+    BASE_URL = getenv('BASE_URL')
+    ES_URL = getenv('ES_URL')
+    ES_PORT = getenv('ES_PORT')
+    ES_INDEX = getenv('ES_INDEX')
+    ES_API_KEY = getenv('ES_API_KEY')
+    CORS_ALLOWED_ORIGINS = getenv('CORS_ALLOWED_ORIGINS').split(',')
 
+class ConfigAccessor:
+    def __init__(self, flask_config):
+        self._config = flask_config
+
+    def __getattr__(self, item):
+        try:
+            return self._config[item]
+        except KeyError:
+            raise AttributeError(f"Configuration key '{item}' not found.")
 
 class AppConfig:
     def __init__(self):
         self.app = Flask(__name__)
-        self.app.config['SECRET_KEY'] = getenv('FLASK_SECRET_KEY')
+        self.app.config.from_object(VarConfig)
+        self.config = ConfigAccessor(self.app.config)
         self.socketio = SocketIO(
             self.app,
             cors_allowed_origins=CorsUtility.get_cors,

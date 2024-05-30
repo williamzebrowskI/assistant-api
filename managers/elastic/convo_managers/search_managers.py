@@ -13,19 +13,19 @@ class SearchManager(BaseElasticConnector):
         self.error_logger = error_logger or ErrorLogger()
 
     @contextmanager
-    def handle_errors(self, conversation_uuid: str, action: str):
+    def handle_errors(self, conversation_id: str, action: str):
         try:
             yield
         except Exception as e:
-            error_msg = f"{action} for conversation {conversation_uuid}: {e}"
+            error_msg = f"{action} for conversation {conversation_id}: {e}"
             logging.error(error_msg)
-            self.error_logger.log_error(conversation_uuid, error_msg)
+            self.error_logger.log_error(conversation_id, error_msg)
             raise RuntimeError(error_msg) from e
 
-    def get_conversation_history(self, conversation_uuid: str) -> List[Dict[str, Any]]:
+    def get_conversation_history(self, conversation_id: str) -> List[Dict[str, Any]]:
         """Retrieve the entire conversation document by UUID."""
-        with self.handle_errors(conversation_uuid, "Failed to fetch conversation"):
-            response = self.es.get(index=self.es_index, id=conversation_uuid)
+        with self.handle_errors(conversation_id, "Failed to fetch conversation"):
+            response = self.es.get(index=self.es_index, id=conversation_id)
             if not response['found']:
                 return []
 
@@ -39,6 +39,6 @@ class SearchManager(BaseElasticConnector):
                 for turn in turns
             ]
 
-            logging.info(f"Conversation history for {conversation_uuid}: {history}")
+            logging.info(f"Conversation history for {conversation_id}: {history}")
 
             return history

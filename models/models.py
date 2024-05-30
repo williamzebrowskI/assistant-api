@@ -30,7 +30,7 @@ class AssistantResponse:
     thread_id: str = None
     assistant_response: str = None
     assistant_type: str = 'openAI'
-    start_response_timestamp: str = None
+    start_respond_timestamp: str = None
     end_respond_timestamp: str = None
     index: int = None
     feedback: dict = field(default_factory=lambda: {
@@ -54,17 +54,17 @@ class Conversation:
 @dataclass
 class Turn:
     turn_id: str
-    conversation_uuid: str
+    conversation_id: str
     turn_timestamp: str
     user: dict
     assistant: dict
     index: int
 
     @classmethod
-    def from_user_and_assistant(cls, user, assistant, conversation_uuid, index):
+    def from_user_and_assistant(cls, user, assistant, conversation_id, index):
         return cls(
             turn_id=str(uuid.uuid4()),
-            conversation_uuid=conversation_uuid,
+            conversation_id=conversation_id,
             turn_timestamp=datetime.now().isoformat(),
             user=asdict(user),
             assistant=asdict(assistant),

@@ -2,6 +2,7 @@ from os import getenv
 getenv('PYTHONDONTWRITEBYTECODE', '1')
 from openai import OpenAI
 from ws.flask_config import config
+import logging
 from managers.openai.managers.thread_manager import ThreadManager
 from managers.openai.managers.assistant_manager import OpenAIAssistant
 from managers.elastic.convo_managers.conversation_managers import ConversationManager
@@ -10,8 +11,8 @@ load_dotenv()
 
 # Set up OpenAI API client
 client = OpenAI()
-OpenAI.api_key = getenv('OPENAI_API_KEY')
-ASSISTANT_ID = getenv('ASSISTANT_ID')
+OpenAI.api_key = config.config.OPENAI_API_KEY
+ASSISTANT_ID = config.config.ASSISTANT_ID
 
 #Set up Managers
 elastic_manager = ConversationManager()

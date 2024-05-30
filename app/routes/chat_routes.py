@@ -8,7 +8,6 @@ from ws.message_data import MessageData
 from managers.openai.managers.event_manager import EventHandler
 from managers.elastic.logger.error_log import ErrorLogger
 from managers.elastic.convo_managers.conversation_managers import ConversationManager
-# from managers.google.nlp.intent_classifier import IntentClassifier
 from models.models import User, AssistantResponse
 from managers.google.sms_handler import SMSHandler
 from app.main import app_instance
@@ -22,10 +21,8 @@ os.environ['PYTHONDONTWRITEBYTECODE'] = '1'
 md_stripper = MarkdownStripper()
 error_logger = ErrorLogger()
 elastic_manager = ConversationManager()
-FAFSA_SERVER_URL = os.getenv("BASE_URL")
+FAFSA_SERVER_URL = config.config.BASE_URL
 sms_message_handler = SMSHandler(api_url=FAFSA_SERVER_URL)
-
-# intent_classifier = IntentClassifier()
 
 # SocketIO event handlers
 @config.socketio.on('connect', namespace='/chat')
@@ -55,19 +52,19 @@ def handle_user_message(message):
     msg_data = MessageData(message, request)
 
     try:
-        if not elastic_manager.document_exists(msg_data.conversation_uuid):
+        if not elastic_manager.document_exists(msg_data.conversation_id):
             elastic_manager.start_conversation(
                 msg_data,
-                "Wyatt Fafsa Conversation",
-                msg_data.partner_id,
+                msg_data.partner_id,  # Assuming this is the correct partner_id
+                "Wyatt Fafsa Conversation",  # Correctly placed as the title
                 assistant_type
             )
 
-        thread_id = thread_manager.get_thread(msg_data.conversation_uuid)
+        thread_id = thread_manager.get_thread(msg_data.conversation_id)
         client.beta.threads.messages.create(thread_id=thread_id, role="user", content=msg_data.user_input)
 
         event_handler = EventHandler(userId=msg_data.user_id)
-        start_response_timestamp = datetime.now().isoformat()
+        start_respond_timestamp = datetime.now().isoformat()
 
         with client.beta.threads.runs.stream(
             thread_id=thread_id,
@@ -93,7 +90,7 @@ def handle_user_message(message):
                             assistant_type=assistant_type,
                             thread_id=thread_id,
                             assistant_response=strip_md_from_resp,
-                            start_response_timestamp=start_response_timestamp,
+                            start_respond_timestamp=start_respond_timestamp,
                             end_respond_timestamp=response_end_time
                         )
 
@@ -102,7 +99,7 @@ def handle_user_message(message):
     except Exception as e:
         error_message = f"An error occurred: {str(e)}"
         logging.error(error_message)
-        error_logger.log_error(msg_data.conversation_uuid, error_message)
+        error_logger.log_error(msg_data.conversation_id, error_message)
         config.socketio.emit('server_message', {'text': 'An error occurred, please try again later.'}, room=msg_data.user_id, namespace='/chat')
 
 @app_instance.route('/sms', methods=['POST'])
@@ -110,12 +107,12 @@ def receive_sms():
     data = request.get_json()
 
     # Generate or Retrieve ConversationUUID
-    conversation_uuid = sms_message_handler.generate_uuid_from_phone(data.get('From', ''), "some_salt_here")
+    conversation_id = sms_message_handler.generate_uuid_from_phone(data.get('From', ''), "some_salt_here")
 
     sms_data = {
         'text': data.get('Body', ''),
         'userId': data.get('From', ''),
-        'conversationId': conversation_uuid,
+        'conversationId': conversation_id,
         'currentPageUrl': None,
         'referralUrl': None,
         'partnerId': None, 
@@ -130,8 +127,8 @@ def receive_sms():
     user = User.from_message_data(msg_data)
 
     try:
-        if not sms_message_handler.conversation_manager.document_exists(conversation_uuid):
-            logging.info(f"Document not found for UUID {conversation_uuid}, initializing...")
+        if not sms_message_handler.conversation_manager.document_exist(conversation_id):
+            logging.info(f"Document not found for UUID {conversation_id}, initializing...")
             sms_message_handler.conversation_manager.start_conversation(
                 msg_data,
                 "SMS Interaction",
@@ -139,9 +136,9 @@ def receive_sms():
                 assistant_type
             )
         else:
-            logging.info(f"Existing UUID retrieved for the conversation: {conversation_uuid}")
+            logging.info(f"Existing UUID retrieved for the conversation: {conversation_id}")
 
-        api_response = sms_message_handler.send_message_to_api(msg_data.user_input, conversation_uuid)
+        api_response = sms_message_handler.send_message_to_api(msg_data.user_input, conversation_id)
 
         # Create AssistantResponse object
         assistant_response = AssistantResponse(
@@ -149,7 +146,7 @@ def receive_sms():
             thread_id=None,
             assistant_response=api_response,
             assistant_type=assistant_type,
-            start_response_timestamp=datetime.now().isoformat(),
+            start_respond_timestamp=datetime.now().isoformat(),
             end_respond_timestamp=None
         )
 
@@ -168,7 +165,7 @@ def receive_sms():
     except Exception as e:
         error_message = f"An error occurred: {str(e)}"
         logging.error(error_message)
-        error_logger.log_error(msg_data.conversation_uuid, error_message)
+        error_logger.log_error(msg_data.conversation_id, error_message)
         return jsonify({
             'status': 'temporarily unavailable',
             'message': 'Service is temporarily unavailable, please try again later.'

@@ -3,6 +3,7 @@ import hashlib
 import uuid
 import requests
 import logging
+from ws.flask_config import config
 from typing import Optional
 from managers.elastic.convo_managers.conversation_managers import ConversationManager
 from managers.elastic.convo_managers.search_managers import SearchManager
@@ -25,20 +26,20 @@ class SMSHandler:
         self.conversation_histories = {}
 
     @contextmanager
-    def handle_errors(self, conversation_uuid: str, action: str):
+    def handle_errors(self, conversation_id: str, action: str):
         try:
             yield
         except Exception as e:
-            error_message = f"{action} for conversation {conversation_uuid}: {e}"
+            error_message = f"{action} for conversation {conversation_id}: {e}"
             logging.error(error_message)
-            self.error_logger.log_error(conversation_uuid, error_message)
+            self.error_logger.log_error(conversation_id, error_message)
             raise RuntimeError(error_message) from e
 
-    def send_message_to_api(self, message_body: str, conversation_uuid: str) -> str:
+    def send_message_to_api(self, message_body: str, conversation_id: str) -> str:
         """Send message to an external API including the conversation history."""
-        with self.handle_errors(conversation_uuid, "Error sending message to API"):
-            conversation_history = self.elastic_manager.get_conversation_history(conversation_uuid) or []
-            FAFSA_SERVER_URL = os.getenv("BASE_URL")
+        with self.handle_errors(conversation_id, "Error sending message to API"):
+            conversation_history = self.elastic_manager.get_conversation_history(conversation_id) or []
+            FAFSA_SERVER_URL = config.config.BASE_URL
             headers = {'Content-Type': 'application/json'}
             payload = {
                 "conversation_history": {"messages": conversation_history},
@@ -46,7 +47,7 @@ class SMSHandler:
             }
             response = requests.post(UrlUtility.create_url(f"{FAFSA_SERVER_URL}/answer_faq"), headers=headers, json=payload)
             response_data = response.json().get("response", "")
-            logging.info(f"Message sent to API for conversation {conversation_uuid}. Response: {response_data}")
+            logging.info(f"Message sent to API for conversation {conversation_id}. Response: {response_data}")
             return response_data
 
     def generate_uuid_from_phone(self, phone_number: str, salt: str = "") -> str:
