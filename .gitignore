@@ -1,0 +1,15 @@
+.env
+test_app.ipynb
+db_connect_excel.py
+runs.ipynb
+evaluate_assistant.ipynb
+.DS_store
+index_begin.html
+.venv/
+.vscode/
+# index.html
+/tests
+poetry.lock
+# managers/google/nlp
+test_intent_classifier.py
+cloudbuild.yaml

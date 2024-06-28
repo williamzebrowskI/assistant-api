@@ -1,0 +1,12 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f2f5;
+}
+
+.widget__wrapper {
+    max-width: 450px;
+    height: 700px;
+    margin: 20px auto;
+}
