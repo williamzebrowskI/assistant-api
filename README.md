@@ -33,8 +33,8 @@ The following Diagram depicts the flow of a user's message from end to end.
 
 1. **Clone this repository:**
     ```bash
-    git clone https://github.com/BenefitsDataTrust/fafsa-chatgpt-assistant.git
-    cd fafsa-chatgpt-assistant
+    git clone https://github.com/williamzebrowskI/assistant-api.git
+    cd assistant-api
     ```
 
 2. **Create a `.env` File**:
@@ -59,13 +59,13 @@ The following Diagram depicts the flow of a user's message from end to end.
     Use the `--no-cache` option to ensure a fresh build:
 
     ```bash
-    docker build --no-cache -t fafsa-openai .
+    docker build --no-cache -t open-assistant .
     ```
 
 2. **Run the Docker Container**:
 
     ```bash
-    docker run -p 8002:8002 fafsa-openai
+    docker run -p 8002:8002 openai-assistant
     ```
 
 3. **Accessing the Chat Interface:**

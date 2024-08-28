@@ -13,3 +13,4 @@ poetry.lock
 # managers/google/nlp
 test_intent_classifier.py
 cloudbuild.yaml
+/managers/google/nlp
