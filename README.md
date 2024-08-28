@@ -59,7 +59,7 @@ The following Diagram depicts the flow of a user's message from end to end.
     Use the `--no-cache` option to ensure a fresh build:
 
     ```bash
-    docker build --no-cache -t open-assistant .
+    docker build --no-cache -t openai-assistant .
     ```
 
 2. **Run the Docker Container**:

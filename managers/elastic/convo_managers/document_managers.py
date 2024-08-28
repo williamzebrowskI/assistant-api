@@ -1,6 +1,7 @@
 # Purpose: Manages document CRUD operations in Elasticsearch that are generic and not specifically tied to conversations alone.
 # Contents: Methods for creating, updating, and checking documents.
 
+import os
 import logging
 from typing import Optional, Dict, Any
 from contextlib import contextmanager
@@ -11,6 +12,7 @@ class DocumentManager(BaseElasticConnector):
     def __init__(self, error_logger: Optional[ErrorLogger] = None):
         super().__init__()
         self.error_logger = error_logger or ErrorLogger()
+        self.elasticsearch_enabled = os.getenv('ELASTICSEARCH_ENABLED', 'false').lower() == 'true'
 
     @contextmanager
     def handle_errors(self, conversation_id: str, action: str):
@@ -19,7 +21,8 @@ class DocumentManager(BaseElasticConnector):
         except Exception as e:
             error_msg = f"{action} for document {conversation_id}: {e}"
             logging.error(error_msg)
-            self.error_logger.log_error(conversation_id, error_msg)
+            if self.elasticsearch_enabled:
+                self.error_logger.log_error(conversation_id, error_msg)
             raise RuntimeError(error_msg) from e
 
     def create_document(self, conversation_id: str, body: Dict[str, Any]) -> None:
@@ -29,6 +32,9 @@ class DocumentManager(BaseElasticConnector):
         :param conversation_id: UUID of the conversation.
         :param body: Body of the document.
         """
+        if not self.elasticsearch_enabled:
+            logging.info(f"Elasticsearch is disabled. Skipping document creation for {conversation_id}.")
+            return
         with self.handle_errors(conversation_id, "Failed to create document"):
             response = self.es.index(index=self.es_index, id=conversation_id, body=body)
             logging.info(f"Document {conversation_id} created successfully. Response: {response}")
@@ -41,6 +47,9 @@ class DocumentManager(BaseElasticConnector):
         :param script: Script to update the document.
         :param upsert_body: Optional upsert body.
         """
+        if not self.elasticsearch_enabled:
+            logging.info(f"Elasticsearch is disabled. Skipping document update for {conversation_id}.")
+            return
         with self.handle_errors(conversation_id, "Failed to update document"):
             response = self.es.update(
                 index=self.es_index, 
@@ -59,6 +68,9 @@ class DocumentManager(BaseElasticConnector):
         :param conversation_id: UUID of the conversation.
         :return: True if the document exists, False otherwise.
         """
+        if not self.elasticsearch_enabled:
+            logging.info(f"Elasticsearch is disabled. Assuming document {conversation_id} does not exist.")
+            return False
         with self.handle_errors(conversation_id, "Failed to check if document exists"):
             exists = self.es.exists(index=self.es_index, id=conversation_id)
             logging.info(f"Document {conversation_id} exists: {exists}")
