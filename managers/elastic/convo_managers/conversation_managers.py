@@ -1,6 +1,7 @@
 # Purpose: Contains specific business logic for managing conversations, such as starting a conversation and adding turns.
 # Contents: Uses models and DocumentManager methods to implement conversation-specific logic.
 
+import os
 import logging
 from dataclasses import asdict
 from typing import Optional, Dict, Any
@@ -14,6 +15,8 @@ class ConversationManager(DocumentManager):
     def __init__(self, error_logger: Optional[ErrorLogger] = None):
         super().__init__()
         self.error_logger = error_logger or ErrorLogger()
+        self.elasticsearch_enabled = os.getenv('ELASTICSEARCH_ENABLED', 'false').lower() == 'true'
+        logging.info(f"Elasticsearch enabled: {self.elasticsearch_enabled}")
 
     @contextmanager
     def handle_errors(self, conversation_id: str, action: str):
@@ -22,7 +25,8 @@ class ConversationManager(DocumentManager):
         except Exception as e:
             error_msg = f"{action} for conversation {conversation_id}: {e}"
             logging.error(error_msg)
-            self.error_logger.log_error(conversation_id, error_msg)
+            if self.elasticsearch_enabled:
+                self.error_logger.log_error(conversation_id, error_msg)
             raise RuntimeError(error_msg) from e
 
     def start_conversation(self, msg_data: MessageData, title: str, partner_id: str, assistant_type: str) -> None:
@@ -42,7 +46,8 @@ class ConversationManager(DocumentManager):
             conversation = Conversation(
                 conversation_id, initial_session_id, initial_user_id, assistant_type, title, partner_id, turns=[]
             )
-            self.create_document(conversation_id, asdict(conversation))
+            if self.elasticsearch_enabled:
+                self.create_document(conversation_id, asdict(conversation))
             logging.info(f"Conversation {conversation_id} started successfully.")
 
     def add_turn(self, msg_data: MessageData, user: User, assistant: AssistantResponse, upsert_body: Optional[Dict[str, Any]] = None, intent: Optional[str] = None, confidence: Optional[float] = None) -> None:
@@ -77,7 +82,8 @@ class ConversationManager(DocumentManager):
             # Detailed logging of upsert_body
             logging.info(f"Upsert body: {upsert_body}")
 
-            self.update_document(conversation_id, script, upsert_body)
+            if self.elasticsearch_enabled:
+                self.update_document(conversation_id, script, upsert_body)
             logging.info(f"Turn added to conversation {conversation_id} at index {current_index}.")
 
     def get_current_index(self, conversation_id: str) -> int:
@@ -88,6 +94,8 @@ class ConversationManager(DocumentManager):
         :return: Current index of turns.
         """
         with self.handle_errors(conversation_id, "Failed to fetch current index"):
+            if not self.elasticsearch_enabled:
+                return 0
             doc = self.es.get(index=self.es_index, id=conversation_id)
             turns = doc['_source'].get('turns', [])
             current_index = len(turns) if turns is not None else 0

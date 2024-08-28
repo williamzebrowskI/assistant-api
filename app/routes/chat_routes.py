@@ -13,17 +13,18 @@ from managers.google.sms_handler import SMSHandler
 from app.main import app_instance
 from utils.markdown_stripper import MarkdownStripper
 from app.main import thread_manager, elastic_manager, client, assistant_id
-from managers.google.nlp.intent_classifier import IntentClassifier
+# from managers.google.nlp.intent_classifier import IntentClassifier
 from dotenv import load_dotenv
 load_dotenv()
 
 os.environ['PYTHONDONTWRITEBYTECODE'] = '1'
+elasticsearch_enabled = os.getenv('ELASTICSEARCH_ENABLED', 'false').lower() == 'true'
 
-classifier = IntentClassifier()
+# classifier = IntentClassifier()
 md_stripper = MarkdownStripper()
 error_logger = ErrorLogger()
-elastic_manager = ConversationManager()
-document_manager = DocumentManager()
+elastic_manager = ConversationManager() if elasticsearch_enabled else None
+document_manager = DocumentManager() if elasticsearch_enabled else None
 FAFSA_SERVER_URL = config.config.BASE_URL
 sms_message_handler = SMSHandler(api_url=FAFSA_SERVER_URL)
 
@@ -55,11 +56,11 @@ def handle_user_message(message):
     msg_data = MessageData(message, request)
 
     try:
-        if not elastic_manager.document_exists(msg_data.conversation_id):
+        if elasticsearch_enabled and not elastic_manager.document_exists(msg_data.conversation_id):
             elastic_manager.start_conversation(
                 msg_data,
                 msg_data.partner_id,
-                "Wyatt Fafsa Conversation",
+                "Conversation",
                 assistant_type
             )
 
@@ -97,16 +98,18 @@ def handle_user_message(message):
                             end_respond_timestamp=response_end_time
                         )
 
-                        elastic_manager.add_turn(
-                            msg_data,
-                            user,
-                            assistant_response
-                        )
+                        if elasticsearch_enabled:
+                            elastic_manager.add_turn(
+                                msg_data,
+                                user,
+                                assistant_response
+                            )
 
     except Exception as e:
         error_message = f"An error occurred: {str(e)}"
         logging.error(error_message)
-        error_logger.log_error(msg_data.conversation_id, error_message)
+        if elasticsearch_enabled:
+            error_logger.log_error(msg_data.conversation_id, error_message)
         config.socketio.emit('server_message', {'text': 'An error occurred, please try again later.'}, room=msg_data.user_id, namespace='/chat')
 
 @app_instance.route('/sms', methods=['POST'])
