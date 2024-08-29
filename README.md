@@ -1,6 +1,6 @@
-# Assistant-api
+# Assistant-Api
 
-The `fafsa-chatgpt-assistant` repository hosts the cutting-edge Assistants API designed to streamline FAFSA-related inquiries through a ChatGPT-powered conversational interface. It combines the prowess of OpenAI's GPT model with Elasticsearch's data indexing for an intuitive and efficient user experience.
+The `assistant-api` repository hosts the Assistants API designed to streamline inquiries through a ChatGPT-powered conversational interface. It combines the prowess of OpenAI's GPT model with Elasticsearch's data indexing for an intuitive and efficient user experience. This infrastructure allows users to connect to an assistant on OpenAI, interact with it, and store conversations in Elasticsearch for future reference and analysis.
 
 ## Table of Contents
 - [Diagram Depiction](#diagram-depiction)
@@ -9,7 +9,10 @@ The `fafsa-chatgpt-assistant` repository hosts the cutting-edge Assistants API d
   - [Setting Up a Virtual Environment](#setting-up-a-virtual-environment)
   - [Configuration](#configuration)
   - [Running the Application](#running-the-application)
-- [FAFSA ChatGPT Assistant Overview](#fafsa-chatgpt-assistant-overview)
+- [Startup](#startup)
+  - [Running with Docker](#running-with-docker)
+  - [Running without Docker](#running-without-docker)
+- [Assistant API Overview](#assistant-api-overview)
 - [Key Components](#key-components)
   - [FastAPI Setup](#fastapi-setup)
   - [OpenAI Integration](#openai-integration)
@@ -20,14 +23,15 @@ The `fafsa-chatgpt-assistant` repository hosts the cutting-edge Assistants API d
 - [Logging and Debugging](#logging-and-debugging)
 
 The following Diagram depicts the flow of a user's message from end to end.
-![FAFSA Assistant API Diagram](images/flow.png)
+![Assistant API Diagram](images/flow.png)
 
 ## Getting Started
 
 ### Prerequisites
 
-- Python 3.9
+- Python 3.11
 - pip
+- Poetry
 
 ### Setting Up a Virtual Environment
 
@@ -43,15 +47,89 @@ The following Diagram depicts the flow of a user's message from end to end.
     ```
     OPENAI_API_KEY=your_openai_api_key_here
     ASSISTANT_ID=your_assistants_id_here
+
+    # Elasticsearch cloud authentication credentials
+    ES_URL=your_elasticsearch_url_here
+    ES_PORT=your_elasticsearch_port_here
+    ES_INDEX=your_elasticsearch_index_name_here
+    ES_API_KEY=your_elasticsearch_api_key_here
+    
+    CORS_ALLOWED_ORIGINS="http://127.0.0.1:8002"
+    ```
+
+    Ensure you replace the placeholder values with your actual credentials.
+
+### Configuration
+
+The application can work with or without Elasticsearch. By default, Elasticsearch is disabled to avoid potential costs associated with using an Elasticsearch index. You can enable or disable Elasticsearch by setting the `ELASTICSEARCH_ENABLED` environment variable in your `.env` file:
+
+```
+ELASTICSEARCH_ENABLED=false # Set to true to enable Elasticsearch
+```
+
+When `ELASTICSEARCH_ENABLED` is set to `false`, the application will not attempt to connect to Elasticsearch, and conversation data will not be stored in an Elasticsearch index. This is useful for development and testing purposes or if you do not want to incur costs for Elasticsearch usage.
+
+## Startup
+
+### Running with Docker
+
+1. **Build the Docker Image**:
+    Use the `--no-cache` option to ensure a fresh build:
+
+    ```bash
+    docker build --no-cache -t openai-assistant .
+    ```
+
+2. **Run the Docker Container**:
+
+    ```bash
+    docker run -p 8002:8002 openai-assistant
+    ```
+
+3. **Accessing the Chat Interface:**
+    Once the server is up and running, open the `index.html` file in a web browser to see the chat interface. This file should be located in your project directory. If you're using an IDE that supports live previews, you can also use that feature to open the file.
+
+### Running without Docker
+
+1. **Clone the Repository**
+    ```bash
+    git clone https://github.com/williamzebrowskI/assistant-api.git
+    cd assistant-api
+    ```
+
+2. **Create and Activate a Virtual Environment**
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+    ```
+
+3. **Install Dependencies**
+    ```bash
+    pip install poetry
+    poetry install
+    ```
+
+4. **Set Up Environment Variables**
+    Create a `.env` file in the root of your project and fill it with your OpenAI and Elasticsearch credentials:
+    ```plaintext
+    OPENAI_API_KEY=your_openai_api_key_here
+    ASSISTANT_ID=your_assistants_id_here
     # Elasticsearch cloud authentication credentials
     ES_URL=your_elasticsearch_url_here
     ES_PORT=your_elasticsearch_port_here
     ES_INDEX=your_elasticsearch_index_name_here
     ES_API_KEY=your_elasticsearch_api_key_here
     CORS_ALLOWED_ORIGINS="http://127.0.0.1:8002"
+    ELASTICSEARCH_ENABLED=false  # Set to true to enable Elasticsearch
     ```
 
-    Ensure you replace the placeholder values with your actual credentials.
+5. **Run the Application**
+    ```bash
+    poetry run gunicorn --config ws/gunicorn_config.py --worker-class eventlet -w 1 app.main:app_instance -b 0.0.0.0:8002
+    ```
+
+6. **Access the Chat Interface**
+    Open the `index.html` file in a web browser to see the chat interface. This file should be located in your project directory. If you're using an IDE that supports live previews, you can also use that feature to open the file.
 
 ### Running the Application
 
@@ -71,11 +149,11 @@ The following Diagram depicts the flow of a user's message from end to end.
 3. **Accessing the Chat Interface:**
     Once the server is up and running, open the `index.html` file in a web browser to see the chat interface. This file should be located in your project directory. If you're using an IDE that supports live previews, you can also use that feature to open the file.
 
-    Interact with the chat interface to send queries to our Wyatt ChatGPT Assistant and receive responses.
+    Interact with the chat interface to send queries to the OpenAI Assistant and receive responses.
 
-## FAFSA ChatGPT Assistant Overview
+## Assistant API Overview
 
-The FAFSA ChatGPT Assistant is designed to facilitate interactions with users seeking guidance on FAFSA processes via a ChatGPT-powered conversational interface. This assistant leverages the OpenAI API for generating responses and Elasticsearch for logging and retrieving conversation histories.
+The Assistant API is designed to facilitate interactions with users seeking guidance or information via a ChatGPT-powered conversational interface. This assistant leverages the OpenAI API for generating responses and Elasticsearch for logging and retrieving conversation histories.
 
 ## Key Components
 
@@ -88,7 +166,7 @@ The FAFSA ChatGPT Assistant is designed to facilitate interactions with users se
 
 #### OpenAIAssistant Class Overview
 
-The `OpenAIAssistant` class is designed to seamlessly integrate OpenAI's GPT models into our application, enabling the generation of dynamic, intelligent responses to user queries. This integration is pivotal for facilitating an engaging conversational experience in the FAFSA ChatGPT Assistant application.
+The `OpenAIAssistant` class is designed to seamlessly integrate OpenAI's GPT models into our application, enabling the generation of dynamic, intelligent responses to user queries. This integration is pivotal for facilitating an engaging conversational experience in the Assistant API application.
 
 ##### Purpose
 
@@ -128,8 +206,7 @@ Integrating the `OpenAIAssistant` class into our application brings several key 
 
 ##### Conclusion
 
-The `OpenAIAssistant` class represents a core component of our FAFSA ChatGPT Assistant application, bridging the gap between user queries and the sophisticated language understanding and generation capabilities of OpenAI's GPT models. Through this integration, we aim to deliver an exceptional conversational experience that aids users in navigating the complexities of the FAFSA process.
-
+The `OpenAIAssistant` class represents a core component of our Assistant API application, bridging the gap between user queries and the sophisticated language understanding and generation capabilities of OpenAI's GPT models. Through this integration, we aim to deliver an exceptional conversational experience that aids users in navigating their inquiries.
 
 # Elasticsearch Connector
 
@@ -185,8 +262,6 @@ Both methods handle exceptions gracefully by logging errors, ensuring the applic
 ## Conclusion
 
 The `ElasticConnector` class provides a streamlined approach to integrating Elasticsearch into your application for handling conversation data. By following the setup instructions and utilizing the provided methods, you can efficiently manage conversation documents within your chosen Elasticsearch index.
-
-
 
 ### Conversational Flow
 

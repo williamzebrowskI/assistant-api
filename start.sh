@@ -3,12 +3,10 @@
 # Set the PYTHONPATH
 export PYTHONPATH=/usr/src/app
 
-# Set Elasticsearch enabled/disabled
-export ELASTICSEARCH_ENABLED=false  # or false to disable
+export PYTHONDONTWRITEBYTECODE=1
 
-# Train the model
-# echo "Training model..."
-# poetry run python /usr/src/app/managers/google/nlp/nn_trainer.py
+# Set Elasticsearch enabled/disabled
+export ELASTICSEARCH_ENABLED=false  # false to disable Elastic
 
 # Start the server
 echo "Starting server..."

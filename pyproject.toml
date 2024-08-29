@@ -1,9 +1,9 @@
 [tool.poetry]
-name = "fafsa-chatgpt-assistant"
+name = "openai-assistant"
 version = "1.0.0"
 description = "A Backend application leverging OpenAI AssistantAPI"
 authors = ["William Zebrowski <38896109+williamzebrowskI@users.noreply.github.com>"]
-license = "Benefits Data Trust LLC"
+license = "Transform.AI"
 readme = "README.md"
 
 [tool.poetry.dependencies]
