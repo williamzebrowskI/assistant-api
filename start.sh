@@ -3,8 +3,10 @@
 # Set the PYTHONPATH
 export PYTHONPATH=/usr/src/app
 
+export PYTHONDONTWRITEBYTECODE=1
+
 # Set Elasticsearch enabled/disabled
-export ELASTICSEARCH_ENABLED=false  # or false to disable
+export ELASTICSEARCH_ENABLED=false  # false to disable Elastic
 
 # Start the server
 echo "Starting server..."
