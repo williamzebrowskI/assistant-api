@@ -9,7 +9,6 @@ from managers.openai.managers.event_manager import EventHandler
 from managers.elastic.logger.error_log import ErrorLogger
 from managers.elastic.convo_managers.conversation_managers import ConversationManager, DocumentManager
 from models.models import User, AssistantResponse
-from managers.google.sms_handler import SMSHandler
 from app.main import app_instance
 from utils.markdown_stripper import MarkdownStripper
 from app.main import thread_manager, elastic_manager, client, assistant_id

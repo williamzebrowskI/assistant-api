@@ -17,3 +17,5 @@ cloudbuild.yaml
 /widget
 /dist
 /managers/google/
+.github/package_instructions.md
+.github/workflows/package-docker.yml
