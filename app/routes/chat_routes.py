@@ -25,8 +25,6 @@ md_stripper = MarkdownStripper()
 error_logger = ErrorLogger()
 elastic_manager = ConversationManager() if elasticsearch_enabled else None
 document_manager = DocumentManager() if elasticsearch_enabled else None
-FAFSA_SERVER_URL = config.config.BASE_URL
-sms_message_handler = SMSHandler(api_url=FAFSA_SERVER_URL)
 
 # SocketIO event handlers
 @config.socketio.on('connect', namespace='/chat')
@@ -72,7 +70,7 @@ def handle_user_message(message):
 
         with client.beta.threads.runs.stream(
             thread_id=thread_id,
-            additional_instructions="Respond with information only related to FAFSA.",
+            additional_instructions="You are a helpful assistant.",
             assistant_id=assistant_id,
             event_handler=event_handler,
             tool_choice={"type": "file_search"}
@@ -111,81 +109,3 @@ def handle_user_message(message):
         if elasticsearch_enabled:
             error_logger.log_error(msg_data.conversation_id, error_message)
         config.socketio.emit('server_message', {'text': 'An error occurred, please try again later.'}, room=msg_data.user_id, namespace='/chat')
-
-# @app_instance.route('/sms', methods=['POST'])
-# def receive_sms():
-#     data = request.get_json()
-
-#     # Generate or Retrieve ConversationUUID
-#     conversation_id = sms_message_handler.generate_uuid_from_phone(data.get('From', ''), "some_salt_here")
-
-#     sms_data = {
-#         'text': data.get('Body', ''),
-#         'userId': data.get('From', ''),
-#         'conversationId': conversation_id,
-#         'currentPageUrl': None,
-#         'referralUrl': None,
-#         'partnerId': data.get('partnerId', 'default'),
-#         'sessionId': None
-#     }
-
-#     # Create MessageData object
-#     msg_data = MessageData(message=sms_data, request=request)
-#     assistant_type = "Google"
-
-#     try:
-#         # Classify intent and get confidence
-#         response, intent, confidence = classifier.handle_message(msg_data.user_input, msg_data.partner_id)
-#         logging.info(f"Classifier response: {response}")
-
-#         # Create User object with intent and confidence
-#         user = User.from_message_data(msg_data, intent=intent, confidence=confidence)
-
-#         # Start conversation if it does not exist
-#         if not sms_message_handler.conversation_manager.document_exists(conversation_id):
-#             logging.info(f"Document not found for UUID {conversation_id}, initializing...")
-#             sms_message_handler.conversation_manager.start_conversation(
-#                 msg_data,
-#                 data.get('partnerId', 'default'),
-#                 "SMS Interaction",
-#                 assistant_type
-#             )
-#         else:
-#             logging.info(f"Existing UUID retrieved for the conversation: {conversation_id}")
-
-#         # Create AssistantResponse object
-#         assistant_response = AssistantResponse(
-#             assistant_id=None,
-#             thread_id=None,
-#             assistant_response=response,
-#             assistant_type=assistant_type,
-#             start_respond_timestamp=datetime.now().isoformat(),
-#             end_respond_timestamp=None
-#         )
-
-#         # Add turn with intent and confidence
-#         sms_message_handler.conversation_manager.add_turn(
-#             msg_data,
-#             user,
-#             assistant_response,
-#             intent=intent,
-#             confidence=confidence
-#         )
-
-#         responses = [{"message": msg} for msg in response]
-#         return jsonify(
-#             {
-#                 'user_id': data.get('From', ''),
-#                 'messages': responses,
-#                 'partnerId': data.get('partnerId')
-#             }
-#         )
-
-#     except Exception as e:
-#         error_message = f"An error occurred: {str(e)}"
-#         logging.error(error_message)
-#         error_logger.log_error(msg_data.conversation_id, error_message)
-#         return jsonify({
-#             'status': 'temporarily unavailable',
-#             'message': 'Service is temporarily unavailable, please try again later.'
-#         })
