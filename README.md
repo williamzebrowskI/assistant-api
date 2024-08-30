@@ -86,7 +86,7 @@ When `ELASTICSEARCH_ENABLED` is set to `false`, the application will not attempt
     ```
 
 3. **Accessing the Chat Interface:**
-    Once the server is up and running, open the `index.html` file in a web browser to see the chat interface. This file should be located in your project directory. If you're using an IDE that supports live previews, you can also use that feature to open the file.
+    Once the server is up and running, a link is provided in the logs directed to the chat widget
 
 ### Running without Docker
 
