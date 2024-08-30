@@ -19,3 +19,4 @@ cloudbuild.yaml
 /managers/google/
 .github/package_instructions.md
 .github/workflows/package-docker.yml
+/node_modules

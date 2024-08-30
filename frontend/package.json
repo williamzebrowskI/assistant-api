@@ -1,0 +1,16 @@
+{
+  "name": "assistant-api",
+  "version": "1.0.0",
+  "description": "The `assistant-api` repository hosts the Assistants API designed to streamline inquiries through a ChatGPT-powered conversational interface. It combines the prowess of OpenAI's GPT model with Elasticsearch's data indexing for an intuitive and efficient user experience. This infrastructure allows users to connect to an assistant on OpenAI, interact with it, and store conversations in Elasticsearch for future reference and analysis.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2",
+    "open": "^10.1.0"
+  }
+}
