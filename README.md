@@ -34,7 +34,7 @@ The following Diagram depicts the flow of a user's message from end to end.
 - pip
 - Poetry
 
-### Setting Up Your Environment
+### Setting Up a Virtual Environment
 
 1. **Clone this repository:**
     ```bash
@@ -54,8 +54,6 @@ The following Diagram depicts the flow of a user's message from end to end.
     ES_PORT=your_elasticsearch_port_here
     ES_INDEX=your_elasticsearch_index_name_here
     ES_API_KEY=your_elasticsearch_api_key_here
-
-    ELASTICSEARCH_ENABLED=false
     
     CORS_ALLOWED_ORIGINS="http://127.0.0.1:8002"
     ```
@@ -70,19 +68,24 @@ The application can work with or without Elasticsearch. By default, Elasticsearc
 ELASTICSEARCH_ENABLED=false # Set to true to enable Elasticsearch
 ```
 
+
 When `ELASTICSEARCH_ENABLED` is set to `false`, the application will not attempt to connect to Elasticsearch, and conversation data will not be stored in an Elasticsearch index. This is useful for development and testing purposes or if you do not want to incur costs for Elasticsearch usage.
 
 ## Startup
 
 ### Running with Docker
 
-1. **Run the Docker Container**:
-
+1. **Build the Docker Image**:
     ```bash
-    docker run -d -p 8002:8002 --name assistant-api --restart always wzebrowski/assistant-api:v1.0.0
+    docker build --no-cache -t assistant-api .
     ```
 
-2. **Accessing the Chat Interface:**
+2. **Run the Docker Container**:
+    ```bash
+    docker run -p 8002:8002 assistant-api
+    ```
+
+3. **Accessing the Chat Interface:**
     Once the server is up and running, open the `index.html` file in a web browser to see the chat interface. This file should be located in your project directory. If you're using an IDE that supports live previews, you can also use that feature to open the file.
 
 ### Running without Docker
@@ -133,7 +136,7 @@ To make it easier for users to install and run the application, you can pull and
 
 1. **Run the Docker Container**:
 
-```bash
+    ```bash
     docker run -d -p 8002:8002 --name assistant-api --restart always \
       -e OPENAI_API_KEY=your_openai_api_key_here \
       -e ASSISTANT_ID=your_assistants_id_here \
@@ -144,7 +147,7 @@ To make it easier for users to install and run the application, you can pull and
       -e CORS_ALLOWED_ORIGINS="http://127.0.0.1:8002" \
       -e ELASTICSEARCH_ENABLED=false \
       wzebrowski/assistant-api:v1.0.0
-```
+    ```
 
 2. **Accessing the Chat Interface:**
     Once the server is up and running, open the `index.html` file in a web browser to see the chat interface. This file should be located in your project directory. If you're using an IDE that supports live previews, you can also use that feature to open the file.
