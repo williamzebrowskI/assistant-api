@@ -12,6 +12,7 @@ The `assistant-api` repository hosts the Assistants API designed to streamline i
 - [Startup](#startup)
   - [Running with Docker](#running-with-docker)
   - [Running without Docker](#running-without-docker)
+- [Running from Docker Hub](#running-from-docker-hub)
 - [Assistant API Overview](#assistant-api-overview)
 - [Key Components](#key-components)
   - [FastAPI Setup](#fastapi-setup)
@@ -33,7 +34,7 @@ The following Diagram depicts the flow of a user's message from end to end.
 - pip
 - Poetry
 
-### Setting Up a Virtual Environment
+### Setting Up Your Environment
 
 1. **Clone this repository:**
     ```bash
@@ -53,6 +54,8 @@ The following Diagram depicts the flow of a user's message from end to end.
     ES_PORT=your_elasticsearch_port_here
     ES_INDEX=your_elasticsearch_index_name_here
     ES_API_KEY=your_elasticsearch_api_key_here
+
+    ELASTICSEARCH_ENABLED=false
     
     CORS_ALLOWED_ORIGINS="http://127.0.0.1:8002"
     ```
@@ -73,20 +76,13 @@ When `ELASTICSEARCH_ENABLED` is set to `false`, the application will not attempt
 
 ### Running with Docker
 
-1. **Build the Docker Image**:
-    Use the `--no-cache` option to ensure a fresh build:
+1. **Run the Docker Container**:
 
     ```bash
-    docker build --no-cache -t openai-assistant .
+    docker run -d -p 8002:8002 --name assistant-api --restart always wzebrowski/assistant-api:v1.0.0
     ```
 
-2. **Run the Docker Container**:
-
-    ```bash
-    docker run -p 8002:8002 openai-assistant
-    ```
-
-3. **Accessing the Chat Interface:**
+2. **Accessing the Chat Interface:**
     Once the server is up and running, open the `index.html` file in a web browser to see the chat interface. This file should be located in your project directory. If you're using an IDE that supports live previews, you can also use that feature to open the file.
 
 ### Running without Docker
@@ -131,25 +127,27 @@ When `ELASTICSEARCH_ENABLED` is set to `false`, the application will not attempt
 6. **Access the Chat Interface**
     Open the `index.html` file in a web browser to see the chat interface. This file should be located in your project directory. If you're using an IDE that supports live previews, you can also use that feature to open the file.
 
-### Running the Application
+### Running from Docker Hub
 
-1. **Build the Docker Image**:
-    Use the `--no-cache` option to ensure a fresh build:
+To make it easier for users to install and run the application, you can pull and run the Docker image directly from Docker Hub.
 
-    ```bash
-    docker build --no-cache -t openai-assistant .
-    ```
+1. **Run the Docker Container**:
 
-2. **Run the Docker Container**:
+```bash
+    docker run -d -p 8002:8002 --name assistant-api --restart always \
+      -e OPENAI_API_KEY=your_openai_api_key_here \
+      -e ASSISTANT_ID=your_assistants_id_here \
+      -e ES_URL=your_elasticsearch_url_here \
+      -e ES_PORT=your_elasticsearch_port_here \
+      -e ES_INDEX=your_elasticsearch_index_name_here \
+      -e ES_API_KEY=your_elasticsearch_api_key_here \
+      -e CORS_ALLOWED_ORIGINS="http://127.0.0.1:8002" \
+      -e ELASTICSEARCH_ENABLED=false \
+      wzebrowski/assistant-api:v1.0.0
+```
 
-    ```bash
-    docker run -p 8002:8002 openai-assistant
-    ```
-
-3. **Accessing the Chat Interface:**
+2. **Accessing the Chat Interface:**
     Once the server is up and running, open the `index.html` file in a web browser to see the chat interface. This file should be located in your project directory. If you're using an IDE that supports live previews, you can also use that feature to open the file.
-
-    Interact with the chat interface to send queries to the OpenAI Assistant and receive responses.
 
 ## Assistant API Overview
 
