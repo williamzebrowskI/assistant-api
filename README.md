@@ -82,7 +82,7 @@ When `ELASTICSEARCH_ENABLED` is set to `false`, the application will not attempt
 
 2. **Run the Docker Container**:
     ```bash
-    docker run -p 8002:8002 assistant-api
+    docker run -p 8002:8002 -p 8001:8001 assistant-api
     ```
 
 3. **Accessing the Chat Interface:**
