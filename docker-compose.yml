@@ -1,43 +1,24 @@
-version: '3.8'
-
 services:
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.9.0
+    build:
+      context: .
+      dockerfile: Dockerfile.elasticsearch
     container_name: elasticsearch
+    volumes:
+      - shared_data:/tmp
+      - elasticsearch-data:/usr/share/elasticsearch/data
+      - ./elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     ports:
       - "9200:9200"
     environment:
       - discovery.type=single-node
-    volumes:
-      - shared_data:/tmp
-    entrypoint: |
-      /bin/bash -c "
-      if [ ! -f /tmp/es_output.txt ]; then
-          echo 'Running password reset'
-          bin/elasticsearch -d
-          echo y | bin/elasticsearch-reset-password -u elastic | tee /tmp/es_output.txt
-      else
-          echo 'Password reset already run'
-      fi
-      echo 'Contents of /tmp/es_output.txt:'
-      cat /tmp/es_output.txt
-      PASSWORD=$(grep -oP '(?<=New value: ).*' /tmp/es_output.txt)
-      curl -X PUT 'https://localhost:9200/ai-index' -H 'Content-Type: application/json' -u "elastic:$PASSWORD" -d '{
-            "settings": {
-                "number_of_shards": 1,
-                "number_of_replicas": 0
-            }
-        }' -k
-      while true; do sleep 1000; done
-      "
-    healthcheck:
-      test: ["CMD", "curl", "-f", "https://localhost:9200"]
-      interval: 10s
-      retries: 5
-      start_period: 10s
-      timeout: 5s
     networks:
       - my_network
+    healthcheck:
+      test: curl -s http://elasticsearch:9200 >/dev/null || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 50
 
   assistant-api:
     build: .
@@ -45,20 +26,29 @@ services:
     environment:
       - ELASTICSEARCH_ENABLED=true
       - FE_PORT=8001
+      - ES_HOST=elasticsearch
       - ES_PORT=9200
       - ES_INDEX=ai-index
+      - ES_USERNAME=elastic
+      - ES_PASSWORD_FILE=/app/es_config/es_output.txt
     ports:
       - "8001:8001"
       - "8002:8002"
     volumes:
       - shared_data:/app/es_config
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
     networks:
       - my_network
-    command: ["/bin/sh", "-c", "sleep 30 && chmod 777 /app/es_config/es_output.txt && ./start.sh"]
-
-
+    entrypoint: |
+      /bin/sh -c "
+      ./scripts/start.sh
+      "
 volumes:
   shared_data:
+    driver: local
+  elasticsearch-data:
     driver: local
 
 networks:
