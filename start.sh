@@ -5,10 +5,20 @@ export PYTHONPATH=/usr/src/app
 export PYTHONDONTWRITEBYTECODE=1
 
 # Set Elasticsearch enabled/disabled
-export ELASTICSEARCH_ENABLED=false # false to disable Elastic
+export ELASTICSEARCH_ENABLED=true # false to disable Elastic
 
 # Set the port for the Node.js server
 export FE_PORT=8001
+
+# Extract the password from the file if it exists
+if [ -f /app/es_config/es_output.txt ]; then
+    ES_PASSWORD=$(awk -F'New value: ' '{print $2}' /app/es_config/es_output.txt | tr -d '[:space:]')
+    export ES_PASSWORD
+    echo "Extracted Elasticsearch password: '$ES_PASSWORD'"
+else
+    echo "Password file not found. Ensure the password reset process completed successfully."
+    exit 1
+fi
 
 # Start the Node.js server
 echo "Starting Node.js server..."
