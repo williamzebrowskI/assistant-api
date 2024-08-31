@@ -4,8 +4,8 @@ import os
 from managers.elastic.es_connector.elastic_connect import BaseElasticConnector
 
 class ErrorLogger(BaseElasticConnector):
-
     def __init__(self):
+        super().__init__()
         self.elasticsearch_enabled = os.getenv('ELASTICSEARCH_ENABLED', 'false').lower() == 'true'
 
     def log_error(self, conversation_uuid, error_message):
