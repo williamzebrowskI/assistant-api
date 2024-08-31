@@ -4,37 +4,26 @@
 import os
 import logging
 from elasticsearch import Elasticsearch
-from utils.url_utility import UrlUtility
 from ws.flask_config import config
 
 class BaseElasticConnector:
     def __init__(self):
-        self.es_url = config.config.ES_URL
-        self.es_port = config.config.ES_PORT
-        self.es_username = config.config.ES_USERNAME
-        self.es_index = config.config.ES_INDEX
-        self.es_password = config.config.ES_PASSWORD
+        self.es_host = os.environ.get('ES_HOST', 'elasticsearch')
+        self.es_port = os.environ.get('ES_PORT', '9200')
+        self.es_username = os.environ.get('ES_USERNAME', 'elastic')
+        self.es_index = os.environ.get('ES_INDEX', 'ai-index')
+        self.es_password = os.environ.get('ES_PASSWORD')
 
-        try: 
+        if not self.es_password:
+            raise ValueError("Elasticsearch password not found in environment variables")
+
+        try:
             self.es = Elasticsearch(
-               "https://elasticsearch:9200",
+                f"http://{self.es_host}:{self.es_port}",
                 basic_auth=(self.es_username, self.es_password),
                 verify_certs=False,
-                ssl_show_warn=False
             )
-                        # Check if the connection is successful
-            if self.es.ping():
-                print("Successfully connected to Elasticsearch!")
-                logging.info("Successfully connected to Elasticsearch!")
-            else:
-                print("Connected to Elasticsearch, but ping failed.")
-                logging.warning("Connected to Elasticsearch, but ping failed.")
-            
-            # Optionally, you can print more information about the cluster
-            info = self.es.info()
-            print(f"Elasticsearch cluster name: {info['cluster_name']}")
-            print(f"Elasticsearch version: {info['version']['number']}")
 
         except Exception as e:
-            logging.error("Failed to connect to Elasticsearch: %s", e)
-            raise SystemExit("Connection to Elasticsearch failed: %s" % e)
+            logging.error(f"Failed to connect to Elasticsearch: {e}")
+            raise SystemExit(f"Connection to Elasticsearch failed: {e}")

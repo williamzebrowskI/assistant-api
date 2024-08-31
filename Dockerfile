@@ -37,10 +37,11 @@ COPY . .
 RUN poetry install --only main
 
 # Explicitly copy and set permissions for the startup script
-COPY start.sh .
-RUN chmod +x ./start.sh
+COPY scripts/start.sh ./scripts/
+RUN chmod +x ./scripts/start.sh
+
+COPY scripts/init-elasticsearch.sh ./scripts/
+RUN chmod +x ./scripts/init-elasticsearch.sh
 
 # Expose ports for both Node.js and Python servers
 EXPOSE 8001 8002
-
-CMD ["./start.sh"]
