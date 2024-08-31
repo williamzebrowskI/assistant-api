@@ -1,6 +1,6 @@
 # Assistant-Api
 
-The `assistant-api` repository hosts the Assistants API designed to streamline inquiries through a ChatGPT-powered conversational interface. It combines the prowess of OpenAI's GPT model with Elasticsearch's data indexing for an intuitive and efficient user experience. This infrastructure allows users to connect to an assistant on OpenAI, interact with it, and store conversations in Elasticsearch for future reference and analysis.
+The `assistant-api` repository hosts the AssistantsAPI designed to streamline inquiries through a conversational interface UI. Primarily, this application combines the prowess of OpenAI's Assistants with Elasticsearch for an intuitive and efficient conversational storage and management. This infrastructure allows users to connect to an Assistant on OpenAI, interact with it, and store conversational data in a Elasticsearch index for future reference and analysis.
 
 ## Table of Contents
 - [Diagram Depiction](#diagram-depiction)
@@ -62,31 +62,26 @@ The following Diagram depicts the flow of a user's message from end to end.
 
 ### Configuration
 
-The application can work with or without Elasticsearch. By default, Elasticsearch is disabled to avoid potential costs associated with using an Elasticsearch index. You can enable or disable Elasticsearch by setting the `ELASTICSEARCH_ENABLED` environment variable in your `.env` file:
+By default, `ELASTICSEARCH_ENABLED` is set to `true`, the application will create and connect to a Elasticsearch instance which is built in a different docker container, and conversation data will  be stored in the Elasticsearch index ("ai-index"). You can disable Elasticsearch by setting the `ELASTICSEARCH_ENABLED` environment variable in your `.env` file:s
 
 ```
-ELASTICSEARCH_ENABLED=false # Set to true to enable Elasticsearch
+ELASTICSEARCH_ENABLED=true # Set to true to enable Elasticsearch (false to disable)
 ```
 
-
-When `ELASTICSEARCH_ENABLED` is set to `false`, the application will not attempt to connect to Elasticsearch, and conversation data will not be stored in an Elasticsearch index. This is useful for development and testing purposes or if you do not want to incur costs for Elasticsearch usage.
+Note: it is also set to true in the `docker-compose.yml` file.
 
 ## Startup
 
-### Running with Docker
+### Running with Docker Compose
 
-1. **Build the Docker Image**:
+1. **Start the Docker Containers**:
     ```bash
-    docker build --no-cache -t assistant-api .
+    docker-compose up
     ```
 
-2. **Run the Docker Container**:
-    ```bash
-    docker run -p 8002:8002 -p 8001:8001 assistant-api
-    ```
+2. **Accessing the Chat Interface:**
+    Once the server is up and running, a link is provided in the logs directed to the chat widget.
 
-3. **Accessing the Chat Interface:**
-    Once the server is up and running, a link is provided in the logs directed to the chat widget
 
 ### Running without Docker
 
