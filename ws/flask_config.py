@@ -16,6 +16,8 @@ class CorsUtility:
 class VarConfig:
     SECRET_KEY = getenv('FLASK_SECRET_KEY', 'default_secret_key')
     OPENAI_API_KEY = getenv('OPENAI_API_KEY')
+    ES_USERNAME = getenv('ES_USERNAME')
+    ES_PASSWORD = getenv('ES_PASSWORD')
     ASSISTANT_ID = getenv('ASSISTANT_ID')
     BASE_URL = getenv('BASE_URL')
     ES_URL = getenv('ES_URL')
