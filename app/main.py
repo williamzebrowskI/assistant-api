@@ -6,6 +6,7 @@ import logging
 from managers.openai.managers.thread_manager import ThreadManager
 from managers.openai.managers.assistant_manager import OpenAIAssistant
 from managers.elastic.convo_managers.conversation_managers import ConversationManager
+from managers.elastic.es_connector.elastic_connect import BaseElasticConnector  
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -15,6 +16,7 @@ OpenAI.api_key = config.config.OPENAI_API_KEY
 ASSISTANT_ID = config.config.ASSISTANT_ID
 
 #Set up Managers
+elastic_connector = BaseElasticConnector()
 elastic_manager = ConversationManager()
 thread_manager = ThreadManager(client=client)
 assistant = OpenAIAssistant(assistant_id=ASSISTANT_ID)

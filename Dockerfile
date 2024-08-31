@@ -3,12 +3,12 @@ FROM python:3.11-slim
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
-
-# Install curl, gnupg, and Node.js dependencies
+    
 RUN apt-get update && \
     apt-get install -y curl && \
     curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get install -y nodejs && \
+    apt-get install -y net-tools && \
     apt-get clean
 
 # Verify installation of Node.js and npm

@@ -13,10 +13,10 @@ poetry.lock
 # managers/google/nlp
 test_intent_classifier.py
 cloudbuild.yaml
-/managers/google/nlp
 /widget
 /dist
 /managers/google/
+/managers/elastic/es_play.ipynb
 .github/package_instructions.md
 .github/workflows/package-docker.yml
 /node_modules
