@@ -16,7 +16,6 @@ class ConversationManager(DocumentManager):
         super().__init__()
         self.error_logger = error_logger or ErrorLogger()
         self.elasticsearch_enabled = os.getenv('ELASTICSEARCH_ENABLED', 'false').lower() == 'true'
-        logging.info(f"Elasticsearch enabled: {self.elasticsearch_enabled}")
 
     @contextmanager
     def handle_errors(self, conversation_id: str, action: str):

@@ -3,7 +3,7 @@ echo 'Starting Elasticsearch...'
 bin/elasticsearch -d
 
 
-echo 'Checking for password...'
+# echo 'Checking for password...'
 if [ ! -f /tmp/es_output.txt ]; then
     echo 'Running password reset'
     echo y | bin/elasticsearch-reset-password -u elastic | tee /tmp/es_output.txt
@@ -13,7 +13,6 @@ if [ -z "$PASSWORD" ]; then
     echo 'Error: Password not extracted correctly. Exiting.'
     exit 1
 fi
-echo "Extracted Elasticsearch password: '$PASSWORD'"
 
 echo 'Checking for existing custom index...'
 # Check if our custom index exists
@@ -30,5 +29,5 @@ else
     echo 'Custom index created.'
 fi
 
-echo 'Elasticsearch setup complete. Switching to foreground mode...'
+echo 'Elasticsearch setup complete. 🚀'
 exec bin/elasticsearch

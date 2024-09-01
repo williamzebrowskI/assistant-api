@@ -5,8 +5,9 @@ USER root
 # Copy your kibana.yml into the container
 COPY kibana.yml /usr/share/kibana/config/kibana.yml
 
-# Optionally, add any other scripts or files you want to include
-# COPY some-script.sh /usr/local/bin/some-script.sh
-# RUN chmod +x /usr/local/bin/some-script.sh
+COPY scripts/kibana.sh /usr/src/app/scripts/kibana.sh
+RUN chmod +x /usr/src/app/scripts/kibana.sh
 
 USER kibana
+
+CMD ["/usr/src/app/scripts/kibana.sh", "--silent"]
