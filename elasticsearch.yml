@@ -2,7 +2,7 @@ cluster.name: "docker-cluster"
 network.host: 0.0.0.0
 
 # Reduce log level
-logger.level: FATAL
+logger.level: fatal
 
 # Other necessary settings
 discovery.type: single-node
