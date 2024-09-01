@@ -27,10 +27,9 @@ services:
     container_name: kibana
     volumes:
       - ./kibana.yml:/usr/share/kibana/config/kibana.yml
+      - kibana-data:/usr/share/kibana/data
     ports:
       - "5601:5601"
-    environment:
-      - xpack.security.enabled=false
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -41,6 +40,18 @@ services:
       interval: 10s
       timeout: 5s
       retries: 50
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.15.0
+    container_name: filebeat
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - /var/log:/var/log
+    depends_on:
+      - elasticsearch
+      - kibana
+    networks:
+      - my_network
 
   assistant-api:
     build: .
