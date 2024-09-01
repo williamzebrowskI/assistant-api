@@ -1,8 +1,16 @@
 <div style="text-align: center;">
-    <img src="images/image-astro.webp" alt="Astronaut Helmet" style="width:200px;"/>
     <h1 style="font-family: 'Arial', sans-serif; color: #FFFFFF; font-size: 2.5em; margin: 20px 0;">Assistant-API</h1>
     <h2 style="font-family: 'Arial', sans-serif; color: #FFFFFF; font-size: 1.75em; margin-bottom: 20px; font-style: italic;">+ ElasticSearch & Kibana</h2>
 </div>
+
+![GitHub stars](https://img.shields.io/github/stars/williamzebrowski/assistant-api)
+![GitHub forks](https://img.shields.io/github/forks/williamzebrowski/assistant-api)
+![GitHub watchers](https://img.shields.io/github/watchers/williamzebrowski/assistant-api)
+![GitHub repo size](https://img.shields.io/github/repo-size/williamzebrowski/assistant-api)
+![GitHub language count](https://img.shields.io/github/languages/count/williamzebrowski/assistant-api)
+![GitHub top language](https://img.shields.io/github/languages/top/williamzebrowski/assistant-api)
+![GitHub last commit](https://img.shields.io/github/last-commit/williamzebrowski/assistant-api)
+![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://github.com/williamzebrowski/assistant-api)
 
 Welcome to the  `assistant-api` package which includes AssistantsAPI backend and designed to streamline inquiries through a chat widget. Primarily, this application combines the prowess of OpenAI's Assistants with Elasticsearch (data storage) and Kibana (data visualization) for an intuitive and efficient conversational storage, management, and visualization. This infrastructure allows users to connect to an Assistant on OpenAI, interact with it, store conversational data in an Elasticsearch index for future reference and analysis, and use Kibana to visualize and explore the stored data.
 
