@@ -1,6 +1,8 @@
-<div style="text-align: center;">
+<div style="text-align: center; padding: 20px; background-color: #333;">
     <h1 style="font-family: 'Arial', sans-serif; color: #FFFFFF; font-size: 2.5em; margin: 20px 0;">Assistant-API</h1>
-    <h2 style="font-family: 'Arial', sans-serif; color: #FFFFFF; font-size: 1.75em; margin-bottom: 20px; font-style: italic;">+ ElasticSearch & Kibana</h2>
+    <h2 style="font-family: 'Arial', sans-serif; color: #FFFFFF; font-size: 1.75em; margin-bottom: 20px; font-style: italic;">
+        + Elasticsearch, Kibana, & Filebeat
+    </h2>
 </div>
 
 ![GitHub stars](https://img.shields.io/github/stars/williamzebrowski/assistant-api)
@@ -12,7 +14,9 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/williamzebrowski/assistant-api)
 ![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://github.com/williamzebrowski/assistant-api)
 
-Welcome to the  `assistant-api` package which includes AssistantsAPI backend and designed to streamline inquiries through a chat widget. Primarily, this application combines the prowess of OpenAI's Assistants with Elasticsearch (data storage) and Kibana (data visualization) for an intuitive and efficient conversational storage, management, and visualization. This infrastructure allows users to connect to an Assistant on OpenAI, interact with it, store conversational data in an Elasticsearch index for future reference and analysis, and use Kibana to visualize and explore the stored data.
+Welcome to the `assistant-api` package, which includes the AssistantsAPI backend designed to streamline inquiries through a chat widget. This application combines the capabilities of OpenAI's Assistants with Elasticsearch (for data storage), Kibana (for data visualization), and Filebeat (for log collection and forwarding) to create an intuitive and efficient system for conversational storage, management, and visualization.
+
+This infrastructure allows users to connect to an Assistant on OpenAI, interact with it, and store conversational data in an Elasticsearch index for future reference and analysis. With Kibana, users can visualize and explore the stored data, while Filebeat provides real-time monitoring and logging, capturing essential system and application logs, which are also indexed in Elasticsearch and can be visualized in Kibana. This combination ensures comprehensive observability and data-driven insights across all aspects of the application.
 
 ## Table of Contents
 - [Diagram Depiction](#diagram-depiction)
