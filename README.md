@@ -1,6 +1,10 @@
-# Assistant-Api
+<div style="text-align: center;">
+    <img src="images/image-astro.webp" alt="Astronaut Helmet" style="width:200px;"/>
+    <h1 style="font-family: 'Arial', sans-serif; color: #FFFFFF; font-size: 2.5em; margin: 20px 0;">Assistant-API</h1>
+    <h2 style="font-family: 'Arial', sans-serif; color: #FFFFFF; font-size: 1.75em; margin-bottom: 20px; font-style: italic;">+ ElasticSearch & Kibana</h2>
+</div>
 
-The `assistant-api` repository hosts the AssistantsAPI designed to streamline inquiries through a conversational interface UI. Primarily, this application combines the prowess of OpenAI's Assistants with Elasticsearch for an intuitive and efficient conversational storage and management. This infrastructure allows users to connect to an Assistant on OpenAI, interact with it, and store conversational data in a Elasticsearch index for future reference and analysis.
+Welcome to the  `assistant-api` package which includes AssistantsAPI backend and designed to streamline inquiries through a chat widget. Primarily, this application combines the prowess of OpenAI's Assistants with Elasticsearch (data storage) and Kibana (data visualization) for an intuitive and efficient conversational storage, management, and visualization. This infrastructure allows users to connect to an Assistant on OpenAI, interact with it, store conversational data in an Elasticsearch index for future reference and analysis, and use Kibana to visualize and explore the stored data.
 
 ## Table of Contents
 - [Diagram Depiction](#diagram-depiction)
@@ -23,8 +27,8 @@ The `assistant-api` repository hosts the AssistantsAPI designed to streamline in
 - [Environment Configuration](#environment-configuration)
 - [Logging and Debugging](#logging-and-debugging)
 
-The following Diagram depicts the flow of a user's message from end to end.
-![Assistant API Diagram](images/flow.png)
+<!-- The following Diagram depicts the flow of a user's message from end to end.
+![Assistant API Diagram](images/flow.png) -->
 
 ## Getting Started
 
@@ -50,10 +54,10 @@ The following Diagram depicts the flow of a user's message from end to end.
     ASSISTANT_ID=your_assistants_id_here
 
     # Elasticsearch cloud authentication credentials
-    ES_URL=your_elasticsearch_url_here
-    ES_PORT=your_elasticsearch_port_here
-    ES_INDEX=your_elasticsearch_index_name_here
-    ES_API_KEY=your_elasticsearch_api_key_here
+    ES_URL=https://localhost
+    ES_PORT=9200
+    ES_INDEX=ai-index
+    ES_USERNAME=elastic
     
     CORS_ALLOWED_ORIGINS="http://127.0.0.1:8002"
     ```
@@ -80,7 +84,10 @@ Note: it is also set to true in the `docker-compose.yml` file.
     ```
 
 2. **Accessing the Chat Interface:**
-    Once the server is up and running, a link is provided in the logs directed to the chat widget.
+    Once the server is up and running, a link is provided in the logs directed to the chat widget, http://localhost:8001
+
+3. **Accessing Kibana:**
+    Once Kibana is fully up and running, you can access it by navigating to [http://localhost:5601](http://localhost:5601) in your web browser. Kibana provides a powerful UI for visualizing and managing data in Elasticsearch. You can create dashboards, explore the data stored in your Elasticsearch indices, and set up alerts.
 
 
 ### Running without Docker

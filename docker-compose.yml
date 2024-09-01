@@ -20,6 +20,28 @@ services:
       timeout: 5s
       retries: 50
 
+  kibana:
+    build:
+      context: .
+      dockerfile: Dockerfile.kibana
+    container_name: kibana
+    volumes:
+      - ./kibana.yml:/usr/share/kibana/config/kibana.yml
+    ports:
+      - "5601:5601"
+    environment:
+      - xpack.security.enabled=false
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - my_network
+    healthcheck:
+      test: ["CMD", "curl", "-s", "http://localhost:5601/api/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 50
+
   assistant-api:
     build: .
     container_name: assistant-api
@@ -37,7 +59,7 @@ services:
     volumes:
       - shared_data:/app/es_config
     depends_on:
-      elasticsearch:
+      kibana:
         condition: service_healthy
     networks:
       - my_network
@@ -49,6 +71,8 @@ volumes:
   shared_data:
     driver: local
   elasticsearch-data:
+    driver: local
+  kibana-data:
     driver: local
 
 networks:
