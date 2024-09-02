@@ -37,11 +37,16 @@ COPY . .
 RUN poetry install --only main
 
 # Explicitly copy and set permissions for the startup script
-COPY scripts/start.sh ./scripts/
-RUN chmod +x ./scripts/start.sh
+COPY scripts/start.sh /usr/src/app/scripts/start.sh
+RUN chmod +x /usr/src/app/scripts/start.sh
 
-COPY scripts/init-elasticsearch.sh ./scripts/
-RUN chmod +x ./scripts/init-elasticsearch.sh
+# Copy and set permissions for the Elasticsearch init script
+COPY elasticsearch/elasticsearch.sh /usr/src/app/scripts/elasticsearch.sh
+RUN chmod +x /usr/src/app/scripts/elasticsearch.sh
+
+# Copy and set permissions for the Kibana script
+COPY kibana/kibana.sh /usr/src/app/scripts/kibana.sh
+RUN chmod +x /usr/src/app/scripts/kibana.sh
 
 # Expose ports for both Node.js and Python servers
 EXPOSE 8001 8002
