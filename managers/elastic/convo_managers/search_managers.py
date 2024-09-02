@@ -1,6 +1,5 @@
 from managers.elastic.es_connector.elastic_connect import BaseElasticConnector
 from managers.elastic.convo_managers.document_managers import DocumentManager
-from managers.elastic.logger.error_log import ErrorLogger
 import logging
 import os
 from typing import List, Dict, Any, Optional
@@ -9,9 +8,8 @@ from contextlib import contextmanager
 document_manager = DocumentManager()
 
 class SearchManager(BaseElasticConnector):
-    def __init__(self, error_logger: Optional[ErrorLogger] = None):
+    def __init__(self):
         super().__init__()
-        self.error_logger = error_logger or ErrorLogger()
         self.elasticsearch_enabled = os.getenv('ELASTICSEARCH_ENABLED', 'false').lower() == 'true'
 
     @contextmanager
@@ -21,8 +19,6 @@ class SearchManager(BaseElasticConnector):
         except Exception as e:
             error_msg = f"{action} for conversation {conversation_id}: {e}"
             logging.error(error_msg)
-            if self.elasticsearch_enabled:
-                self.error_logger.log_error(conversation_id, error_msg)
             raise RuntimeError(error_msg) from e
 
     def get_conversation_history(self, conversation_id: str) -> List[Dict[str, Any]]:

@@ -186,15 +186,10 @@
                 var messageText = document.getElementById("message").value.trim();
                 if (!messageText) return;
 
-                let currentPageUrl = window.location.href;
-                let referralUrl = document.referrer;
-
                 socket.emit('user_message', {
                     text: messageText,
                     userId: userId,
                     conversationId: conversationId,
-                    currentPageUrl: currentPageUrl,
-                    referralUrl: referralUrl,
                 });
 
                 const messagesList = document.getElementById("messages");

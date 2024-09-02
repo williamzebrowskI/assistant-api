@@ -1,16 +1,15 @@
 from openai import OpenAI
-from managers.elastic.logger.error_log import ErrorLogger
+
 from managers.elastic.convo_managers.document_managers import DocumentManager 
 import logging
 from typing import Optional
 from contextlib import contextmanager
 
 class ThreadManager(DocumentManager):
-    def __init__(self, client: OpenAI, error_logger: Optional[ErrorLogger] = None):
+    def __init__(self, client: OpenAI):
         super().__init__()
         self.client = client
         self.threads = {}
-        self.error_logger = error_logger or ErrorLogger()
 
     @contextmanager
     def handle_errors(self, conversation_id: str, action: str):
@@ -19,7 +18,6 @@ class ThreadManager(DocumentManager):
         except Exception as e:
             error_msg = f"{action} for UUID '{conversation_id}': {e}"
             logging.error(error_msg, exc_info=True)
-            self.error_logger.log_error(conversation_id, error_msg)
             raise RuntimeError(error_msg) from e
 
     def get_thread(self, conversation_id: str) -> str:

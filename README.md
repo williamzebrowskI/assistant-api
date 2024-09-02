@@ -1,7 +1,7 @@
 <div style="text-align: center; padding: 20px; background-color: #333;">
     <h1 style="font-family: 'Arial', sans-serif; color: #FFFFFF; font-size: 2.5em; margin: 20px 0;">Assistant-API</h1>
     <h2 style="font-family: 'Arial', sans-serif; color: #FFFFFF; font-size: 1.75em; margin-bottom: 20px; font-style: italic;">
-        + Elasticsearch, Kibana, & Filebeat
+        + Elasticsearch & Kibana
     </h2>
 </div>
 
@@ -14,9 +14,9 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/williamzebrowski/assistant-api)
 ![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://github.com/williamzebrowski/assistant-api)
 
-Welcome to the `assistant-api` package, which includes the AssistantsAPI backend designed to streamline inquiries through a chat widget. This application combines the capabilities of OpenAI's Assistants with Elasticsearch (for data storage), Kibana (for data visualization), and Filebeat (for log collection and forwarding) to create an intuitive and efficient system for conversational storage, management, and visualization.
+Welcome to the `assistant-api` package, which includes the AssistantsAPI backend designed to streamline inquiries through a chat widget. This application combines the capabilities of OpenAI's Assistants with Elasticsearch (for data storage), Kibana (for data visualization) to create an intuitive and efficient system for conversational storage, management, and visualization.
 
-This infrastructure allows users to connect to an Assistant on OpenAI, interact with it, and store conversational data in an Elasticsearch index for future reference and analysis. With Kibana, users can visualize and explore the stored data, while Filebeat provides real-time monitoring and logging, capturing essential system and application logs, which are also indexed in Elasticsearch and can be visualized in Kibana. This combination ensures comprehensive observability and data-driven insights across all aspects of the application.
+This infrastructure allows users to connect to an Assistant on OpenAI, interact with it, and store conversational data in an Elasticsearch index for future reference and analysis. With Kibana, users can visualize and explore the stored data. This combination ensures comprehensive observability and data-driven insights across all aspects of the application.
 
 ## Table of Contents
 - [Diagram Depiction](#diagram-depiction)
@@ -250,7 +250,7 @@ Upon instantiation, the `ElasticConnector` class initializes a connection to an 
 
 ### Methods
 
-#### async push_to_index(conversation_uuid, user_id, client_ip, thread_id, assistant_id)
+#### async push_to_index(conversation_uuid, user_id, thread_id, assistant_id)
 
 This asynchronous method creates a new conversation document in Elasticsearch. The document includes metadata such as the user's ID, the client's IP address, the thread's ID, the assistant's ID, and a timestamp marking the creation time. This setup initializes an empty list for conversations to hold future interactions.
 
@@ -258,7 +258,6 @@ This asynchronous method creates a new conversation document in Elasticsearch. T
 
 - `conversation_uuid` (str): Unique identifier for the conversation document.
 - `user_id` (str): ID of the user initiating the conversation.
-- `client_ip` (str): IP address of the client.
 - `thread_id` (str): Unique identifier of the thread associated with the conversation.
 - `assistant_id` (str): ID of the assistant involved in the conversation.
 
