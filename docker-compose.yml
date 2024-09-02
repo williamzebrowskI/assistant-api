@@ -2,12 +2,12 @@ services:
   elasticsearch:
     build:
       context: .
-      dockerfile: Dockerfile.elasticsearch
+      dockerfile: elasticsearch/Dockerfile
     container_name: elasticsearch
     volumes:
       - shared_data:/tmp
       - elasticsearch-data:/usr/share/elasticsearch/data
-      - ./elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+       - ./elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     ports:
       - "9200:9200"
     environment:
@@ -23,10 +23,10 @@ services:
   kibana:
     build:
       context: .
-      dockerfile: Dockerfile.kibana
+      dockerfile: kibana/Dockerfile
     container_name: kibana
     volumes:
-      - ./kibana.yml:/usr/share/kibana/config/kibana.yml
+      - ./kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
       - kibana-data:/usr/share/kibana/data
       - shared_data:/app/es_config
     ports:

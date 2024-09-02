@@ -82,7 +82,7 @@ This infrastructure allows users to connect to an Assistant on OpenAI, interact 
 
 1. **Start the Docker Containers**:
     ```bash
-    docker-compose up
+    docker-compose up --build
     ```
 
 2. **Accessing the Chat Interface:**
