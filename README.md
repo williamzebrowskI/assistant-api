@@ -76,16 +76,6 @@ This infrastructure allows users to connect to an Assistant on OpenAI, interact 
 
     Ensure you replace the placeholder values with your actual credentials.
 
-### Configuration
-
-By default, `ELASTICSEARCH_ENABLED` is set to `true`, the application will create and connect to a Elasticsearch instance which is built in a different docker container, and conversation data will  be stored in the Elasticsearch index ("ai-index"). You can disable Elasticsearch by setting the `ELASTICSEARCH_ENABLED` environment variable in your `.env` file:s
-
-```
-ELASTICSEARCH_ENABLED=true # Set to true to enable Elasticsearch (false to disable)
-```
-
-Note: it is also set to true in the `docker-compose.yml` file.
-
 ## Startup
 
 ### Running with Docker Compose
@@ -96,10 +86,17 @@ Note: it is also set to true in the `docker-compose.yml` file.
     ```
 
 2. **Accessing the Chat Interface:**
-    Once the server is up and running, a link is provided in the logs directed to the chat widget, http://localhost:8001
+    Once the server is up and running, a link is provided in the logs directed to the chat widget, http://localhost:8001.
 
 3. **Accessing Kibana:**
     Once Kibana is fully up and running, you can access it by navigating to [http://localhost:5601](http://localhost:5601) in your web browser. Kibana provides a powerful UI for visualizing and managing data in Elasticsearch. You can create dashboards, explore the data stored in your Elasticsearch indices, and set up alerts.
+
+    To get into Kibana, the `username` and `password` will be printed after. ie:
+
+    ```sh
+    username: elastic
+    password: <generated password>
+    ```
 
 
 ### Running without Docker
@@ -141,9 +138,6 @@ Note: it is also set to true in the `docker-compose.yml` file.
     poetry run gunicorn --config ws/gunicorn_config.py --worker-class eventlet -w 1 app.main:app_instance -b 0.0.0.0:8002
     ```
 
-6. **Access the Chat Interface**
-    Open the `index.html` file in a web browser to see the chat interface. This file should be located in your project directory. If you're using an IDE that supports live previews, you can also use that feature to open the file.
-
 ### Running from Docker Hub
 
 To make it easier for users to install and run the application, you can pull and run the Docker image directly from Docker Hub.
@@ -151,20 +145,18 @@ To make it easier for users to install and run the application, you can pull and
 1. **Run the Docker Container**:
 
     ```bash
-    docker run -d -p 8002:8002 --name assistant-api --restart always \
-      -e OPENAI_API_KEY=your_openai_api_key_here \
-      -e ASSISTANT_ID=your_assistants_id_here \
-      -e ES_URL=your_elasticsearch_url_here \
-      -e ES_PORT=your_elasticsearch_port_here \
-      -e ES_INDEX=your_elasticsearch_index_name_here \
-      -e ES_API_KEY=your_elasticsearch_api_key_here \
-      -e CORS_ALLOWED_ORIGINS="http://127.0.0.1:8002" \
-      -e ELASTICSEARCH_ENABLED=false \
-      wzebrowski/assistant-api:v1.0.0
+    docker run -d -p 8001:8001 -p 8002:8002 --name assistant-api --restart always \
+        -e FE_PORT=8001 \
+        -e ES_HOST=elasticsearch \
+        -e ES_PORT=9200 \
+        -e ES_INDEX=ai-index \
+        -e ES_USERNAME=elastic \
+        -e ES_PASSWORD_FILE=/app/es_config/es_output.txt \
+        -e OPENAI_API_KEY=your_openai_api_key_here \
+        -e ASSISTANT_ID=your_assistants_id_here \
+        -v shared_data:/app/es_config \
+        wzebrowski/assistant-api:<version number>
     ```
-
-2. **Accessing the Chat Interface:**
-    Once the server is up and running, open the `index.html` file in a web browser to see the chat interface. This file should be located in your project directory. If you're using an IDE that supports live previews, you can also use that feature to open the file.
 
 ## Assistant API Overview
 
@@ -238,7 +230,6 @@ Before utilizing the `ElasticConnector`, ensure the following environmental vari
 - `ES_URL`: The URL of your Elasticsearch instance.
 - `ES_INDEX`: The Elasticsearch index to which documents will be pushed and from which they will be retrieved.
 - `ES_PORT`: The port on which your Elasticsearch instance is running.
-- `ES_API_KEY`: The API key for authenticating with your Elasticsearch instance.
 
 These variables are critical for establishing a connection to Elasticsearch. The connector will log warnings if any of these are unset.
 

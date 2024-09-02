@@ -2,7 +2,6 @@ from os import getenv
 getenv('PYTHONDONTWRITEBYTECODE', '1')
 from openai import OpenAI
 from ws.flask_config import config
-import logging
 from managers.openai.managers.thread_manager import ThreadManager
 from managers.openai.managers.assistant_manager import OpenAIAssistant
 from managers.elastic.convo_managers.conversation_managers import ConversationManager

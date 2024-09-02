@@ -4,9 +4,6 @@
 export PYTHONPATH=/usr/src/app
 export PYTHONDONTWRITEBYTECODE=1
 
-# Set Elasticsearch enabled/disabled
-export ELASTICSEARCH_ENABLED=true # false to disable Elastic
-
 # Set the port for the Node.js server
 export FE_PORT=8001
 

@@ -13,7 +13,6 @@ from managers.elastic.convo_managers.document_managers import DocumentManager
 class ConversationManager(DocumentManager):
     def __init__(self):
         super().__init__()
-        self.elasticsearch_enabled = os.getenv('ELASTICSEARCH_ENABLED', 'false').lower() == 'true'
 
     @contextmanager
     def handle_errors(self, conversation_id: str, action: str):
@@ -37,8 +36,7 @@ class ConversationManager(DocumentManager):
             conversation = Conversation(
                 conversation_id, user_id, turns=[]
             )
-            if self.elasticsearch_enabled:
-                self.create_document(conversation_id, asdict(conversation))
+            self.create_document(conversation_id, asdict(conversation))
             logging.info(f"Conversation {conversation_id} started successfully.")
 
     def add_turn(self, msg_data: MessageData, user: User, assistant: AssistantResponse, upsert_body: Optional[Dict[str, Any]] = None, intent: Optional[str] = None, confidence: Optional[float] = None) -> None:
@@ -68,8 +66,7 @@ class ConversationManager(DocumentManager):
             # Detailed logging of upsert_body
             logging.info(f"Upsert body: {upsert_body}")
 
-            if self.elasticsearch_enabled:
-                self.update_document(conversation_id, script, upsert_body)
+            self.update_document(conversation_id, script, upsert_body)
             logging.info(f"Turn added to conversation {conversation_id} at index {current_index}.")
 
     def get_current_index(self, conversation_id: str) -> int:
@@ -80,8 +77,6 @@ class ConversationManager(DocumentManager):
         :return: Current index of turns.
         """
         with self.handle_errors(conversation_id, "Failed to fetch current index"):
-            if not self.elasticsearch_enabled:
-                return 0
             doc = self.es.get(index=self.es_index, id=conversation_id)
             turns = doc['_source'].get('turns', [])
             current_index = len(turns) if turns is not None else 0
