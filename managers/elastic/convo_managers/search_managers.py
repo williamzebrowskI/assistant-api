@@ -10,7 +10,6 @@ document_manager = DocumentManager()
 class SearchManager(BaseElasticConnector):
     def __init__(self):
         super().__init__()
-        self.elasticsearch_enabled = os.getenv('ELASTICSEARCH_ENABLED', 'false').lower() == 'true'
 
     @contextmanager
     def handle_errors(self, conversation_id: str, action: str):
@@ -23,8 +22,6 @@ class SearchManager(BaseElasticConnector):
 
     def get_conversation_history(self, conversation_id: str) -> List[Dict[str, Any]]:
         with self.handle_errors(conversation_id, "Failed to fetch conversation"):
-            if not self.elasticsearch_enabled:
-                return []
             response = self.es.get(index=self.es_index, id=conversation_id)
             if not response['found']:
                 return []
