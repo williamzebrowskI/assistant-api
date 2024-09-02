@@ -1,7 +1,6 @@
 import os
 import logging
-from datetime import datetime
-from flask import session, request, jsonify
+from flask import session, request
 from flask_socketio import join_room
 from ws.flask_config import config
 from ws.message_data import MessageData
@@ -15,12 +14,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 os.environ['PYTHONDONTWRITEBYTECODE'] = '1'
-elasticsearch_enabled = os.getenv('ELASTICSEARCH_ENABLED', 'false').lower() == 'true'
 
 # classifier = IntentClassifier()
 md_stripper = MarkdownStripper()
-elastic_manager = ConversationManager() if elasticsearch_enabled else None
-document_manager = DocumentManager() if elasticsearch_enabled else None
+elastic_manager = ConversationManager()
+document_manager = DocumentManager()
 
 # SocketIO event handlers
 @config.socketio.on('connect', namespace='/chat')
@@ -49,7 +47,7 @@ def handle_user_message(message):
     msg_data = MessageData(message, request)
 
     try:
-        if elasticsearch_enabled and not elastic_manager.document_exists(msg_data.conversation_id):
+        if not elastic_manager.document_exists(msg_data.conversation_id):
             elastic_manager.start_conversation(
                 msg_data,
             )
@@ -83,8 +81,7 @@ def handle_user_message(message):
                             assistant_response=strip_md_from_resp,
                         )
 
-                        if elasticsearch_enabled:
-                            elastic_manager.add_turn(
+                        elastic_manager.add_turn(
                                 msg_data,
                                 user,
                                 assistant_response
