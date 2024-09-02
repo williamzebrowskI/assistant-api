@@ -8,13 +8,11 @@ from typing import Optional, Dict, Any
 from contextlib import contextmanager
 from models.models import Conversation, Turn, User, AssistantResponse
 from ws.message_data import MessageData
-from managers.elastic.logger.error_log import ErrorLogger
 from managers.elastic.convo_managers.document_managers import DocumentManager
 
 class ConversationManager(DocumentManager):
-    def __init__(self, error_logger: Optional[ErrorLogger] = None):
+    def __init__(self):
         super().__init__()
-        self.error_logger = error_logger or ErrorLogger()
         self.elasticsearch_enabled = os.getenv('ELASTICSEARCH_ENABLED', 'false').lower() == 'true'
 
     @contextmanager
@@ -24,26 +22,20 @@ class ConversationManager(DocumentManager):
         except Exception as e:
             error_msg = f"{action} for conversation {conversation_id}: {e}"
             logging.error(error_msg)
-            if self.elasticsearch_enabled:
-                self.error_logger.log_error(conversation_id, error_msg)
             raise RuntimeError(error_msg) from e
 
-    def start_conversation(self, msg_data: MessageData, title: str, partner_id: str, assistant_type: str) -> None:
+    def start_conversation(self, msg_data: MessageData) -> None:
         """
         Starts a new conversation and creates a document in the database.
 
         :param msg_data: MessageData object containing conversation metadata.
-        :param title: Title of the conversation.
-        :param partner_id: ID of the partner.
-        :param assistant_type: Type of the assistant.
         """
         conversation_id = msg_data.conversation_id
-        initial_session_id = msg_data.session_id_ga
-        initial_user_id = msg_data.user_id
+        user_id = msg_data.user_id
 
         with self.handle_errors(conversation_id, "Failed to start conversation"):
             conversation = Conversation(
-                conversation_id, initial_session_id, initial_user_id, assistant_type, title, partner_id, turns=[]
+                conversation_id, user_id, turns=[]
             )
             if self.elasticsearch_enabled:
                 self.create_document(conversation_id, asdict(conversation))
@@ -64,11 +56,6 @@ class ConversationManager(DocumentManager):
             current_index = self.get_current_index(conversation_id)
             user.index = current_index
             assistant.index = current_index
-
-            user.intent_data = {
-                "intent": intent,
-                "confidence": confidence
-            }
 
             turn = Turn.from_user_and_assistant(user, assistant, conversation_id, current_index)
 
