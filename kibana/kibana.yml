@@ -1,0 +1,33 @@
+server.name: "kibana"
+server.host: 0.0.0.0
+
+xpack.apm.enabled: false
+
+# Logging configuration
+logging:
+  root:
+    level: fatal
+  appenders:
+    default:
+      type: console
+      layout:
+        type: pattern
+        highlight: false
+  loggers:
+    - name: elastic-apm-node
+      level: fatal
+    - name: elasticsearch
+      level: fatal
+    - name: http.server.response
+      level: fatal
+    - name: plugins.task_manager
+      level: fatal
+    - name: plugins.reporting
+      level: fatal
+
+elasticsearch.ssl.verificationMode: none
+
+elasticsearch.hosts: ["http://elasticsearch:9200"]
+elasticsearch.serviceAccountToken: "${ELASTICSEARCH_SERVICE_TOKEN}"
+xpack.encryptedSavedObjects.encryptionKey: "wGC2e12S4b10eJc3SfLN6l8QlsdYyYNub3dbR2AJp5Y=" # random 32-char key
+server.ssl.enabled: false
