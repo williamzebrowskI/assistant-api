@@ -48,7 +48,6 @@ services:
     build: .
     container_name: assistant-api
     environment:
-      - ELASTICSEARCH_ENABLED=true
       - FE_PORT=8001
       - ES_HOST=elasticsearch
       - ES_PORT=9200
