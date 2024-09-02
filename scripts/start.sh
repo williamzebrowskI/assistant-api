@@ -10,11 +10,21 @@ export ELASTICSEARCH_ENABLED=true # false to disable Elastic
 # Set the port for the Node.js server
 export FE_PORT=8001
 
+# Path to the shared volume where the marker file is stored
+ES_CONFIG_DIR="/app/es_config"
+MARKER_FILE="$ES_CONFIG_DIR/assistant-start.marker"
+
+# Wait until the marker file is detected
+while [ ! -f "$MARKER_FILE" ]; do
+    sleep 1
+done
+
+rm -f "$MARKER_FILE"
+
 # Extract the password from the file if it exists
 if [ -f /app/es_config/es_output.txt ]; then
     ES_PASSWORD=$(awk -F'New value: ' '{print $2}' /app/es_config/es_output.txt | tr -d '[:space:]')
     export ES_PASSWORD
-    # echo "Extracted Elasticsearch password: '$ES_PASSWORD'"
 else
     echo "Password file not found. Ensure the password reset process completed successfully."
     exit 1

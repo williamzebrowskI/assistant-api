@@ -6,5 +6,5 @@ logger.level: fatal
 
 # Other necessary settings
 discovery.type: single-node
-xpack.security.enabled: false
-xpack.security.enrollment.enabled: true
+xpack.security.enabled: true
+xpack.security.enrollment.enabled: false
