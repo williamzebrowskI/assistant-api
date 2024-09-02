@@ -10,7 +10,6 @@ from managers.elastic.es_connector.elastic_connect import BaseElasticConnector
 class DocumentManager(BaseElasticConnector):
     def __init__(self):
         super().__init__()
-        self.elasticsearch_enabled = os.getenv('ELASTICSEARCH_ENABLED', 'false').lower() == 'true'
 
     @contextmanager
     def handle_errors(self, conversation_id: str, action: str):
@@ -28,9 +27,6 @@ class DocumentManager(BaseElasticConnector):
         :param conversation_id: UUID of the conversation.
         :param body: Body of the document.
         """
-        if not self.elasticsearch_enabled:
-            logging.info(f"Elasticsearch is disabled. Skipping document creation for {conversation_id}.")
-            return
         with self.handle_errors(conversation_id, "Failed to create document"):
             response = self.es.index(index=self.es_index, id=conversation_id, body=body)
             logging.info(f"Document {conversation_id} created successfully. Response: {response}")
@@ -43,9 +39,6 @@ class DocumentManager(BaseElasticConnector):
         :param script: Script to update the document.
         :param upsert_body: Optional upsert body.
         """
-        if not self.elasticsearch_enabled:
-            logging.info(f"Elasticsearch is disabled. Skipping document update for {conversation_id}.")
-            return
         with self.handle_errors(conversation_id, "Failed to update document"):
             response = self.es.update(
                 index=self.es_index, 
@@ -64,9 +57,6 @@ class DocumentManager(BaseElasticConnector):
         :param conversation_id: UUID of the conversation.
         :return: True if the document exists, False otherwise.
         """
-        if not self.elasticsearch_enabled:
-            logging.info(f"Elasticsearch is disabled. Assuming document {conversation_id} does not exist.")
-            return False
         with self.handle_errors(conversation_id, "Failed to check if document exists"):
             exists = self.es.exists(index=self.es_index, id=conversation_id)
             logging.info(f"Document {conversation_id} exists: {exists}")
