@@ -35,7 +35,6 @@ class Conversation:
 
 @dataclass
 class Turn:
-    turn_id: str
     conversation_id: str
     user: dict
     assistant: dict
@@ -44,7 +43,6 @@ class Turn:
     @classmethod
     def from_user_and_assistant(cls, user, assistant, conversation_id, index):
         return cls(
-            turn_id=str(uuid.uuid4()),
             conversation_id=conversation_id,
             user=asdict(user),
             assistant=asdict(assistant),
