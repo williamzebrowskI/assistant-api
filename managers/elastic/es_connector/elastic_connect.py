@@ -12,7 +12,7 @@ class BaseElasticConnector:
         self.es_port = os.environ.get('ES_PORT', '9200')
         self.es_username = os.environ.get('ES_USERNAME', 'elastic')
         self.es_index = os.environ.get('ES_INDEX', 'ai-index')
-        self.es_password = os.environ.get('ES_PASSWORD')
+        self.es_password = os.environ.get('ELASTIC_PASSWORD', 'changeme')
 
         if not self.es_password:
             raise ValueError("Elasticsearch password not found in environment variables")
