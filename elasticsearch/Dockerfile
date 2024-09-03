@@ -1,4 +1,7 @@
-FROM docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+ARG ELASTIC_VERSION
+
+# https://www.docker.elastic.co/
+FROM docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION}
 
 USER root
 
