@@ -1,7 +1,12 @@
 server.name: "kibana"
 server.host: 0.0.0.0
+elasticsearch.hosts: [ http://elasticsearch:9200 ]
 
 xpack.apm.enabled: false
+
+monitoring.ui.container.elasticsearch.enabled: true
+elasticsearch.username: kibana_system
+elasticsearch.password: changeme
 
 # Logging configuration
 logging:
@@ -26,8 +31,3 @@ logging:
       level: fatal
 
 elasticsearch.ssl.verificationMode: none
-
-elasticsearch.hosts: ["http://elasticsearch:9200"]
-elasticsearch.serviceAccountToken: "${ELASTICSEARCH_SERVICE_TOKEN}"
-xpack.encryptedSavedObjects.encryptionKey: "wGC2e12S4b10eJc3SfLN6l8QlsdYyYNub3dbR2AJp5Y=" # random 32-char key
-server.ssl.enabled: false

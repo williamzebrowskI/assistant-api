@@ -7,11 +7,11 @@ services:
     volumes:
       - shared_data:/tmp
       - elasticsearch-data:/usr/share/elasticsearch/data
-       - ./elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     ports:
       - "9200:9200"
     environment:
-      - discovery.type=single-node
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
     networks:
       - my_network
     healthcheck:
@@ -26,18 +26,17 @@ services:
       dockerfile: kibana/Dockerfile
     container_name: kibana
     volumes:
-      - ./kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
+      - ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml
       - kibana-data:/usr/share/kibana/data
       - shared_data:/app/es_config
     ports:
       - "5601:5601"
     depends_on:
-      elasticsearch:
-        condition: service_healthy
+      - elasticsearch
     networks:
       - my_network
     environment:
-      - ELASTIC_PASSWORD_FILE=/app/es_config
+       KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
     healthcheck:
       test: ["CMD", "curl", "-s", "http://localhost:5601/api/status"]
       interval: 10s
@@ -53,15 +52,13 @@ services:
       - ES_PORT=9200
       - ES_INDEX=ai-index
       - ES_USERNAME=elastic
-      - ES_PASSWORD_FILE=/app/es_config/es_output.txt
     ports:
       - "8001:8001"
       - "8002:8002"
     volumes:
       - shared_data:/app/es_config
     depends_on:
-      kibana:
-        condition: service_healthy
+      - elasticsearch
     networks:
       - my_network
     entrypoint: |
