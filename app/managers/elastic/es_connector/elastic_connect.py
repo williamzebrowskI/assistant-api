@@ -4,7 +4,7 @@
 import os
 import logging
 from elasticsearch import Elasticsearch
-from ws.flask_config import config
+from app.ws.flask_config import config
 
 class BaseElasticConnector:
     def __init__(self):

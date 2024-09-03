@@ -32,7 +32,7 @@ class EventHandler(AssistantEventHandler):
         using the user's unique identifier to target the correct room. 
         """
         with self.handle_errors("Error processing text delta"):
-            from ws.flask_config import config
+            from app.ws.flask_config import config
             annotation_pattern = re.compile(r"【\d+:\d+†[^】]*】")
 
             config.socketio.emit(

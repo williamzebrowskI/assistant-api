@@ -5,7 +5,7 @@ import os
 import logging
 from typing import Optional, Dict, Any
 from contextlib import contextmanager
-from managers.elastic.es_connector.elastic_connect import BaseElasticConnector
+from app.managers.elastic.es_connector.elastic_connect import BaseElasticConnector
 
 class DocumentManager(BaseElasticConnector):
     def __init__(self):

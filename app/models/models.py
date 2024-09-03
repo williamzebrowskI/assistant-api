@@ -1,6 +1,5 @@
 from datetime import datetime
 from dataclasses import dataclass, asdict, field
-import uuid
 
 @dataclass
 class User:

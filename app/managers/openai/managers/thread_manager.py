@@ -1,6 +1,6 @@
 from openai import OpenAI
 
-from managers.elastic.convo_managers.document_managers import DocumentManager 
+from app.managers.elastic.convo_managers.document_managers import DocumentManager 
 import logging
 from typing import Optional
 from contextlib import contextmanager

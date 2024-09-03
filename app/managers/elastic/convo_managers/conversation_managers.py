@@ -6,9 +6,9 @@ import logging
 from dataclasses import asdict
 from typing import Optional, Dict, Any
 from contextlib import contextmanager
-from models.models import Conversation, Turn, User, AssistantResponse
-from ws.message_data import MessageData
-from managers.elastic.convo_managers.document_managers import DocumentManager
+from app.models.models import Conversation, Turn, User, AssistantResponse
+from app.ws.message_data import MessageData
+from app.managers.elastic.convo_managers.document_managers import DocumentManager
 
 class ConversationManager(DocumentManager):
     def __init__(self):

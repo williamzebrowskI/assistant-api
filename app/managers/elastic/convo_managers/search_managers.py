@@ -1,5 +1,5 @@
-from managers.elastic.es_connector.elastic_connect import BaseElasticConnector
-from managers.elastic.convo_managers.document_managers import DocumentManager
+from app.managers.elastic.es_connector.elastic_connect import BaseElasticConnector
+from app.managers.elastic.convo_managers.document_managers import DocumentManager
 import logging
 import os
 from typing import List, Dict, Any, Optional
