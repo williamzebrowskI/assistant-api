@@ -28,4 +28,4 @@ sleep 2
 echo "\n\033[0;34mChat widget is available at: \033[4;34mhttp://localhost:$FE_PORT\033[0m"
 
 # Start the Python server
-exec poetry run gunicorn --config ws/gunicorn_config.py --worker-class eventlet -w 1 app.main:app_instance -b 0.0.0.0:8002
+exec poetry run gunicorn --config app/ws/gunicorn_config.py --worker-class eventlet -w 1 app.main:app_instance -b 0.0.0.0:8002
