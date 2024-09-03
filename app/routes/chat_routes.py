@@ -2,13 +2,13 @@ import os
 import logging
 from flask import session, request
 from flask_socketio import join_room
-from ws.flask_config import config
-from ws.message_data import MessageData
-from managers.openai.managers.event_manager import EventHandler
-from managers.elastic.convo_managers.conversation_managers import ConversationManager, DocumentManager
-from models.models import User, AssistantResponse
+from app.ws.flask_config import config
+from app.ws.message_data import MessageData
+from app.managers.openai.managers.event_manager import EventHandler
+from app.managers.elastic.convo_managers.conversation_managers import ConversationManager, DocumentManager
+from app.models.models import User, AssistantResponse
 from app.main import app_instance
-from utils.markdown_stripper import MarkdownStripper
+from app.utils.markdown_stripper import MarkdownStripper
 from app.main import thread_manager, elastic_manager, client, assistant_id
 from dotenv import load_dotenv
 load_dotenv()
