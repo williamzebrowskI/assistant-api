@@ -143,7 +143,7 @@ This infrastructure allows users to connect to an Assistant on OpenAI, interact 
 
 5. **Run the Application**
     ```bash
-    poetry run gunicorn --config ws/gunicorn_config.py --worker-class eventlet -w 1 app.main:app_instance -b 0.0.0.0:8002
+    poetry run gunicorn --config app/ws/gunicorn_config.py --worker-class eventlet -w 1 app.main:app_instance -b 0.0.0.0:8002
     ```
 
 ### Running from Docker Hub
