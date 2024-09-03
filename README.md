@@ -1,7 +1,7 @@
 <div style="text-align: center; padding: 20px; background-color: #333;">
     <h1 style="font-family: 'Arial', sans-serif; color: #FFFFFF; font-size: 2.5em; margin: 20px 0;">Assistant-API</h1>
     <h2 style="font-family: 'Arial', sans-serif; color: #FFFFFF; font-size: 1.75em; margin-bottom: 20px; font-style: italic;">
-        + Elasticsearch & Kibana
+        w/ Elasticsearch, Logstash + Kibana (ELK Stack)
     </h2>
 </div>
 
@@ -14,9 +14,9 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/williamzebrowski/assistant-api)
 ![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://github.com/williamzebrowski/assistant-api)
 
-Welcome to the `assistant-api` package, which includes the AssistantsAPI backend designed to streamline inquiries through a chat widget. This application combines the capabilities of OpenAI's Assistants with Elasticsearch (for data storage), Kibana (for data visualization) to create an intuitive and efficient system for conversational storage, management, and visualization.
+Welcome to the `assistant-api` package, which includes the AssistantsAPI backend designed to streamline inquiries through a chat widget. This application combines the capabilities of OpenAI’s Assistants with Elasticsearch (for data storage), Logstash (for real-time data processing and transformation), and Kibana (for data visualization) to create an intuitive and efficient system for conversational storage, management, and visualization.
 
-This infrastructure allows users to connect to an Assistant on OpenAI, interact with it, and store conversational data in an Elasticsearch index for future reference and analysis. With Kibana, users can visualize and explore the stored data. This combination ensures comprehensive observability and data-driven insights across all aspects of the application.
+This infrastructure allows users to connect to an Assistant on OpenAI, interact with it, and store conversational data in an Elasticsearch index for future reference and analysis. Logstash processes and enriches the incoming data before storing it, ensuring that the data is clean, structured, and ready for advanced analysis. With Kibana, users can visualize and explore the stored data. This combination ensures comprehensive observability and data-driven insights across all aspects of the application.
 
 ## Table of Contents
 - [Diagram Depiction](#diagram-depiction)
@@ -66,10 +66,15 @@ This infrastructure allows users to connect to an Assistant on OpenAI, interact 
     ASSISTANT_ID=your_assistants_id_here
 
     # Elasticsearch cloud authentication credentials
+    ELASTIC_VERSION=8.15.0
     ES_URL=https://localhost
     ES_PORT=9200
     ES_INDEX=ai-index
     ES_USERNAME=elastic
+
+    ELASTIC_PASSWORD='changeme'
+    KIBANA_SYSTEM_PASSWORD='changeme'
+    LOGSTASH_INTERNAL_PASSWORD='changeme'
     
     CORS_ALLOWED_ORIGINS="http://127.0.0.1:8002"
     ```
@@ -125,12 +130,15 @@ This infrastructure allows users to connect to an Assistant on OpenAI, interact 
     OPENAI_API_KEY=your_openai_api_key_here
     ASSISTANT_ID=your_assistants_id_here
     # Elasticsearch cloud authentication credentials
-    ES_URL=your_elasticsearch_url_here
-    ES_PORT=your_elasticsearch_port_here
-    ES_INDEX=your_elasticsearch_index_name_here
-    ES_API_KEY=your_elasticsearch_api_key_here
+    ELASTIC_VERSION=8.15.0
+    ES_URL=https://localhost
+    ES_PORT=9200
+    ES_INDEX=ai-index
+    ES_USERNAME=elastic
     CORS_ALLOWED_ORIGINS="http://127.0.0.1:8002"
-    ELASTICSEARCH_ENABLED=false  # Set to true to enable Elasticsearch
+    ELASTIC_PASSWORD='changeme'
+    KIBANA_SYSTEM_PASSWORD='changeme'
+    LOGSTASH_INTERNAL_PASSWORD='changeme'
     ```
 
 5. **Run the Application**
