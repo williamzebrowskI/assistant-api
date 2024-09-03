@@ -139,80 +139,110 @@
     markedScript.src = 'https://cdn.jsdelivr.net/npm/marked/marked.min.js';
     document.head.appendChild(markedScript);
 
-    socketIoScript.onload = markedScript.onload = function () {
+    Promise.all([
+        new Promise(resolve => socketIoScript.onload = resolve),
+        new Promise(resolve => markedScript.onload = resolve)
+    ]).then(() => {
         console.log("Socket.IO and Marked libraries loaded");
-
+    
+        // Initialize marked
+        if (typeof marked !== 'undefined') {
+            marked.use({
+                breaks: true,
+                gfm: true
+            });
+        } else {
+            console.error("Marked library not loaded properly");
+            return;
+        }
+    
         let userId = localStorage.getItem("userId") || crypto.randomUUID();
         let conversationId = localStorage.getItem("conversationId") || crypto.randomUUID();
         localStorage.setItem("userId", userId);
         localStorage.setItem("conversationId", conversationId);
-
+    
         var socket = io.connect('http://localhost:8002/chat', {
             query: { 'userId': userId, 'conversationId': conversationId }
         });
-
+    
         // Function to send a heartbeat message
         function sendHeartbeat() {
             socket.emit('heartbeat', { message: 'ping' });
         }
-
+    
         setInterval(sendHeartbeat, 60000);
-
+    
         const messageInput = document.getElementById("message");
         const sendButton = document.getElementById("send");
-
+    
+        function sendMessage() {
+            var messageText = messageInput.value.trim();
+            if (!messageText) return;
+    
+            socket.emit('user_message', {
+                text: messageText,
+                userId: userId,
+                conversationId: conversationId,
+            });
+    
+            const messagesList = document.getElementById("messages");
+            const userMsgElement = document.createElement("div");
+            userMsgElement.classList.add("message", "user");
+            userMsgElement.innerText = messageText;
+            messagesList.appendChild(userMsgElement);
+    
+            messageInput.value = ''; // Clear the input field after sending
+            messagesList.scrollTop = messagesList.scrollHeight; // Scroll to the bottom
+        }
+    
         if (messageInput && sendButton) {
             messageInput.addEventListener("keydown", function (event) {
                 if (event.key === "Enter" && !event.shiftKey) {
                     event.preventDefault();
-                    sendButton.click();
+                    sendMessage();
                 }
             });
-
-            sendButton.addEventListener("click", function () {
-                var messageText = messageInput.value.trim();
-                if (!messageText) return;
-
-                socket.emit('user_message', {
-                    text: messageText,
-                    userId: userId,
-                    conversationId: conversationId,
-                });
-
-                const messagesList = document.getElementById("messages");
-                const userMsgElement = document.createElement("div");
-                userMsgElement.classList.add("message", "user");
-                userMsgElement.innerText = messageText;
-                messagesList.appendChild(userMsgElement);
-
-                messageInput.value = ''; // Clear the input field after sending
-                messagesList.scrollTop = messagesList.scrollHeight; // Scroll to the bottom
-            });
+    
+            sendButton.addEventListener("click", sendMessage);
         }
-
-        let currentMessage = "";
+    
+        let accumulatedMarkdown = '';
 
         socket.on('assistant_message', function (data) {
             const messagesList = document.getElementById("messages");
             let lastMessage = messagesList.lastElementChild;
-
+            
             // Check if the last message is from the assistant
             if (!lastMessage || lastMessage.classList.contains("user")) {
                 lastMessage = document.createElement("div");
                 lastMessage.classList.add("message", "assistant");
                 messagesList.appendChild(lastMessage);
+                accumulatedMarkdown = ''; // Reset the accumulated markdown for a new message
             }
-
-            // Accumulate incoming data and update the message
-            currentMessage += data.text;
-            lastMessage.innerHTML = marked.parseInline(currentMessage); // Use parseInline to prevent new blocks from being created
-
+            
+            // Only add the new incoming text
+            const newContent = data.text;
+            
+            // Append the new content to the accumulated markdown
+            accumulatedMarkdown += newContent;
+            
+            console.log('Accumulated (unparsed):', accumulatedMarkdown);
+            
+            // Parse and update the content
+            if (typeof marked !== 'undefined') {
+                lastMessage.innerHTML = marked.parse(accumulatedMarkdown);
+            } else {
+                lastMessage.textContent = accumulatedMarkdown; // Fallback if marked is not available
+            }
+            
+            console.log('Parsed:', lastMessage.innerHTML);
+            
             // Scroll to the bottom
             messagesList.scrollTop = messagesList.scrollHeight;
         });
 
         console.log("Chat functionality initialized");
-    };
+    });
 
     function toggleChat() {
         const chatWidget = document.getElementById('chat-widget');
