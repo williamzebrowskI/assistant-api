@@ -18,15 +18,6 @@ done
 
 rm -f "$MARKER_FILE"
 
-# Extract the password from the file if it exists
-if [ -f /app/es_config/es_output.txt ]; then
-    ES_PASSWORD=$(awk -F'New value: ' '{print $2}' /app/es_config/es_output.txt | tr -d '[:space:]')
-    export ES_PASSWORD
-else
-    echo "Password file not found. Ensure the password reset process completed successfully."
-    exit 1
-fi
-
 # Start the Node.js server
 cd frontend && PORT=$FE_PORT node server.js &
 
