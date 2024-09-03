@@ -1,0 +1,33 @@
+server.name: "kibana"
+server.host: 0.0.0.0
+elasticsearch.hosts: [ http://elasticsearch:9200 ]
+
+xpack.apm.enabled: false
+
+monitoring.ui.container.elasticsearch.enabled: true
+elasticsearch.username: kibana_system
+elasticsearch.password: changeme
+
+# Logging configuration
+logging:
+  root:
+    level: fatal
+  appenders:
+    default:
+      type: console
+      layout:
+        type: pattern
+        highlight: false
+  loggers:
+    - name: elastic-apm-node
+      level: fatal
+    - name: elasticsearch
+      level: fatal
+    - name: http.server.response
+      level: fatal
+    - name: plugins.task_manager
+      level: fatal
+    - name: plugins.reporting
+      level: fatal
+
+elasticsearch.ssl.verificationMode: none
